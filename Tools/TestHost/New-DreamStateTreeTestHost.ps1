@@ -5,13 +5,17 @@
 #
 #   <HostDir>/                          copy of Tools/TestHost/Template
 #   <HostDir>/Plugins/DreamStateTree    git worktree of this repository on -Branch (daily development)
-#   <HostDir>/Source/TP_*               the engine templates' game modules, under their own names, so the
-#   <HostDir>/Content/Variant_*         StateTree assets the templates ship load as they are: they are the
-#                                       corpus of real trees the tests decompile and rebuild
+#   <HostDir>/Source/TP_ThirdPerson     the third-person template's game module, under its own name, so the
+#   <HostDir>/Content/Variant_*         StateTree assets that template ships load as they are
+#   <CorpusDir>/TP_FirstPerson          the other templates with StateTree assets, each a project of its own:
+#   <CorpusDir>/TP_TopDown              their game modules declare structs with the same names as the
+#                                       third-person one, and one project cannot hold both
+#   <CorpusDir>/<other project>         any other project copied there by hand (a sample such as GASP)
 #
-# The template corpus is copied from the engine at -EngineRoot; nothing of it is kept in this repository.
+# Every corpus project gets Plugins/DreamStateTree as a junction to the host's worktree, so all of them run the
+# same code. The corpus is copied from the engine at -EngineRoot; nothing of it is kept in this repository.
 # Running the script again re-copies the template and leaves the worktree and the corpus alone (-RefreshCorpus
-# copies the corpus again).
+# copies the corpus again). Build the corpus projects one at a time: they share the plugin's binaries.
 
 [CmdletBinding()]
 param(
@@ -19,6 +23,7 @@ param(
     [string]$Branch = 'dev',
     [string]$EngineAssociation = '5.8',
     [string]$EngineRoot = 'I:\UnrealEngine\UE_5.8',
+    [string]$CorpusDir = 'I:\UnrealProject_Moon\DEV_58\DreamStateTreeCorpus',
     [switch]$RefreshCorpus
 )
 
@@ -26,12 +31,12 @@ $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $template = Join-Path $PSScriptRoot 'Template'
 
-# The engine templates whose variants ship StateTree assets, and those variants.
+# The engine template that lives in the host, and its variants that ship StateTree assets.
 $corpus = @(
-    @{ Module = 'TP_ThirdPerson'; Variants = @('Variant_Combat', 'Variant_SideScrolling') },
-    @{ Module = 'TP_FirstPerson'; Variants = @('Variant_Shooter') },
-    @{ Module = 'TP_TopDown';     Variants = @('Variant_TwinStick') }
+    @{ Module = 'TP_ThirdPerson'; Variants = @('Variant_Combat', 'Variant_SideScrolling') }
 )
+# The templates that become projects of their own under -CorpusDir.
+$corpusProjects = @('TP_FirstPerson', 'TP_TopDown')
 
 function Invoke-Git([string[]]$GitArgs) {
     & git @GitArgs
@@ -94,6 +99,53 @@ foreach ($name in $modules) {
 $project.Modules = $list.ToArray()
 $project | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $projectPath -Encoding UTF8
 
+function Add-PluginToProject([string]$UProject) {
+    $p = Get-Content -LiteralPath $UProject -Raw -Encoding UTF8 | ConvertFrom-Json
+    $p.EngineAssociation = $EngineAssociation
+    $plugins = [System.Collections.Generic.List[object]]::new()
+    if ($p.PSObject.Properties['Plugins']) { foreach ($x in $p.Plugins) { $plugins.Add($x) } }
+    if (-not ($plugins | Where-Object { $_.Name -eq 'DreamStateTree' })) {
+        $plugins.Add([pscustomobject]@{ Name = 'DreamStateTree'; Enabled = $true })
+    }
+    $p | Add-Member -NotePropertyName Plugins -NotePropertyValue $plugins.ToArray() -Force
+    $p | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $UProject -Encoding UTF8
+}
+
+function Add-PluginJunction([string]$ProjectDir) {
+    $link = Join-Path $ProjectDir 'Plugins\DreamStateTree'
+    if (Test-Path -LiteralPath $link) { return }
+    New-Item -ItemType Directory -Force -Path (Split-Path $link) | Out-Null
+    New-Item -ItemType Junction -Path $link -Target $pluginDir | Out-Null
+    Write-Host "    Plugins\DreamStateTree -> $pluginDir"
+}
+
+$projects = [System.Collections.Generic.List[string]]::new()
+New-Item -ItemType Directory -Force -Path $CorpusDir | Out-Null
+foreach ($name in $corpusProjects) {
+    $dir = Join-Path $CorpusDir $name
+    if ($RefreshCorpus -and (Test-Path -LiteralPath $dir)) {
+        $junction = Join-Path $dir 'Plugins\DreamStateTree'
+        if (Test-Path -LiteralPath $junction) { (Get-Item -LiteralPath $junction).Delete() }
+        Remove-Item -LiteralPath $dir -Recurse -Force
+    }
+    if (-not (Test-Path -LiteralPath $dir)) {
+        Write-Host "==> Corpus project $name"
+        Copy-Item -LiteralPath (Join-Path $templates $name) -Destination $dir -Recurse
+    }
+    Add-PluginToProject (Join-Path $dir "$name.uproject")
+    Add-PluginJunction $dir
+    $projects.Add($dir)
+}
+# Projects copied into the corpus folder by hand: wire them up the same way.
+foreach ($dir in Get-ChildItem -LiteralPath $CorpusDir -Directory | Where-Object { $_.Name -notin $corpusProjects }) {
+    $uproject = Get-ChildItem -LiteralPath $dir.FullName -Filter '*.uproject' -File | Select-Object -First 1
+    if (-not $uproject) { continue }
+    Write-Host "==> Corpus project $($dir.Name) (copied by hand)"
+    Add-PluginToProject $uproject.FullName
+    Add-PluginJunction $dir.FullName
+    $projects.Add($dir.FullName)
+}
+
 $info = [ordered]@{
     schema            = 1
     repoPath          = $repo
@@ -102,6 +154,7 @@ $info = [ordered]@{
     engineAssociation = $EngineAssociation
     engineRoot        = $EngineRoot
     corpusModules     = $modules
+    corpusProjects    = $projects
 }
 $info | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $HostDir '.dreamstatetree-testhost.json') -Encoding utf8
 
