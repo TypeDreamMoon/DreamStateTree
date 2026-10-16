@@ -9,15 +9,34 @@ public class DreamStateTreeEditor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine" });
-
-		PrivateDependencyModuleNames.AddRange(new string[]
+		PublicDependencyModuleNames.AddRange(new string[]
 		{
+			"Core",
+			"CoreUObject",
+			"Engine",
 			"UnrealEd",
-			"StateTreeModule",
-			"StateTreeEditorModule",
+			"DeveloperSettings",
+			"EditorSubsystem",
 			"DreamStateTreeLang",
 			"DreamStateTreeCompiler",
 		});
+
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"AssetRegistry",
+			"AssetTools",
+			"ContentBrowser",
+			"DirectoryWatcher",
+			"InputCore",
+			"MessageLog",
+			"Slate",
+			"SlateCore",
+			"StateTreeModule",
+			"StateTreeEditorModule",
+			"ToolMenus",
+		});
+
+		// StateTreeEditorModule.h includes BlueprintEditorModule.h, which lives in Kismet.
+		PrivateIncludePathModuleNames.Add("Kismet");
 	}
 }
