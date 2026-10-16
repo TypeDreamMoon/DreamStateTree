@@ -1,0 +1,27 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "",
+	"Description": "Minimal host project that builds DreamStateTree on its own and runs its automation tests, away from any working project. Generated from Plugins/DreamStateTree/Tools/TestHost/Template by New-DreamStateTreeTestHost.ps1.",
+	"Modules": [
+		{
+			"Name": "DreamStateTreeTestHost",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "DreamStateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "StateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayStateTree",
+			"Enabled": true
+		}
+	]
+}
