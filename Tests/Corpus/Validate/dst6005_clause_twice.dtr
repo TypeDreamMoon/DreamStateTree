@@ -1,0 +1,19 @@
+StateTree(Name="DreamStateTreeTests/Validate/ClauseTwice", Schema=TestAgent)
+{
+    State Root {
+        State Picky {
+            pick Random
+            pick InOrder
+            State Inner {
+                do Delay(1)
+            }
+        }
+        State Scored {
+            utility 0.5
+            utility 0.7
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST6005 (6,13)
+// EXPECT DST6005 (13,13)

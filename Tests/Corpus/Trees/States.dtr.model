@@ -1,0 +1,62 @@
+Tree /Game/DreamStateTreeTests/Generated/States.States
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  Color Warm = (R=0.900000,G=0.500000,B=0.100000,A=1.000000)
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Transition OnTick -> GotoState Root
+    State Root/Idle
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete All
+      Tag DreamStateTreeTest.State.Explore
+      Description Waiting
+      Weight 2.000000
+      TickRate enabled=true value=0.200000
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Idle/Task[0]
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Idle/Task[1]
+        Arg Instance Duration = 2.000000
+    State Root/Disabled
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Enabled false
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Disabled/Task[0]
+    State Root/Folder
+      Type Group
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      State Root/Folder/Inner
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/StateTreeModule.StateTreeDelayTask
+          Key Root/Folder/Inner/Task[0]
+    State Root/Move To
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Color Warm
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Move To/Task[0]
+    State Root/巡逻
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/巡逻/Task[0]
+        Bind 连 击
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Cheap
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      CopyParameterBindingsOnTick true
+      CheckPrerequisitesWhenActivatingChildDirectly false
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Cheap/Task[0]

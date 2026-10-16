@@ -1,0 +1,15 @@
+Tree /Game/DreamStateTreeTests/Generated/ComponentSchema.ComponentSchema
+  Schema /Script/GameplayStateTreeModule.StateTreeComponentSchema
+  SchemaProperty ContextActorClass = /Script/CoreUObject.Class'/Script/Engine.Pawn'
+  Parameter float Wait = 2.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    EnterCondition /Script/StateTreeModule.StateTreeObjectIsValidCondition
+      Key Root/EnterCondition[0]
+      Arg Instance Object <- Context:Actor
+    Task /Script/StateTreeModule.StateTreeDelayTask
+      Key Root/Task[0]
+      Arg Instance Duration <- Parameters:Wait
+    Transition OnStateCompleted -> GotoState Root

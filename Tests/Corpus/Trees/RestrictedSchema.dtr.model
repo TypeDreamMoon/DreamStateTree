@@ -1,0 +1,22 @@
+Tree /Game/DreamStateTreeTests/Generated/RestrictedSchema.RestrictedSchema
+  Schema /Script/DreamStateTreeTests.DstTestRestrictedSchema
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Idle
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Idle/Task[0]
+        Bind Idle
+      Transition OnStateCompleted -> GotoState Root/Work
+    State Root/Work
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Work/Task[0]
+        Bind Work
+        Arg Instance InputValue <- Context:Owner:Health

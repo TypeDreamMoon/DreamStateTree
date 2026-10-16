@@ -1,0 +1,17 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownSetting", Schema=TestAgent)
+{
+    Settings = { Bogus = 1; }
+
+    State Root [ Bogus = 1 ] {
+        do Delay(1) [ Bogus = 1 ]
+        -> Root on Tick [ Bogus = 1 ]
+        State NoEvent [ ConsumeEvent = false ] {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST4014 (3,18)
+// EXPECT DST4014 (5,18)
+// EXPECT DST4014 (6,23)
+// EXPECT DST4014 (7,27)
+// EXPECT DST4014 (8,15)

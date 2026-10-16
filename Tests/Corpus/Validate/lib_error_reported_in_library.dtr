@@ -1,0 +1,10 @@
+#include "inc/BrokenSubtree.dth"
+
+StateTree(Name="DreamStateTreeTests/Validate/LibraryError", Schema=TestAgent)
+{
+    State Root {
+        link Broken
+    }
+}
+// The error is in the library's subtree; its position is not in this file, so only the code is expected.
+// EXPECT DST4001

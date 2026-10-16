@@ -1,0 +1,10 @@
+StateTree(Name="DreamStateTreeTests/Validate/DuplicateSection", Schema=TestAgent)
+{
+    Tags = { DreamStateTreeTest.Event; }
+    Tags = { DreamStateTreeTest.State; }
+
+    State Root {
+        do Delay(1)
+    }
+}
+// EXPECT DST4013 (4,5)

@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownTask", Schema=TestAgent)
+{
+    State Root {
+        do Delayy(1)
+    }
+}
+// EXPECT DST4001 (4,12)

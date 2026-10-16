@@ -1,0 +1,29 @@
+Tree /Game/DreamStateTreeTests/Generated/LinkParent.LinkParent
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Reach = 5.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Far
+      Type LinkedAsset
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link /Game/DreamStateTreeTests/Generated/LinkChild.LinkChild
+      Parameter float Radius = 2.000000
+        Overridden
+      Parameter int32 Count = 4
+        Overridden
+      ParameterBindings
+        Arg Instance Radius <- Parameters:Reach
+      Transition OnStateCompleted -> GotoState Root/Near
+    State Root/Near
+      Type LinkedAsset
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link /Game/DreamStateTreeTests/Generated/LinkChild.LinkChild
+      Parameter float Radius = 2.000000
+      Parameter int32 Count = 3
+      Transition OnStateCompleted -> Succeeded

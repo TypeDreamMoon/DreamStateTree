@@ -1,0 +1,16 @@
+Tree /Game/DreamStateTreeTests/Generated/Blueprint.Blueprint
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Task /Script/StateTreeModule.StateTreeBlueprintTaskWrapper
+      Key Root/Task[0]
+      Blueprint /Script/DreamStateTreeTests.DstTestBlueprintTask
+      Bind Pause
+    Task /Script/DreamStateTreeTests.DstTestTask
+      Key Root/Task[1]
+      Bind Work
+      Arg Instance InputValue <- Parameters:Speed
+    Transition OnStateCompleted -> Succeeded

@@ -1,0 +1,109 @@
+run ticks=18 dt=0.1 seed=12345
+owner Level=3 Health=100 Mode=Patrol Alerted=false
+send tick=6 DreamStateTreeTest.Event.Hit.Light Amount=7 Severity=0.8 Source=None Critical=false
+send tick=12 DreamStateTreeTest.Event.Hit.Heavy Amount=9 Severity=0.4 Source=None Critical=false
+started=yes
+--- steps
+start    Running | Root/Idle | recorded=1 | Counter: TreeStart:Step=1 ; Counter: Tick:Counter=1 ; IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 0   Running | Root/Idle | recorded=1 | Counter: Tick:Counter=2 ; IdleTask: Tick:1
+tick 1   Running | Root/Patrol | recorded=2 | Counter: Tick:Counter=3 ; IdleTask: Tick:2 ; IdleTask: Done:Succeeded ; IdleTask: Exit:TickCount=2 ; PatrolTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 2   Running | Root/Patrol | recorded=2 | Counter: Tick:Counter=4 ; PatrolTask: Tick:1
+tick 3   Running | Root/Patrol | recorded=2 | Counter: Tick:Counter=5 ; PatrolTask: Tick:2
+tick 4   Running | Root/Idle | recorded=3 | Counter: Tick:Counter=6 ; PatrolTask: Tick:3 ; PatrolTask: Done:Succeeded ; PatrolTask: Exit:TickCount=3 ; IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 5   Running | Root/Idle | recorded=3 | Counter: Tick:Counter=7 ; IdleTask: Tick:1
+tick 6   Running | Root/Fight/Light | recorded=4 | Counter: Tick:Counter=8 ; IdleTask: Tick:2 ; IdleTask: Done:Succeeded ; IdleTask: Exit:TickCount=2 ; FightTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3) ; LightTask: Enter:Input=4 Scale=1 Amount=7 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 7   Running | Root/Idle | recorded=5 | Counter: Tick:Counter=9 ; FightTask: Tick:1 ; LightTask: Tick:1 ; LightTask: Done:Succeeded ; LightTask: Exit:TickCount=1 ; FightTask: Exit:TickCount=1 ; IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 8   Running | Root/Idle | recorded=5 | Counter: Tick:Counter=10 ; IdleTask: Tick:1
+tick 9   Running | Root/Patrol | recorded=6 | Counter: Tick:Counter=11 ; IdleTask: Tick:2 ; IdleTask: Done:Succeeded ; IdleTask: Exit:TickCount=2 ; PatrolTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 10  Running | Root/Patrol | recorded=6 | Counter: Tick:Counter=12 ; PatrolTask: Tick:1
+tick 11  Running | Root/Patrol | recorded=6 | Counter: Tick:Counter=13 ; PatrolTask: Tick:2
+tick 12  Running | Root/Fight/Heavy | recorded=7 | Counter: Tick:Counter=14 ; PatrolTask: Tick:3 ; PatrolTask: Done:Succeeded ; PatrolTask: Exit:TickCount=3 ; FightTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3) ; HeavyTask: Enter:Input=4 Scale=1 Amount=9 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 13  Running | Root/Fight/Heavy | recorded=7 | Counter: Tick:Counter=15 ; FightTask: Tick:1 ; HeavyTask: Tick:1
+tick 14  Running | Root/Idle | recorded=8 | Counter: Tick:Counter=16 ; FightTask: Tick:2 ; HeavyTask: Tick:2 ; HeavyTask: Done:Succeeded ; HeavyTask: Exit:TickCount=2 ; FightTask: Exit:TickCount=2 ; IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 15  Running | Root/Idle | recorded=8 | Counter: Tick:Counter=17 ; IdleTask: Tick:1
+tick 16  Running | Root/Patrol | recorded=9 | Counter: Tick:Counter=18 ; IdleTask: Tick:2 ; IdleTask: Done:Succeeded ; IdleTask: Exit:TickCount=2 ; PatrolTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+tick 17  Running | Root/Patrol | recorded=9 | Counter: Tick:Counter=19 ; PatrolTask: Tick:1
+stop     Stopped | recorded=9 | PatrolTask: Exit:TickCount=1 ; Counter: TreeStop:Counter=19
+--- recorded transitions
+Root/Idle
+Root/Patrol
+Root/Idle
+Root/Fight/Light
+Root/Idle
+Root/Patrol
+Root/Fight/Heavy
+Root/Idle
+Root/Patrol
+--- log
+Counter: TreeStart:Step=1
+Counter: Tick:Counter=1
+IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=2
+IdleTask: Tick:1
+Counter: Tick:Counter=3
+IdleTask: Tick:2
+IdleTask: Done:Succeeded
+IdleTask: Exit:TickCount=2
+PatrolTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=4
+PatrolTask: Tick:1
+Counter: Tick:Counter=5
+PatrolTask: Tick:2
+Counter: Tick:Counter=6
+PatrolTask: Tick:3
+PatrolTask: Done:Succeeded
+PatrolTask: Exit:TickCount=3
+IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=7
+IdleTask: Tick:1
+Counter: Tick:Counter=8
+IdleTask: Tick:2
+IdleTask: Done:Succeeded
+IdleTask: Exit:TickCount=2
+FightTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+LightTask: Enter:Input=4 Scale=1 Amount=7 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=9
+FightTask: Tick:1
+LightTask: Tick:1
+LightTask: Done:Succeeded
+LightTask: Exit:TickCount=1
+FightTask: Exit:TickCount=1
+IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=10
+IdleTask: Tick:1
+Counter: Tick:Counter=11
+IdleTask: Tick:2
+IdleTask: Done:Succeeded
+IdleTask: Exit:TickCount=2
+PatrolTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=12
+PatrolTask: Tick:1
+Counter: Tick:Counter=13
+PatrolTask: Tick:2
+Counter: Tick:Counter=14
+PatrolTask: Tick:3
+PatrolTask: Done:Succeeded
+PatrolTask: Exit:TickCount=3
+FightTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+HeavyTask: Enter:Input=4 Scale=1 Amount=9 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=15
+FightTask: Tick:1
+HeavyTask: Tick:1
+Counter: Tick:Counter=16
+FightTask: Tick:2
+HeavyTask: Tick:2
+HeavyTask: Done:Succeeded
+HeavyTask: Exit:TickCount=2
+FightTask: Exit:TickCount=2
+IdleTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=17
+IdleTask: Tick:1
+Counter: Tick:Counter=18
+IdleTask: Tick:2
+IdleTask: Done:Succeeded
+IdleTask: Exit:TickCount=2
+PatrolTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=3)
+Counter: Tick:Counter=19
+PatrolTask: Tick:1
+PatrolTask: Exit:TickCount=1
+Counter: TreeStop:Counter=19

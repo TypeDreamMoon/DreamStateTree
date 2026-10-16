@@ -1,0 +1,33 @@
+// Subtrees: one from an included library, one written here, linked with constants, bindings and operations.
+// RUN ticks=40 dt=0.1 seed=1
+#include "Lib/Reactions.dth"
+
+StateTree(Name="DreamStateTreeTests/Generated/Subtrees", Schema=TestAgent)
+{
+    Parameters = { float Courage = 0.5; }
+
+    State Root {
+        State Fight {
+            link Flinch(Intensity = 1 + Params.Courage, Rounds = 3)
+            -> Local
+        }
+        State Local {
+            link Wobble(Amount = Params.Courage)
+            -> Plain
+        }
+        State Plain {
+            link Flinch
+            -> Positional
+        }
+        State Positional {
+            link Wobble(0.8)
+            -> TreeSucceeded
+        }
+    }
+
+    Subtree Wobble(float Amount = 0.5) {
+        State Sway {
+            do Swaying = DstTestTask(InputValue = Params.Amount, TicksToComplete = 2)
+        }
+    }
+}

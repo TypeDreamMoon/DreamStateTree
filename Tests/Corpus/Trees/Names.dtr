@@ -1,0 +1,18 @@
+// Names: a namespaced node, its alias, a global alias, positional arguments, a bool written without its b, the
+// full struct name, backticks and names in other scripts.
+// RUN ticks=30 dt=0.1 seed=1
+StateTree(Name="DreamStateTreeTests/Generated/Names", Schema=TestAgent)
+{
+    Parameters = { float Distance; }
+
+    State Root {
+        State Short      { do Hop = Move(2, true)  -> Next }
+        State Named      { do Step = Move(Speed = 3, Sprint = true, Travelled -> Params.Distance)  -> Next }
+        State Alias      { do Dash = Run(1.5)  -> Next }
+        State Global     { do Rush = Sprint(4)  -> Next }
+        State Full       { do Walk = TestAgent.Move(1)  -> Next }
+        State Reflected  { do Stroll = DstTestMoveTask(Speed = 0.5)  -> Next }
+        State `Move To`  { do `Take Off` = Move(1)  -> Next }
+        State 巡逻       [ Description = "中文描述" ] { do 连击 = Move(Speed = 2)  -> TreeSucceeded }
+    }
+}

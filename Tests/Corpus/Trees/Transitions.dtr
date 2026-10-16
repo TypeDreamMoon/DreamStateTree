@@ -1,0 +1,45 @@
+// Transitions: every trigger and every kind of target, conditions, and every option.
+StateTree(Name="DreamStateTreeTests/Generated/Transitions", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    Tags = { DreamStateTreeTest.Event; }
+
+    State Root {
+        -> TreeSucceeded on Succeeded
+        -> TreeFailed on Failed
+
+        State Idle {
+            do Worker = DstTestTask(InputValue = Params.Speed, TicksToComplete = 2)
+            -> Patrol
+            -> Combat.Strike on Tick if Owner.bAlerted [ Priority = High ]
+            -> Combat on Hit(DstTestPayload) [ Priority = Medium; ConsumeEvent = false ]
+            -> Patrol on Tick [ Delay = 1; Variance = 0.25; Priority = Low ]
+            -> Alarm on Ask [ Priority = Critical; Reactivate ]
+            -> Patrol on Tick [ Enabled = false ]
+            -> Next on Delegate(Worker.Succeeds)
+            -> Next on Delegate(Worker.Fails)
+            -> Parent on Delegate(Worker.Completes)
+            -> Parent on Delegate(Worker.OnFinished)
+        }
+        State Patrol {
+            do Delay(1)
+            -> NextSelectable on Completed
+        }
+        State Combat {
+            State Strike {
+                do Delay(1)
+                -> Parent on Succeeded
+                -> NextParent on Failed
+            }
+            State Guard {
+                do Delay(1)
+                -> NextSelectableParent on Failed
+            }
+        }
+        State Alarm {
+            on Ask
+            do Delay(1)
+        }
+    }
+}

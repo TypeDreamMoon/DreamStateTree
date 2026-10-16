@@ -1,0 +1,71 @@
+StateTree(Name="Blueprints/AI/StateTree/ST_Player_SandboxCharacter_SmartObject", Schema=Component)
+{
+    Colors = {
+        Animation            = (R = 0.35243, G = 0.094838, B = 0.327886);
+        Base                 = (R = 0.013702, G = 0.309469, B = 0.386429);
+        `Smart Object State` = (R = 0.072842, G = 0.295652, B = 0.074815);
+    }
+
+    State Root {
+        State `Smart Object State` [ Description = "When the Player state tree smart object starts, it stays in this state waiting for the player to use a smart object. When a player interacts, this state recives a trigger event with a payload."; Complete = All ] {
+            -> UsingSmartObj on SmartObject.ObjectType.Player(S_SmartObjectPayload)
+        }
+        State UsingSmartObj [ Color = `Smart Object State`; Description = "This state sets the player to walkling movement input state."; Complete = All ] {
+            on SmartObject.ObjectType.Player(S_SmartObjectPayload)
+            State ClaimSlot [ Color = `Smart Object State`; Description = "In this state, the task takes in the payload slot handle and claims it."; Complete = All ] {
+                do STT_ClaimSlot = STT_ClaimSlot(
+                    SlotToBeClaimed = Event.SlotToClaim_7_7EAEF7D54419EFFC4C99739CA31968C5,
+                    SmartObject     = Event.SmartObject_6_E0784E4F4C94A475930155882AB2E691
+                ) [ ConsideredForCompletion = false ]
+                State `Find Slot Location` [ Color = `Smart Object State`; Description = "Find Slot Transform is unique Task for Player as it is not running the GameplayInteraction State tree like the NPC SO State tree."; Complete = All ] {
+                    do STT_FindSlotTransforms = STT_FindSlotTransforms(
+                        `Claim Handle` = STT_ClaimSlot.ClaimedHandle
+                    ) [ ConsideredForCompletion = false ]
+                    State `Play Entry` [ Color = Animation; Description = "When the player actor has a claim slot and claim slot location, it starts to evaluate possible entry animations using pose search proxy chooser table."; Complete = All ] {
+                        do STT_CharacterIgnoreCollisionsWithOtherActor(
+                               `Other Actor` = Event.SmartObject_6_E0784E4F4C94A475930155882AB2E691,
+                               ShouldIgnore  = true
+                           ) [ ConsideredForCompletion = false ],
+                           STT_PlayAnimFromBestCost(
+                               `Animation Proxy Table`  = CHPT_SmartObject_Bench,
+                               CostThreshold            = 1,
+                               `Claimed Handle`         = STT_ClaimSlot.ClaimedHandle,
+                               Destination              = STT_FindSlotTransforms.`Out Slot Transform`,
+                               `Minimum Velocity Check` = 0
+                           )
+                        -> Next on Succeeded
+                        -> ReleaseSlot on Failed
+                    }
+                    State `Play Loop` [ Color = Animation; Description = "Play the looping animation, notice the play time and play time variance being used in this case. "; Complete = All ] {
+                        do STT_PlayAnimMontage(
+                            `Montage to Play`    = M_interaction_bench_idle_loop_Montage,
+                            `Play Time`          = 25,
+                            `Play Time Variance` = 3,
+                            `Number Of Loops`    = -1,
+                            `Ignore Collision`   = true,
+                            `Slot Handle`        = STT_ClaimSlot.ClaimedHandle,
+                            `Smart Object Actor` = Event.SmartObject_6_E0784E4F4C94A475930155882AB2E691
+                        )
+                        -> Next
+                    }
+                    State `Play Exit` [ Color = Animation; Description = "Currently we do not motion match out of the interaction. We play just and exit."; Complete = All ] {
+                        do STT_PlayAnimMontage(
+                            `Montage to Play`    = M_interaction_bench_out_to_stand_Montage,
+                            `Ignore Collision`   = true,
+                            `Slot Handle`        = STT_ClaimSlot.ClaimedHandle,
+                            `Smart Object Actor` = Event.SmartObject_6_E0784E4F4C94A475930155882AB2E691
+                        )
+                        -> Next
+                    }
+                    State ReleaseSlot [ Color = Animation; Description = "When the tree succeeds the claim slot is released and the chracters collision with SO and Input state are reset."; Complete = All ] {
+                        do STT_CharacterIgnoreCollisionsWithOtherActor(
+                               `Other Actor` = Event.SmartObject_6_E0784E4F4C94A475930155882AB2E691
+                           ),
+                           STT_ClearHandle(`Claimed Handle` = STT_FindSlotTransforms.`Claim Handle`)
+                        -> Root
+                    }
+                }
+            }
+        }
+    }
+}

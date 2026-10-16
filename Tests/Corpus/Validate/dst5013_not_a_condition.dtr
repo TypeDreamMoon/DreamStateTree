@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/NotACondition", Schema=TestAgent)
+{
+    State Root {
+        State Path {
+            if Owner.Health
+            do Delay(1)
+        }
+        State Sum {
+            if 1 + 2
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST5013 (5,16)
+// EXPECT DST5013 (9,16)

@@ -1,0 +1,17 @@
+StateTree(Name="DreamStateTreeTests/Validate/NotCannotApply", Schema=TestAgent)
+{
+    Parameters = { bool A; bool B; }
+
+    State Root {
+        State Node {
+            if not Random(0.5)
+            do Delay(1)
+        }
+        State Group {
+            if not (Params.A and Params.B)
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST5010 (7,20)
+// EXPECT DST5010 (11,21)

@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/PickWithoutChildren", Schema=TestAgent)
+{
+    State Root {
+        pick Random
+    }
+}
+// EXPECT DST6010 (4,9)

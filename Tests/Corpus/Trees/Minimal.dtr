@@ -1,0 +1,7 @@
+// The smallest tree: one state with one task.
+StateTree(Name="DreamStateTreeTests/Generated/Minimal", Schema=TestAgent)
+{
+    State Root {
+        do Delay(1)
+    }
+}

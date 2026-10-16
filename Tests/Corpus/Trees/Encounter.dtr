@@ -1,0 +1,44 @@
+// Idle and Patrol alternate; a Hit starts a fight whose child depends on the tag, and the fight ends back in Idle.
+// RUN ticks=18 dt=0.1 seed=12345
+// OWNER Level=3
+// SEND 6 DreamStateTreeTest.Event.Hit.Light Amount=7 Severity=0.8
+// SEND 12 DreamStateTreeTest.Event.Hit.Heavy Amount=9 Severity=0.4
+StateTree(Name="DreamStateTreeTests/Generated/Encounter", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    Globals = { Counter = DstTestEvaluator(Step = 1); }
+
+    Tags = { DreamStateTreeTest.Event; }
+
+    State Root {
+        State Idle {
+            do IdleTask = DstTestTask(InputValue = Params.Speed, TicksToComplete = 2)
+            -> Fight on Hit(DstTestPayload)
+            -> Patrol on Succeeded
+        }
+        State Patrol {
+            do PatrolTask = DstTestTask(InputValue = Params.Speed, TicksToComplete = 3)
+            -> Fight on Hit(DstTestPayload)
+            -> Idle
+        }
+        State Fight {
+            on Hit(DstTestPayload)
+            do FightTask = DstTestTask(InputValue = Params.Speed, TicksToComplete = 1000)
+            State Light {
+                on Hit.Light(DstTestPayload)
+                do LightTask = DstTestTask(InputValue = Params.Speed, PayloadAmount = Event.Amount, TicksToComplete = 1)
+                -> Idle
+            }
+            State Heavy {
+                on Hit.Heavy(DstTestPayload)
+                do HeavyTask = DstTestTask(InputValue = Params.Speed, PayloadAmount = Event.Amount, TicksToComplete = 2)
+                -> Idle
+            }
+            State Generic {
+                do GenericTask = DstTestTask(InputValue = Params.Speed, PayloadAmount = Event.Amount, TicksToComplete = 1)
+                -> Idle
+            }
+        }
+    }
+}

@@ -1,0 +1,35 @@
+run ticks=6 dt=0.1 seed=1
+owner Level=1 Health=50 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Bold | recorded=1 | BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 0   Running | Root/Bold | recorded=1 | BoldTask: Tick:1
+tick 1   Running | Root/Bold | recorded=2 | BoldTask: Tick:2 ; BoldTask: Done:Succeeded ; BoldTask: Exit:TickCount=2 ; BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 2   Running | Root/Bold | recorded=2 | BoldTask: Tick:1
+tick 3   Running | Root/Bold | recorded=3 | BoldTask: Tick:2 ; BoldTask: Done:Succeeded ; BoldTask: Exit:TickCount=2 ; BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 4   Running | Root/Bold | recorded=3 | BoldTask: Tick:1
+tick 5   Running | Root/Bold | recorded=4 | BoldTask: Tick:2 ; BoldTask: Done:Succeeded ; BoldTask: Exit:TickCount=2 ; BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+stop     Stopped | recorded=4 | BoldTask: Exit:TickCount=0
+--- recorded transitions
+Root/Bold
+Root/Bold
+Root/Bold
+Root/Bold
+--- log
+BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+BoldTask: Tick:1
+BoldTask: Tick:2
+BoldTask: Done:Succeeded
+BoldTask: Exit:TickCount=2
+BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+BoldTask: Tick:1
+BoldTask: Tick:2
+BoldTask: Done:Succeeded
+BoldTask: Exit:TickCount=2
+BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+BoldTask: Tick:1
+BoldTask: Tick:2
+BoldTask: Done:Succeeded
+BoldTask: Exit:TickCount=2
+BoldTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+BoldTask: Exit:TickCount=0

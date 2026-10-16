@@ -1,0 +1,131 @@
+run ticks=20 dt=0.1 seed=3
+owner Level=1 Health=100 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Wander/Leg1 | recorded=1 | LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 0   Running | Root/Wander/Leg2 | recorded=2 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask2: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 1   Running | Root/Wander/Leg1 | recorded=3 | LegTask2: Tick:1 ; LegTask2: Done:Succeeded ; LegTask2: Exit:TickCount=1 ; LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 2   Running | Root/Wander/Leg1 | recorded=4 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 3   Running | Root/Wander/Leg0 | recorded=5 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 4   Running | Root/Wander/Leg0 | recorded=6 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 5   Running | Root/Wander/Leg3 | recorded=7 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask3: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 6   Running | Root/Wander/Leg3 | recorded=8 | LegTask3: Tick:1 ; LegTask3: Done:Succeeded ; LegTask3: Exit:TickCount=1 ; LegTask3: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 7   Running | Root/Wander/Leg1 | recorded=9 | LegTask3: Tick:1 ; LegTask3: Done:Succeeded ; LegTask3: Exit:TickCount=1 ; LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 8   Running | Root/Wander/Leg0 | recorded=10 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 9   Running | Root/Wander/Leg3 | recorded=11 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask3: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 10  Running | Root/Wander/Leg2 | recorded=12 | LegTask3: Tick:1 ; LegTask3: Done:Succeeded ; LegTask3: Exit:TickCount=1 ; LegTask2: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 11  Running | Root/Wander/Leg1 | recorded=13 | LegTask2: Tick:1 ; LegTask2: Done:Succeeded ; LegTask2: Exit:TickCount=1 ; LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 12  Running | Root/Wander/Leg2 | recorded=14 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask2: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 13  Running | Root/Wander/Leg0 | recorded=15 | LegTask2: Tick:1 ; LegTask2: Done:Succeeded ; LegTask2: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 14  Running | Root/Wander/Leg0 | recorded=16 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 15  Running | Root/Wander/Leg0 | recorded=17 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 16  Running | Root/Wander/Leg1 | recorded=18 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 17  Running | Root/Wander/Leg0 | recorded=19 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 18  Running | Root/Wander/Leg1 | recorded=20 | LegTask0: Tick:1 ; LegTask0: Done:Succeeded ; LegTask0: Exit:TickCount=1 ; LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 19  Running | Root/Wander/Leg0 | recorded=21 | LegTask1: Tick:1 ; LegTask1: Done:Succeeded ; LegTask1: Exit:TickCount=1 ; LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+stop     Stopped | recorded=21 | LegTask0: Exit:TickCount=0
+--- recorded transitions
+Root/Wander/Leg1
+Root/Wander/Leg2
+Root/Wander/Leg1
+Root/Wander/Leg1
+Root/Wander/Leg0
+Root/Wander/Leg0
+Root/Wander/Leg3
+Root/Wander/Leg3
+Root/Wander/Leg1
+Root/Wander/Leg0
+Root/Wander/Leg3
+Root/Wander/Leg2
+Root/Wander/Leg1
+Root/Wander/Leg2
+Root/Wander/Leg0
+Root/Wander/Leg0
+Root/Wander/Leg0
+Root/Wander/Leg1
+Root/Wander/Leg0
+Root/Wander/Leg1
+Root/Wander/Leg0
+--- log
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask2: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask2: Tick:1
+LegTask2: Done:Succeeded
+LegTask2: Exit:TickCount=1
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask3: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask3: Tick:1
+LegTask3: Done:Succeeded
+LegTask3: Exit:TickCount=1
+LegTask3: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask3: Tick:1
+LegTask3: Done:Succeeded
+LegTask3: Exit:TickCount=1
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask3: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask3: Tick:1
+LegTask3: Done:Succeeded
+LegTask3: Exit:TickCount=1
+LegTask2: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask2: Tick:1
+LegTask2: Done:Succeeded
+LegTask2: Exit:TickCount=1
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask2: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask2: Tick:1
+LegTask2: Done:Succeeded
+LegTask2: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Tick:1
+LegTask0: Done:Succeeded
+LegTask0: Exit:TickCount=1
+LegTask1: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask1: Tick:1
+LegTask1: Done:Succeeded
+LegTask1: Exit:TickCount=1
+LegTask0: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+LegTask0: Exit:TickCount=0

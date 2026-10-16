@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/OutputBindingTarget", Schema=TestAgent)
+{
+    Parameters = { float Speed; float Result; }
+
+    State Root {
+        State NotAnOutput {
+            do DstTestTask(InputValue = Params.Speed, Scale -> Params.Result)
+        }
+        State BadTarget {
+            do DstTestTask(InputValue = Params.Speed, TickCount -> Owner.Level)
+        }
+    }
+}
+// EXPECT DST5016 (7,55)
+// EXPECT DST5016 (10,68)

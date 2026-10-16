@@ -1,0 +1,18 @@
+// Shared by the subtree and template trees: tag prefixes, expression templates and a subtree that takes parameters.
+StateTreeLibrary(Name="DreamStateTreeTests/Reactions")
+{
+    Tags = { DreamStateTreeTest.Event; }
+
+    Template Healthy(Min) = Owner.Health >= Min;
+    Template Hurt = Owner.Health < 30;
+
+    Subtree Flinch(float Intensity = 1, int Rounds = 2) {
+        State Start {
+            do Shake = DstTestTask(InputValue = Params.Intensity, Scale = Params.Intensity * 2, TicksToComplete = Params.Rounds)
+            -> Recover
+        }
+        State Recover {
+            do Settle = DstTestTask(InputValue = Params.Intensity, TicksToComplete = 1)
+        }
+    }
+}

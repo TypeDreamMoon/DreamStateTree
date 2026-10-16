@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/BadDelegateSource", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+
+    State Root {
+        State A {
+            do Gauge = DstTestTask(InputValue = Params.Speed)
+            -> Next on Delegate(Gauge)
+        }
+        State B {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST5018 (8,33)

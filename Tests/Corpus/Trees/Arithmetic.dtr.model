@@ -1,0 +1,136 @@
+Tree /Game/DreamStateTreeTests/Generated/Arithmetic.Arithmetic
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  Parameter int32 Level = 3
+  Parameter bool Alert = True
+  Parameter bool Calm
+  Parameter Struct:/Script/CoreUObject.Vector Home = (X=1.000000,Y=2.000000,Z=3.000000)
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Sum
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Sum/Task[0]
+        Bind Plain
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance Scale fn
+          PropertyFunction /Script/StateTreeModule.StateTreeAddFloatPropertyFunction
+            Key Root/Sum/Task[0]/Fn:Scale
+            Arg Instance Left = 1.000000
+            Arg Instance Right fn
+              PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+                Key Root/Sum/Task[0]/Fn:Scale/Fn:Right
+                Arg Instance Left <- Parameters:Speed
+                Arg Instance Right = 0.500000
+        Arg Instance TicksToComplete = 1
+      Transition OnStateCompleted -> NextState
+    State Root/Negated
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Negated/Task[0]
+        Bind Minus
+        Arg Instance InputValue fn
+          PropertyFunction /Script/StateTreeModule.StateTreeInvertFloatPropertyFunction
+            Key Root/Negated/Task[0]/Fn:InputValue
+            Arg Instance Input <- Parameters:Speed
+        Arg Instance Scale fn
+          PropertyFunction /Script/StateTreeModule.StateTreeSubtractFloatPropertyFunction
+            Key Root/Negated/Task[0]/Fn:Scale
+            Arg Instance Left fn
+              PropertyFunction /Script/StateTreeModule.StateTreeDivideFloatPropertyFunction
+                Key Root/Negated/Task[0]/Fn:Scale/Fn:Left
+                Arg Instance Left <- Parameters:Speed
+                Arg Instance Right = 2.000000
+            Arg Instance Right = 1.000000
+        Arg Instance TicksToComplete = 1
+      Transition OnStateCompleted -> NextState
+    State Root/Whole
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Whole/Task[0]
+        Bind Count
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance PayloadAmount fn
+          PropertyFunction /Script/StateTreeModule.StateTreeAddIntPropertyFunction
+            Key Root/Whole/Task[0]/Fn:PayloadAmount
+            Arg Instance Left fn
+              PropertyFunction /Script/StateTreeModule.StateTreeMultiplyIntPropertyFunction
+                Key Root/Whole/Task[0]/Fn:PayloadAmount/Fn:Left
+                Arg Instance Left <- Parameters:Level
+                Arg Instance Right = 2
+            Arg Instance Right = 1
+        Arg Instance TicksToComplete = 1
+      Transition OnStateCompleted -> NextState
+    State Root/Logic
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Logic/Task[0]
+        Bind Flags
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance TicksToComplete = 1
+        Arg Instance bFlag fn
+          PropertyFunction /Script/StateTreeModule.StateTreeBooleanAndPropertyFunction
+            Key Root/Logic/Task[0]/Fn:bFlag
+            Arg Instance bLeft <- Parameters:Alert
+            Arg Instance bRight fn
+              PropertyFunction /Script/StateTreeModule.StateTreeBooleanNotPropertyFunction
+                Key Root/Logic/Task[0]/Fn:bFlag/Fn:bRight
+                Arg Instance bInput <- Parameters:Calm
+      Transition OnStateCompleted -> NextState
+    State Root/Folded
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Folded/Task[0]
+        Bind Fixed
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance Scale = 6.000000
+      Transition OnStateCompleted -> NextState
+    State Root/Calls
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Calls/Task[0]
+        Bind Called
+        Arg Instance InputValue fn
+          PropertyFunction /Script/StateTreeModule.StateTreeAbsoluteFloatPropertyFunction
+            Key Root/Calls/Task[0]/Fn:InputValue
+            Arg Instance Input <- Parameters:Speed
+        Arg Instance Scale fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Root/Calls/Task[0]/Fn:Scale
+            Arg Instance Left fn
+              PropertyFunction /Script/StateTreeModule.StateTreeAbsoluteFloatPropertyFunction
+                Key Root/Calls/Task[0]/Fn:Scale/Fn:Left
+                Arg Instance Input <- Parameters:Speed
+            Arg Instance Right = 2.000000
+        Arg Instance TicksToComplete = 1
+      Transition OnStateCompleted -> NextState
+    State Root/Vector
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Vector/Task[0]
+        Bind Moved
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance Location.X <- Parameters:Home.X
+        Arg Instance Location.Z fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Root/Vector/Task[0]/Fn:Location.Z
+            Arg Instance Left <- Parameters:Speed
+            Arg Instance Right = 2.000000
+        Arg Instance TicksToComplete = 1
+      Transition OnStateCompleted -> Succeeded

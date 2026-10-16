@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownConsideration", Schema=TestAgent)
+{
+    State Root {
+        utility Nope()
+        do Delay(1)
+    }
+}
+// EXPECT DST4001 (4,17)

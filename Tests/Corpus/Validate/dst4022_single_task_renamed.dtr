@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/SingleTaskRenamed", Schema=RestrictedAgent)
+{
+    State Root {
+        do Slowly = Delay(1)
+    }
+}
+// EXPECT DST4022 (4,12)

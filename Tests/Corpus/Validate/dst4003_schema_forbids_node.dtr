@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/SchemaForbidsNode", Schema=TestAgent)
+{
+    State Root {
+        do DstTestForbidden(Value = 1)
+    }
+}
+// EXPECT DST4003 (4,12)

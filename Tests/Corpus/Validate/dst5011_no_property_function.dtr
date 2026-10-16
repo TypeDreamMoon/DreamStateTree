@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/NoPropertyFunction", Schema=TestAgent)
+{
+    Parameters = { float A; }
+
+    State Root {
+        State Text {
+            do DebugText(Params.A + 1)
+        }
+        State Comparison {
+            do Delay(Duration = Params.A < 2)
+        }
+    }
+}
+// EXPECT DST5011 (7,26)
+// EXPECT DST5011 (10,33)

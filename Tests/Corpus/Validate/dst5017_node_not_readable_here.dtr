@@ -1,0 +1,14 @@
+StateTree(Name="DreamStateTreeTests/Validate/NodeNotReadableHere", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+    Globals = {
+        First  = DstTestEvaluator(Step = Second.Counter);
+        Second = DstTestEvaluator();
+    }
+
+    State Root {
+        do Early = DstTestTask(InputValue = Params.Speed, TicksToComplete = Late.TickCount), Late = DstTestTask(InputValue = Params.Speed)
+    }
+}
+// EXPECT DST5017 (5,42)
+// EXPECT DST5017 (10,77)

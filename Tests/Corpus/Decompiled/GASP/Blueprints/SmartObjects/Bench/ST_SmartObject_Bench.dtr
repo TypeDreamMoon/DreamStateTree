@@ -1,0 +1,67 @@
+StateTree(Name="Blueprints/SmartObjects/Bench/ST_SmartObject_Bench", Schema=GameplayInteraction)
+{
+    Globals = { STE_GetAIData = STE_GetAIData(); }
+
+    State Root {
+        State `Find Slot Location` [ Description = "NPC is finding the slot entrence to move towards it." ] {
+            do Task_FindSlotEntranceLocation = Task_FindSlotEntranceLocation(
+                ReferenceSlot = SmartObjectClaimedHandle.SlotHandle,
+                SelectMethod  = NearestToSearchLocation
+            )
+            -> Root
+            State `Move To Slot And Play Entry` [ Description = "NPC moves toards the slot entrence. \r\nParallely, a choosesr task is running during the MobeTo. This task checks for the navigathion path distance of the NPC to the Slot."; Complete = All ] {
+                do MoveTo(
+                       Task_FindSlotEntranceLocation.EntryTransform.Translation,
+                       AIController                 = STE_GetAIData.AIController,
+                       AcceptableRadius             = 10,
+                       ReachTestIncludesAgentRadius = false,
+                       ReachTestIncludesGoalRadius  = false
+                   ) [ ConsideredForCompletion = false ],
+                   STT_FocusToTarget(
+                       AIController  = STE_GetAIData.AIController,
+                       TargetToFocus = SmartObjectActor
+                   ) [ ConsideredForCompletion = false ],
+                   STT_CharacterIgnoreCollisionsWithOtherActor(ShouldIgnore = true) [ ConsideredForCompletion = false ],
+                   STT_PlayAnimFromBestCost(
+                       `Animation Proxy Table`  = CHPT_SmartObject_Bench,
+                       CostThreshold            = 1,
+                       `Claimed Handle`         = SmartObjectClaimedHandle,
+                       Destination              = Task_FindSlotEntranceLocation.EntryTransform,
+                       `Minimum Velocity Check` = 10
+                   )
+                -> Next on Succeeded
+                -> ReleaseSlot on Failed
+            }
+            State `Play Loop` [ Description = "Play the looping animation, notice the play time and play time variance being used in this case. "; Complete = All ] {
+                do STT_PlayAnimMontage(
+                    `Montage to Play`    = M_interaction_bench_idle_loop_Montage,
+                    `Play Time`          = 10,
+                    `Play Time Variance` = 3,
+                    `Ignore Collision`   = true,
+                    `Slot Handle`        = SmartObjectClaimedHandle,
+                    `Smart Object Actor` = SmartObjectActor
+                )
+                -> Next
+            }
+            State `Play Exit` [ Description = "Currently we do not motion match out of the interaction. We play just and exit."; Complete = All ] {
+                do STT_PlayAnimMontage(
+                    `Montage to Play`    = M_interaction_bench_out_to_stand_Montage,
+                    `Ignore Collision`   = true,
+                    `Slot Handle`        = SmartObjectClaimedHandle,
+                    `Smart Object Actor` = SmartObjectActor
+                )
+                -> Next
+            }
+            State ReleaseSlot [ Description = "When the tree succeeds the claim slot is released."; Complete = All ] {
+                do STT_ClearFocus(AIController = STE_GetAIData.AIController) [ ConsideredForCompletion = false ],
+                   STT_AddCooldown(
+                       CooldownName    = "Sit",
+                       `Cooldown Time` = 5,
+                       AIController    = STE_GetAIData.AIController
+                   ),
+                   STT_CharacterIgnoreCollisionsWithOtherActor()
+                -> TreeSucceeded
+            }
+        }
+    }
+}

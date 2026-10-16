@@ -1,0 +1,19 @@
+StateTree(Name="DreamStateTreeTests/Validate/GroupWithTasks", Schema=TestAgent)
+{
+    State Root {
+        State Folder [ Group ] {
+            do Delay(1)
+        }
+        State Linking [ Group ] {
+            link Sub
+        }
+    }
+
+    Subtree Sub {
+        State In {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST6003 (5,13)
+// EXPECT DST6003 (8,13)

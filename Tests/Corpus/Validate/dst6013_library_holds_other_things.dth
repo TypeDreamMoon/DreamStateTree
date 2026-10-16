@@ -1,0 +1,16 @@
+StateTreeLibrary(Name="DreamStateTreeTests/Validate/LibraryHoldsOtherThings")
+{
+    Tags = { DreamStateTreeTest.Event; }
+    Template Fine = Owner.Health > 3;
+    Parameters = { float Speed; }
+    State Root {
+        do Delay(1)
+    }
+    Subtree Fine2 {
+        State In {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST6013 (5,5)
+// EXPECT DST6013 (6,5)

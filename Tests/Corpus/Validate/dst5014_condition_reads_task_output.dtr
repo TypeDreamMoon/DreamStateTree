@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/ConditionReadsTaskOutput", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+
+    State Root {
+        State Probe {
+            do Gauge = DstTestTask(InputValue = Params.Speed)
+            -> Other if Gauge.TickCount > 1
+        }
+        State Other {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST5014 (8,25)

@@ -1,0 +1,83 @@
+run ticks=40 dt=0.1 seed=1
+owner Level=1 Health=100 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Fight/Flinch/Start | recorded=1 | Shake: Enter:Input=1.5 Scale=3 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 0   Running | Root/Fight/Flinch/Start | recorded=1 | Shake: Tick:1
+tick 1   Running | Root/Fight/Flinch/Start | recorded=1 | Shake: Tick:2
+tick 2   Running | Root/Fight/Flinch/Recover | recorded=2 | Shake: Tick:3 ; Shake: Done:Succeeded ; Shake: Exit:TickCount=3 ; Settle: Enter:Input=1.5 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 3   Running | Root/Local/Wobble/Sway | recorded=3 | Settle: Tick:1 ; Settle: Done:Succeeded ; Settle: Exit:TickCount=1 ; Swaying: Enter:Input=0.5 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 4   Running | Root/Local/Wobble/Sway | recorded=3 | Swaying: Tick:1
+tick 5   Running | Root/Plain/Flinch/Start | recorded=4 | Swaying: Tick:2 ; Swaying: Done:Succeeded ; Swaying: Exit:TickCount=2 ; Shake: Enter:Input=1 Scale=2 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 6   Running | Root/Plain/Flinch/Start | recorded=4 | Shake: Tick:1
+tick 7   Running | Root/Plain/Flinch/Recover | recorded=5 | Shake: Tick:2 ; Shake: Done:Succeeded ; Shake: Exit:TickCount=2 ; Settle: Enter:Input=1 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 8   Running | Root/Positional/Wobble/Sway | recorded=6 | Settle: Tick:1 ; Settle: Done:Succeeded ; Settle: Exit:TickCount=1 ; Swaying: Enter:Input=0.8 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 9   Running | Root/Positional/Wobble/Sway | recorded=6 | Swaying: Tick:1
+tick 10  Succeeded |  | recorded=6 | Swaying: Tick:2 ; Swaying: Done:Succeeded ; Swaying: Exit:TickCount=2
+tick 11  Succeeded |  | recorded=6 | 
+tick 12  Succeeded |  | recorded=6 | 
+tick 13  Succeeded |  | recorded=6 | 
+tick 14  Succeeded |  | recorded=6 | 
+tick 15  Succeeded |  | recorded=6 | 
+tick 16  Succeeded |  | recorded=6 | 
+tick 17  Succeeded |  | recorded=6 | 
+tick 18  Succeeded |  | recorded=6 | 
+tick 19  Succeeded |  | recorded=6 | 
+tick 20  Succeeded |  | recorded=6 | 
+tick 21  Succeeded |  | recorded=6 | 
+tick 22  Succeeded |  | recorded=6 | 
+tick 23  Succeeded |  | recorded=6 | 
+tick 24  Succeeded |  | recorded=6 | 
+tick 25  Succeeded |  | recorded=6 | 
+tick 26  Succeeded |  | recorded=6 | 
+tick 27  Succeeded |  | recorded=6 | 
+tick 28  Succeeded |  | recorded=6 | 
+tick 29  Succeeded |  | recorded=6 | 
+tick 30  Succeeded |  | recorded=6 | 
+tick 31  Succeeded |  | recorded=6 | 
+tick 32  Succeeded |  | recorded=6 | 
+tick 33  Succeeded |  | recorded=6 | 
+tick 34  Succeeded |  | recorded=6 | 
+tick 35  Succeeded |  | recorded=6 | 
+tick 36  Succeeded |  | recorded=6 | 
+tick 37  Succeeded |  | recorded=6 | 
+tick 38  Succeeded |  | recorded=6 | 
+tick 39  Succeeded |  | recorded=6 | 
+stop     Succeeded | recorded=6 | 
+--- recorded transitions
+Root/Fight/Flinch/Start
+Root/Fight/Flinch/Recover
+Root/Local/Wobble/Sway
+Root/Plain/Flinch/Start
+Root/Plain/Flinch/Recover
+Root/Positional/Wobble/Sway
+--- log
+Shake: Enter:Input=1.5 Scale=3 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Shake: Tick:1
+Shake: Tick:2
+Shake: Tick:3
+Shake: Done:Succeeded
+Shake: Exit:TickCount=3
+Settle: Enter:Input=1.5 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Settle: Tick:1
+Settle: Done:Succeeded
+Settle: Exit:TickCount=1
+Swaying: Enter:Input=0.5 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Swaying: Tick:1
+Swaying: Tick:2
+Swaying: Done:Succeeded
+Swaying: Exit:TickCount=2
+Shake: Enter:Input=1 Scale=2 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Shake: Tick:1
+Shake: Tick:2
+Shake: Done:Succeeded
+Shake: Exit:TickCount=2
+Settle: Enter:Input=1 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Settle: Tick:1
+Settle: Done:Succeeded
+Settle: Exit:TickCount=1
+Swaying: Enter:Input=0.8 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Swaying: Tick:1
+Swaying: Tick:2
+Swaying: Done:Succeeded
+Swaying: Exit:TickCount=2

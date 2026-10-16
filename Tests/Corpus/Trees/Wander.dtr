@@ -1,0 +1,28 @@
+// A state that picks one of four legs at random, again and again: the seed decides which.
+// RUN ticks=20 dt=0.1 seed=3
+StateTree(Name="DreamStateTreeTests/Generated/Wander", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        State Wander {
+            pick Random
+            State Leg0 {
+                do LegTask0 = DstTestTask(InputValue = Params.Speed, TicksToComplete = 1)
+                -> Wander
+            }
+            State Leg1 {
+                do LegTask1 = DstTestTask(InputValue = Params.Speed, TicksToComplete = 1)
+                -> Wander
+            }
+            State Leg2 {
+                do LegTask2 = DstTestTask(InputValue = Params.Speed, TicksToComplete = 1)
+                -> Wander
+            }
+            State Leg3 {
+                do LegTask3 = DstTestTask(InputValue = Params.Speed, TicksToComplete = 1)
+                -> Wander
+            }
+        }
+    }
+}

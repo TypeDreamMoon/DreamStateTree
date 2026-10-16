@@ -1,0 +1,22 @@
+run ticks=6 dt=0.1 seed=1
+owner Level=1 Health=100 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root | recorded=1 | DstTestBlueprintTask: Enter:Strength=3 ; Work: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 0   Running | Root | recorded=1 | Work: Tick:1
+tick 1   Succeeded |  | recorded=1 | Work: Tick:2 ; Work: Done:Succeeded ; Work: Exit:TickCount=2 ; DstTestBlueprintTask: Exit:Strength=3
+tick 2   Succeeded |  | recorded=1 | 
+tick 3   Succeeded |  | recorded=1 | 
+tick 4   Succeeded |  | recorded=1 | 
+tick 5   Succeeded |  | recorded=1 | 
+stop     Succeeded | recorded=1 | 
+--- recorded transitions
+Root
+--- log
+DstTestBlueprintTask: Enter:Strength=3
+Work: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Work: Tick:1
+Work: Tick:2
+Work: Done:Succeeded
+Work: Exit:TickCount=2
+DstTestBlueprintTask: Exit:Strength=3

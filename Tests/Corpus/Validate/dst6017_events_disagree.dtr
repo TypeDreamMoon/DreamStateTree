@@ -1,0 +1,12 @@
+StateTree(Name="DreamStateTreeTests/Validate/EventsDisagree", Schema=TestAgent)
+{
+    State Root {
+        -> Hurt on DreamStateTreeTest.Event.Ask
+        State Hurt {
+            on DreamStateTreeTest.Event.Hit
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST6017 (4,9)
+// EXPECT DST6016 (6,13)

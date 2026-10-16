@@ -1,0 +1,18 @@
+// A tree that runs another tree asset, once with its parameters set and once with the defaults.
+// REQUIRE LinkChild.dtr
+// RUN ticks=20 dt=0.1 seed=1
+StateTree(Name="DreamStateTreeTests/Generated/LinkParent", Schema=TestAgent)
+{
+    Parameters = { float Reach = 5; }
+
+    State Root {
+        State Far {
+            link asset LinkChild(Radius = Params.Reach, Count = 4)
+            -> Near
+        }
+        State Near {
+            link asset LinkChild
+            -> TreeSucceeded
+        }
+    }
+}

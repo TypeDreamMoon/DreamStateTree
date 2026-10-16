@@ -1,0 +1,23 @@
+// Utility picks the child with the best score: Bold, with 0.9 * 0.9.
+// RUN ticks=6 dt=0.1 seed=1
+// OWNER Health=50
+StateTree(Name="DreamStateTreeTests/Generated/Chooser", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        pick HighestUtility
+        State Timid {
+            utility 0.2
+            do TimidTask = DstTestTask(InputValue = Params.Speed)
+        }
+        State Bold {
+            utility DstTestConsideration(Score = 0.9) * 0.9
+            do BoldTask = DstTestTask(InputValue = Params.Speed)
+        }
+        State Hurt {
+            utility FloatInput(Owner.Health, (0, 100)) * 0.8
+            do HurtTask = DstTestTask(InputValue = Params.Speed)
+        }
+    }
+}

@@ -1,0 +1,42 @@
+// The sections of a tree: settings, parameters of many types, global nodes, tag prefixes and colors.
+StateTree(Name="DreamStateTreeTests/Generated/Sections", Schema=TestAgent)
+{
+    Settings = { GlobalTasksCompletion = All; }
+
+    Parameters = {
+        float Speed = 4 [ Category = "Movement" ];
+        int Level = 3;
+        int64 Seed = 1234567890123;
+        double Precision = 0.001;
+        bool Alert = true;
+        bool Calm;
+        Name Label = "Guard";
+        String Title = "Night watch";
+        FVector Home = (100, 0, 50);
+        EDstTestMode Mode = Combat;
+        Array<int> Route = [1, 2, 3];
+        DstTestOwner Boss;
+        Class<Actor> Kind;
+    }
+
+    Globals = {
+        Stats  = DstTestEvaluator(Step = Params.Level);
+        Beacon = DstTestTask(InputValue = Params.Speed, TicksToComplete = 1000000);
+    }
+
+    Tags = { DreamStateTreeTest.Event; DreamStateTreeTest.State; }
+
+    Colors = {
+        Combat = (0.8, 0.25, 0.2);
+        Calm   = (R = 0.2, G = 0.4, B = 0.8);
+        Dim    = (0.1, 0.1, 0.1, 0.5);
+    }
+
+    State Root [ Color = Combat; Tag = Combat; Description = "Start here" ] {
+        do Delay(Duration = Params.Speed)
+        -> Resting
+        State Resting [ Color = Calm ] {
+            do Delay(2)
+        }
+    }
+}

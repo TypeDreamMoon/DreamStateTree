@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/NameHiddenByNamespace", Schema=TestAgent)
+{
+    State Root {
+        do Echo()
+    }
+}
+// EXPECT DST4018 (4,12)

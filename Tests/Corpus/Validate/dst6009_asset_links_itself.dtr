@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/SelfLink", Schema=TestAgent)
+{
+    State Root {
+        link asset Path(Game, "DreamStateTreeTests/Validate/SelfLink")
+    }
+}
+// EXPECT DST6009 (4,20)

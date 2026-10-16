@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/WrongKindOfNode", Schema=TestAgent)
+{
+    State Root {
+        do DstTestCondition()
+    }
+}
+// EXPECT DST4021 (4,12)

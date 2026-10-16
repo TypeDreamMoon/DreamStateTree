@@ -1,0 +1,81 @@
+Tree /Game/DreamStateTreeTests/Generated/Templates.Templates
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Rested
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Rested/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 50.000000
+        Arg Node Operator = GreaterOrEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Rested/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 30.000000
+        Arg Node Operator = Less
+        Arg Node bInvert = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Rested/Task[0]
+    State Root/Quick
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Quick/EnterCondition[0]
+        Arg Instance Left <- Parameters:Speed
+        Arg Instance Right = 3.000000
+        Arg Node Operator = Greater
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Quick/Task[0]
+        Bind Job
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance TicksToComplete = 5
+    State Root/Tired
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Tired/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 10.000000
+        Arg Node Operator = GreaterOrEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Tired/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 60.000000
+        Arg Node Operator = LessOrEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Tired/EnterCondition[2]
+        Operand And
+        Arg Instance Left <- Parameters:Speed
+        Arg Instance Right = 3.000000
+        Arg Node Operator = Greater
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Tired/Task[0]
+        Bind Rest
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Mixed
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Mixed/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 20.000000
+        Arg Node Operator = GreaterOrEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Mixed/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 80.000000
+        Arg Node Operator = LessOrEqual
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Mixed/Task[0]

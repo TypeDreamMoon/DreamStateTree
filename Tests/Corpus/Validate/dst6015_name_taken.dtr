@@ -1,0 +1,14 @@
+StateTree(Name="DreamStateTreeTests/Validate/NameTaken", Schema=TestAgent)
+{
+    Parameters = { float Speed; float Speed; }
+    Colors = { Warm = (1, 0, 0); Warm = (0, 1, 0); }
+    Globals = { Stats = DstTestEvaluator(); Stats = DstTestEvaluator(); }
+
+    State Root {
+        do Twice = Delay(1), Twice = Delay(2)
+    }
+}
+// EXPECT DST6015 (3,39)
+// EXPECT DST6015 (4,34)
+// EXPECT DST6015 (5,45)
+// EXPECT DST6015 (8,30)

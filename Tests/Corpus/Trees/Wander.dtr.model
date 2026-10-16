@@ -1,0 +1,51 @@
+Tree /Game/DreamStateTreeTests/Generated/Wander.Wander
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Wander
+      Type State
+      Selection TrySelectChildrenAtRandom
+      Complete Any
+      State Root/Wander/Leg0
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/DreamStateTreeTests.DstTestTask
+          Key Root/Wander/Leg0/Task[0]
+          Bind LegTask0
+          Arg Instance InputValue <- Parameters:Speed
+          Arg Instance TicksToComplete = 1
+        Transition OnStateCompleted -> GotoState Root/Wander
+      State Root/Wander/Leg1
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/DreamStateTreeTests.DstTestTask
+          Key Root/Wander/Leg1/Task[0]
+          Bind LegTask1
+          Arg Instance InputValue <- Parameters:Speed
+          Arg Instance TicksToComplete = 1
+        Transition OnStateCompleted -> GotoState Root/Wander
+      State Root/Wander/Leg2
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/DreamStateTreeTests.DstTestTask
+          Key Root/Wander/Leg2/Task[0]
+          Bind LegTask2
+          Arg Instance InputValue <- Parameters:Speed
+          Arg Instance TicksToComplete = 1
+        Transition OnStateCompleted -> GotoState Root/Wander
+      State Root/Wander/Leg3
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/DreamStateTreeTests.DstTestTask
+          Key Root/Wander/Leg3/Task[0]
+          Bind LegTask3
+          Arg Instance InputValue <- Parameters:Speed
+          Arg Instance TicksToComplete = 1
+        Transition OnStateCompleted -> GotoState Root/Wander

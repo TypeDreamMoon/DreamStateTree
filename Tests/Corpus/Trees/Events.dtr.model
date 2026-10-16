@@ -1,0 +1,76 @@
+Tree /Game/DreamStateTreeTests/Generated/Events.Events
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Transition OnEvent -> GotoState Root/Fight
+      Event tag=DreamStateTreeTest.Event.Hit payload=/Script/DreamStateTreeTests.DstTestPayload consume=true
+      TransitionCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Transition[0]/Condition[0]
+        Arg Instance Left <- TransitionEvent:Root#0:Payload</Script/DreamStateTreeTests.DstTestPayload>.Severity
+        Arg Instance Right = 0.500000
+        Arg Node Operator = Greater
+    Transition OnEvent -> GotoState Root/Observe
+      Event tag=DreamStateTreeTest.Event.Hit.Light payload=/Script/DreamStateTreeTests.DstTestPayload consume=true
+    Transition OnEvent -> GotoState Root/Chat
+      Event tag=DreamStateTreeTest.Event.Ask payload= consume=true
+    Transition OnTick -> GotoState Root
+    State Root/Idle
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Idle/Task[0]
+    State Root/Fight
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Event tag=DreamStateTreeTest.Event.Hit payload=/Script/DreamStateTreeTests.DstTestPayload consume=true
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Fight/Task[0]
+        Bind Strike
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance PayloadAmount <- StateEvent:Root/Fight:Payload</Script/DreamStateTreeTests.DstTestPayload>.Amount
+        Arg Instance PayloadSeverity <- StateEvent:Root/Fight:Payload</Script/DreamStateTreeTests.DstTestPayload>.Severity
+        Arg Instance bFlag <- StateEvent:Root/Fight:Payload</Script/DreamStateTreeTests.DstTestPayload>.bCritical
+      State Root/Fight/Light
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Event tag=DreamStateTreeTest.Event.Hit.Light payload=/Script/DreamStateTreeTests.DstTestPayload consume=true
+        Task /Script/DreamStateTreeTests.DstTestTask
+          Key Root/Fight/Light/Task[0]
+          Bind LightTask
+          Arg Instance InputValue <- Parameters:Speed
+          Arg Instance PayloadAmount <- StateEvent:Root/Fight:Payload</Script/DreamStateTreeTests.DstTestPayload>.Amount
+          Arg Instance PayloadSeverity <- StateEvent:Root/Fight/Light:Payload</Script/DreamStateTreeTests.DstTestPayload>.Severity
+      State Root/Fight/Generic
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/DreamStateTreeTests.DstTestTask
+          Key Root/Fight/Generic/Task[0]
+          Bind GenericTask
+          Arg Instance InputValue <- Parameters:Speed
+          Arg Instance PayloadAmount <- StateEvent:Root/Fight:Payload</Script/DreamStateTreeTests.DstTestPayload>.Amount
+    State Root/Observe
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Event tag=DreamStateTreeTest.Event.Hit.Light payload=/Script/DreamStateTreeTests.DstTestPayload consume=false
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Observe/Task[0]
+        Bind Watch
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance PayloadAmount <- StateEvent:Root/Observe:Payload</Script/DreamStateTreeTests.DstTestPayload>.Amount
+    State Root/Chat
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Event tag=DreamStateTreeTest.Event.Ask payload= consume=true
+      Task /Script/DreamStateTreeTests.DstTestSendEventTask
+        Key Root/Chat/Task[0]
+        Bind Echoing
+        Arg Instance Tag <- StateEvent:Root/Chat:Tag

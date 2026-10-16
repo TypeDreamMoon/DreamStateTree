@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/RefMisuse", Schema=TestAgent)
+{
+    Parameters = { float Speed; int Count; }
+
+    State Root {
+        State NotARef {
+            do Delay(Duration = ref Params.Speed)
+        }
+        State NeedsRef {
+            do DstTestTask(InputValue = Params.Speed, CounterRef = Params.Count)
+        }
+    }
+}
+// EXPECT DST5015 (7,33)
+// EXPECT DST5015 (10,68)

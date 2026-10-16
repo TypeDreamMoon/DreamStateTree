@@ -1,0 +1,41 @@
+Tree /Game/DreamStateTreeTests/Generated/NodeSettings.NodeSettings
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    EnterCondition /Script/StateTreeModule.StateTreeRandomCondition
+      Key Root/EnterCondition[0]
+      Arg Instance Threshold = 0.300000
+      Arg Node EvaluationMode = ForcedTrue
+    EnterCondition /Script/DreamStateTreeTests.DstTestCondition
+      Key Root/EnterCondition[1]
+      Bind LowHealth
+      Operand And
+      Arg Instance Left <- Context:Owner:Health
+      Arg Instance Right = 20.000000
+      Arg Node Compare = Less
+      Arg Node EvaluationMode = ForcedFalse
+    Task /Script/DreamStateTreeTests.DstTestTask
+      Key Root/Task[0]
+      Bind Lead
+      Arg Instance InputValue <- Parameters:Speed
+      Arg Node bConsideredForCompletion = False
+    Task /Script/DreamStateTreeTests.DstTestTask
+      Key Root/Task[1]
+      Bind Spare
+      Arg Instance InputValue <- Parameters:Speed
+      Arg Node bTaskEnabled = False
+    Task /Script/DreamStateTreeTests.DstTestTask
+      Key Root/Task[2]
+      Bind Urgent
+      Arg Instance InputValue <- Parameters:Speed
+      Arg Node TransitionHandlingPriority = High
+    Transition OnTick -> GotoState Root
+      Priority High
+      TransitionCondition /Script/DreamStateTreeTests.DstTestCondition
+        Key Root/Transition[0]/Condition[0]
+        Bind Fit
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 90.000000

@@ -1,0 +1,45 @@
+// Bindings from every kind of source: parameters, the context, a global node and an earlier task; property references
+// and an output binding.
+// RUN ticks=10 dt=0.1 seed=1
+// OWNER Level=2 Health=75 Mode=Combat
+StateTree(Name="DreamStateTreeTests/Generated/Bindings", Schema=TestAgent)
+{
+    Parameters = {
+        float Speed = 4;
+        int Count = 7;
+        int Total;
+        EDstTestMode Mode = Patrol;
+        Array<int> Route = [3, 1, 2];
+        FVector Home = (10, 20, 30);
+        DstTestOwner Boss;
+        bool Flag = true;
+    }
+
+    Globals = { Stats = DstTestEvaluator(Step = 2); }
+
+    State Root {
+        State First {
+            do Worker = DstTestTask(InputValue = Params.Speed,
+                                    Mode = Params.Mode,
+                                    Route = Params.Route,
+                                    Location = Params.Home,
+                                    Target = Owner,
+                                    bFlag = Params.Flag,
+                                    CounterRef = ref Stats.Counter,
+                                    TickCount -> Params.Total,
+                                    TicksToComplete = 2),
+               Reader = DstTestTask(InputValue = Worker.TickCount,
+                                    Scale = Owner.Health,
+                                    PayloadAmount = Stats.Counter,
+                                    Mode = Owner.Mode,
+                                    CounterRef = ref Params.Count,
+                                    TicksToComplete = 2)
+            -> Second
+        }
+        State Second {
+            if Stats.Counter > 1 and Params.Flag
+            do Final = DstTestTask(InputValue = Params.Total, TicksToComplete = 1)
+            -> TreeSucceeded
+        }
+    }
+}

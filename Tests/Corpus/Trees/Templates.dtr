@@ -1,0 +1,30 @@
+// Templates: expression templates from a library and from the tree itself, used in conditions and as a whole node.
+#include "Lib/Reactions.dth"
+
+StateTree(Name="DreamStateTreeTests/Generated/Templates", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    Template Fast = Params.Speed > 3;
+    Template Work(Ticks = 2) = DstTestTask(InputValue = Params.Speed, TicksToComplete = Ticks);
+    Template Between(Low, High) = Owner.Health >= Low and Owner.Health <= High;
+
+    State Root {
+        State Rested {
+            if Healthy(50) and not Hurt
+            do Delay(1)
+        }
+        State Quick {
+            if Fast
+            do Job = Work(5)
+        }
+        State Tired {
+            if Between(10, 60) and Fast
+            do Rest = Work()
+        }
+        State Mixed {
+            if Between(Low = 20, High = 80)
+            do Delay(1)
+        }
+    }
+}

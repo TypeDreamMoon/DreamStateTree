@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/DelayOnCompletion", Schema=TestAgent)
+{
+    State Root {
+        do Delay(1)
+        -> Root [ Delay = 1 ]
+    }
+}
+// EXPECT DST6018 (5,9)

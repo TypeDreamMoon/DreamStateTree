@@ -1,0 +1,5 @@
+StateTree(Name="DreamStateTreeTests/Validate/NoRootState", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+}
+// EXPECT DST6012 (1,1)

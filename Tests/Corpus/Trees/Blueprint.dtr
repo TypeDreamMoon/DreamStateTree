@@ -1,0 +1,11 @@
+// A Blueprint-style node is named by its class; its data lives in an instance object.
+// RUN ticks=6 dt=0.1 seed=1
+StateTree(Name="DreamStateTreeTests/Generated/Blueprint", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        do Pause = DstTestBlueprintTask(), Work = DstTestTask(InputValue = Params.Speed, TicksToComplete = 2)
+        -> TreeSucceeded
+    }
+}

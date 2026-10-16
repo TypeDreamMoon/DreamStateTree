@@ -1,0 +1,23 @@
+StateTree(Name="DreamStateTreeTests/Validate/LinkedStateWithTasksOrChildren", Schema=TestAgent)
+{
+    State Root {
+        State WithTask {
+            link Sub
+            do Delay(1)
+        }
+        State WithChild {
+            link Sub
+            State Kid {
+                do Delay(1)
+            }
+        }
+    }
+
+    Subtree Sub {
+        State In {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST6004 (6,13)
+// EXPECT DST6004 (10,13)

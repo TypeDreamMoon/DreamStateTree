@@ -1,0 +1,14 @@
+// Node settings in [ ]: a name, enabled, considered for completion, transition priority and evaluation mode.
+StateTree(Name="DreamStateTreeTests/Generated/NodeSettings", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        if Random(0.3) [ Evaluation = ForcedTrue ]
+        if DstTestCondition(Left = Owner.Health, Right = 20, Compare = Less) [ Name = "LowHealth"; Evaluation = ForcedFalse ]
+        do Lead = DstTestTask(InputValue = Params.Speed) [ ConsideredForCompletion = false ],
+           Spare = DstTestTask(InputValue = Params.Speed) [ Enabled = false ],
+           Urgent = DstTestTask(InputValue = Params.Speed) [ TransitionPriority = High ]
+        -> Root on Tick if DstTestCondition(Left = Owner.Health, Right = 90) [ Name = "Fit" ] [ Priority = High ]
+    }
+}

@@ -1,0 +1,11 @@
+// An engine schema with a context class given in the header.
+StateTree(Name="DreamStateTreeTests/Generated/ComponentSchema", Schema=Component(Actor = Pawn))
+{
+    Parameters = { float Wait = 2; }
+
+    State Root {
+        if ObjectIsValid(Actor)
+        do Delay(Duration = Params.Wait)
+        -> Root
+    }
+}

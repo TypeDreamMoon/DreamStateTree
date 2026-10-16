@@ -1,0 +1,40 @@
+run ticks=10 dt=0.1 seed=1
+owner Level=2 Health=75 Mode=Combat Alerted=false
+started=yes
+--- steps
+start    Running | Root/First | recorded=1 | Stats: TreeStart:Step=2 ; Stats: Tick:Counter=2 ; Worker: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=1 Route=3 Ref=2 Owner(Level=2) ; Reader: Enter:Input=0 Scale=75 Amount=2 Severity=0 Mode=2 Route=0 Ref=7 Owner(Level=2)
+tick 0   Running | Root/First | recorded=1 | Stats: Tick:Counter=4 ; Worker: Tick:1 ; Reader: Tick:1
+tick 1   Running | Root/Second | recorded=2 | Stats: Tick:Counter=6 ; Worker: Tick:2 ; Worker: Done:Succeeded ; Reader: Tick:2 ; Reader: Done:Succeeded ; Reader: Exit:TickCount=2 ; Worker: Exit:TickCount=2 ; Final: Enter:Input=2 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+tick 2   Succeeded |  | recorded=2 | Stats: Tick:Counter=8 ; Final: Tick:1 ; Final: Done:Succeeded ; Final: Exit:TickCount=1 ; Stats: TreeStop:Counter=8
+tick 3   Succeeded |  | recorded=2 | 
+tick 4   Succeeded |  | recorded=2 | 
+tick 5   Succeeded |  | recorded=2 | 
+tick 6   Succeeded |  | recorded=2 | 
+tick 7   Succeeded |  | recorded=2 | 
+tick 8   Succeeded |  | recorded=2 | 
+tick 9   Succeeded |  | recorded=2 | 
+stop     Succeeded | recorded=2 | 
+--- recorded transitions
+Root/First
+Root/Second
+--- log
+Stats: TreeStart:Step=2
+Stats: Tick:Counter=2
+Worker: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=1 Route=3 Ref=2 Owner(Level=2)
+Reader: Enter:Input=0 Scale=75 Amount=2 Severity=0 Mode=2 Route=0 Ref=7 Owner(Level=2)
+Stats: Tick:Counter=4
+Worker: Tick:1
+Reader: Tick:1
+Stats: Tick:Counter=6
+Worker: Tick:2
+Worker: Done:Succeeded
+Reader: Tick:2
+Reader: Done:Succeeded
+Reader: Exit:TickCount=2
+Worker: Exit:TickCount=2
+Final: Enter:Input=2 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+Stats: Tick:Counter=8
+Final: Tick:1
+Final: Done:Succeeded
+Final: Exit:TickCount=1
+Stats: TreeStop:Counter=8

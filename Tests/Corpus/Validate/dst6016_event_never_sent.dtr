@@ -1,0 +1,10 @@
+StateTree(Name="DreamStateTreeTests/Validate/EventNeverSent", Schema=TestAgent)
+{
+    State Root {
+        State Hurt {
+            on DreamStateTreeTest.Event.Hit(DstTestPayload)
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST6016 (5,13)

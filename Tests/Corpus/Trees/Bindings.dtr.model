@@ -1,0 +1,63 @@
+Tree /Game/DreamStateTreeTests/Generated/Bindings.Bindings
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  Parameter int32 Count = 7
+  Parameter int32 Total
+  Parameter Enum:/Script/DreamStateTreeTests.EDstTestMode Mode = Patrol
+  Parameter Array<int32> Route = (3,1,2)
+  Parameter Struct:/Script/CoreUObject.Vector Home = (X=10.000000,Y=20.000000,Z=30.000000)
+  Parameter Object:/Script/DreamStateTreeTests.DstTestOwner Boss
+  Parameter bool Flag = True
+  Global /Script/DreamStateTreeTests.DstTestEvaluator
+    Role Evaluator
+    Key Global[0]
+    Bind Stats
+    Arg Instance Step = 2
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/First
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/First/Task[0]
+        Bind Worker
+        Arg Instance CounterRef ref Global:Global[0]:Counter
+        Arg Instance InputValue <- Parameters:Speed
+        Arg Instance Location <- Parameters:Home
+        Arg Instance Mode <- Parameters:Mode
+        Arg Instance Route <- Parameters:Route
+        Arg Instance Target <- Context:Owner
+        Arg Instance TickCount -> Parameters:Total
+        Arg Instance bFlag <- Parameters:Flag
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/First/Task[1]
+        Bind Reader
+        Arg Instance CounterRef ref Parameters:Count
+        Arg Instance InputValue <- Node:Root/First/Task[0]:TickCount
+        Arg Instance Mode <- Context:Owner:Mode
+        Arg Instance PayloadAmount <- Global:Global[0]:Counter
+        Arg Instance Scale <- Context:Owner:Health
+      Transition OnStateCompleted -> GotoState Root/Second
+    State Root/Second
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Second/EnterCondition[0]
+        Arg Instance Left <- Global:Global[0]:Counter
+        Arg Instance Right = 1
+        Arg Node Operator = Greater
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Second/EnterCondition[1]
+        Operand And
+        Arg Instance bLeft <- Parameters:Flag
+        Arg Instance bRight = True
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Second/Task[0]
+        Bind Final
+        Arg Instance InputValue <- Parameters:Total
+        Arg Instance TicksToComplete = 1
+      Transition OnStateCompleted -> Succeeded

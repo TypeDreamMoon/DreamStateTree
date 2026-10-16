@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/NoSchema")
+{
+    State Root {
+        do Delay(1)
+    }
+}
+// EXPECT DST4005 (1,1)

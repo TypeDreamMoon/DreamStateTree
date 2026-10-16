@@ -1,0 +1,12 @@
+StateTreeLibrary(Name="DreamStateTreeTests/Validate/OkLibrary")
+{
+    Tags = { DreamStateTreeTest.Event; }
+
+    Template Healthy(Min) = Owner.Health >= Min;
+
+    Subtree Reaction(float Intensity = 1) {
+        State In {
+            do Delay(Params.Intensity)
+        }
+    }
+}

@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/InputNotBound", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+
+    State Root {
+        State Unbound {
+            do DstTestTask(Scale = 2)
+        }
+        State Constant {
+            do DstTestTask(InputValue = 5)
+        }
+    }
+}
+// EXPECT DST5004 (7,16)
+// EXPECT DST5004 (10,41)

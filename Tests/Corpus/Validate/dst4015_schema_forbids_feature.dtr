@@ -1,0 +1,43 @@
+StateTree(Name="DreamStateTreeTests/Validate/SchemaForbidsFeature", Schema=RestrictedAgent)
+{
+    Settings = { GlobalTasksCompletion = All; }
+    Parameters = { float Speed; }
+    Globals = { Stats = DstTestEvaluator(); }
+
+    State Root {
+        State Folder [ Group ] {
+            State Leaf {
+                do Delay(1)
+            }
+        }
+        State Picky {
+            pick FollowTransitions
+            State Inner {
+                do Delay(1)
+            }
+        }
+        State Gated {
+            if Random(0.5)
+            do Delay(1)
+        }
+        State Scored {
+            utility 0.5
+            do Delay(1)
+        }
+        State Busy {
+            do Delay(1), Delay(2)
+        }
+        State Slow [ Complete = All ] {
+            do Delay(1)
+        }
+    }
+}
+// EXPECT DST4015 (3,18)
+// EXPECT DST4015 (4,5)
+// EXPECT DST4015 (5,17)
+// EXPECT DST4015 (8,15)
+// EXPECT DST4015 (14,13)
+// EXPECT DST4015 (20,13)
+// EXPECT DST4015 (24,13)
+// EXPECT DST4015 (28,13)
+// EXPECT DST4015 (30,22)

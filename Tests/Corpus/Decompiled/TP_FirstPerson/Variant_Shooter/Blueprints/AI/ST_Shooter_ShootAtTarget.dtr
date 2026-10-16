@@ -1,0 +1,49 @@
+StateTree(Name="Variant_Shooter/Blueprints/AI/ST_Shooter_ShootAtTarget", Schema=AIComponent(AIController = BP_ShooterAIController, Actor = BP_ShooterNPC))
+{
+    Parameters = {
+        Actor  Target;
+        double Line_of_Sight_Check_Interval    = 0.75;
+        double Line_of_Sight_Cone_Angle        = 85;
+        int    Number_of_LoS_Vertical_Segments = 5;
+    }
+
+    Colors = {
+        `Default Color` = (R = 0.013702, G = 0.309469, B = 0.386429);
+        Firing          = (R = 0.203125, G = 0.007105, B = 0.002029);
+        `No LoS`        = (R = 0.4, G = 0.139887, B = 0.008851);
+        Reloading       = (R = 0.022181, G = 0.234375, B = 0.01402);
+    }
+
+    State Root {
+        State Attacking {
+            if LineOfSightToTarget(
+                Target                            = Params.Target,
+                LineOfSightConeAngle              = Params.Line_of_Sight_Cone_Angle,
+                NumberOfVerticalLineOfSightChecks = Params.Number_of_LoS_Vertical_Segments
+            )
+            State Shooting [ Color = Firing ] {
+                do SetRandomFloat = SetRandomFloat(MinValue = 1, MaxValue = 3),
+                   Delay(SetRandomFloat.OutValue),
+                   ShootAtTarget(Target = Params.Target),
+                   DebugText("Shooting", ReferenceActor = Actor)
+                -> `No Line of Sight` on Tick if LineOfSightToTarget(
+                    Target                            = Params.Target,
+                    LineOfSightConeAngle              = Params.Line_of_Sight_Cone_Angle,
+                    NumberOfVerticalLineOfSightChecks = Params.Number_of_LoS_Vertical_Segments,
+                    MustHaveLineOfSight               = false
+                )
+                -> Reloading
+            }
+            State Reloading [ Color = Reloading ] {
+                do SetRandomFloat2 = SetRandomFloat(MinValue = 1, MaxValue = 4),
+                   Delay(SetRandomFloat2.OutValue),
+                   DebugText("Reloading", ReferenceActor = Actor)
+                -> Root
+            }
+        }
+        State `No Line of Sight` [ Color = `No LoS` ] {
+            do Delay(Params.Line_of_Sight_Check_Interval), DebugText("No LoS", ReferenceActor = Actor)
+            -> Root
+        }
+    }
+}

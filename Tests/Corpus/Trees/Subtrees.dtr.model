@@ -1,0 +1,96 @@
+Tree /Game/DreamStateTreeTests/Generated/Subtrees.Subtrees
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Courage = 0.500000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Fight
+      Type Linked
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link Flinch
+      Parameter float Intensity = 1.000000
+        Overridden
+      Parameter int32 Rounds = 3
+        Overridden
+      ParameterBindings
+        Arg Instance Intensity fn
+          PropertyFunction /Script/StateTreeModule.StateTreeAddFloatPropertyFunction
+            Key Root/Fight/Parameters/Fn:Intensity
+            Arg Instance Left = 1.000000
+            Arg Instance Right <- Parameters:Courage
+      Transition OnStateCompleted -> GotoState Root/Local
+    State Root/Local
+      Type Linked
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link Wobble
+      Parameter float Amount = 0.500000
+        Overridden
+      ParameterBindings
+        Arg Instance Amount <- Parameters:Courage
+      Transition OnStateCompleted -> GotoState Root/Plain
+    State Root/Plain
+      Type Linked
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link Flinch
+      Parameter float Intensity = 1.000000
+      Parameter int32 Rounds = 2
+      Transition OnStateCompleted -> GotoState Root/Positional
+    State Root/Positional
+      Type Linked
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link Wobble
+      Parameter float Amount = 0.800000
+        Overridden
+      Transition OnStateCompleted -> Succeeded
+  State Wobble
+    Type Subtree
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Parameter float Amount = 0.500000
+    State Wobble/Sway
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Wobble/Sway/Task[0]
+        Bind Swaying
+        Arg Instance InputValue <- StateParameters:Wobble:Amount
+  State Flinch
+    Type Subtree
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Parameter float Intensity = 1.000000
+    Parameter int32 Rounds = 2
+    State Flinch/Start
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Flinch/Start/Task[0]
+        Bind Shake
+        Arg Instance InputValue <- StateParameters:Flinch:Intensity
+        Arg Instance Scale fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Flinch/Start/Task[0]/Fn:Scale
+            Arg Instance Left <- StateParameters:Flinch:Intensity
+            Arg Instance Right = 2.000000
+        Arg Instance TicksToComplete <- StateParameters:Flinch:Rounds
+      Transition OnStateCompleted -> GotoState Flinch/Recover
+    State Flinch/Recover
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Flinch/Recover/Task[0]
+        Bind Settle
+        Arg Instance InputValue <- StateParameters:Flinch:Intensity
+        Arg Instance TicksToComplete = 1

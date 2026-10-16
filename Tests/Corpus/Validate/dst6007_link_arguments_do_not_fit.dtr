@@ -1,0 +1,23 @@
+StateTree(Name="DreamStateTreeTests/Validate/LinkArgumentsDoNotFit", Schema=TestAgent)
+{
+    State Root {
+        State A {
+            link Sub(Nope = 2)
+        }
+        State B {
+            link Sub(1, 2)
+        }
+        State C {
+            link Sub(1, Amount = 2)
+        }
+    }
+
+    Subtree Sub(float Amount = 1) {
+        State In {
+            do Delay(Params.Amount)
+        }
+    }
+}
+// EXPECT DST6007 (5,22)
+// EXPECT DST6007 (8,25)
+// EXPECT DST6007 (11,25)

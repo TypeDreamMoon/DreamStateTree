@@ -1,0 +1,43 @@
+StateTree(Name="Blueprints/AI/StateTree/ST_NPC_SandboxCharacter_SmartObject", Schema=AIComponent)
+{
+    Colors = {
+        Base                 = (R = 0.013702, G = 0.309469, B = 0.386429);
+        Patrol               = (R = 0.35243, G = 0.094838, B = 0.327886);
+        `Smart Object State` = (R = 0.072842, G = 0.295652, B = 0.074815);
+    }
+
+    State Root {
+        State `Smart Object State` {
+            -> `Patrol State`
+            State UsingSmartObj [ Color = `Smart Object State` ] {
+                if STC_CheckCooldown(CooldownName = "Sit")
+                State FindSmartObject [ Color = `Smart Object State`; Complete = All ] {
+                    do STT_SetCharacterInputState(WantsToWalk = true) [ ConsideredForCompletion = false ],
+                       STT_FindSmartObject = STT_FindSmartObject(
+                           `Search Box Extents`     = (X = 1000, Y = 1000, Z = 500),
+                           `Smart Object User Tags` = [SmartObject.ObjectType.NPC]
+                       ) [ ConsideredForCompletion = false ]
+                    State ClaimSlot [ Color = `Smart Object State` ] {
+                        do STT_ClaimSlot = STT_ClaimSlot(
+                            SlotToBeClaimed = STT_FindSmartObject.CandidateSlot,
+                            SmartObject     = STT_FindSmartObject.`Smart Object`
+                        ) [ ConsideredForCompletion = false ]
+                        State UseSmartObject [ Color = `Smart Object State` ] {
+                            do STT_UseSmartObject(
+                                AIController     = AIController,
+                                `Claimed Handle` = STT_ClaimSlot.ClaimedHandle
+                            )
+                        }
+                    }
+                }
+            }
+            State `Patrol State` [ Color = Patrol; Group ] {
+                -> `Smart Object State`
+                State Patrol [ Color = Patrol; bCopyParameterBindingsOnTick ] {
+                    link asset ST_NPC_SandboxCharacter_Patrol_Subtree
+                    -> `Smart Object State`
+                }
+            }
+        }
+    }
+}

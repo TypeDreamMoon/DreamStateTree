@@ -1,0 +1,68 @@
+run ticks=24 dt=0.1 seed=1
+owner Level=1 Health=100 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Sum | recorded=1 | Plain: Enter:Input=4 Scale=3 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 0   Running | Root/Negated | recorded=2 | Plain: Tick:1 ; Plain: Done:Succeeded ; Plain: Exit:TickCount=1 ; Minus: Enter:Input=-4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 1   Running | Root/Whole | recorded=3 | Minus: Tick:1 ; Minus: Done:Succeeded ; Minus: Exit:TickCount=1 ; Count: Enter:Input=4 Scale=1 Amount=7 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 2   Running | Root/Logic | recorded=4 | Count: Tick:1 ; Count: Done:Succeeded ; Count: Exit:TickCount=1 ; Flags: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 3   Running | Root/Folded | recorded=5 | Flags: Tick:1 ; Flags: Done:Succeeded ; Flags: Exit:TickCount=1 ; Fixed: Enter:Input=4 Scale=6 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 4   Running | Root/Folded | recorded=5 | Fixed: Tick:1
+tick 5   Running | Root/Calls | recorded=6 | Fixed: Tick:2 ; Fixed: Done:Succeeded ; Fixed: Exit:TickCount=2 ; Called: Enter:Input=4 Scale=8 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 6   Running | Root/Vector | recorded=7 | Called: Tick:1 ; Called: Done:Succeeded ; Called: Exit:TickCount=1 ; Moved: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+tick 7   Succeeded |  | recorded=7 | Moved: Tick:1 ; Moved: Done:Succeeded ; Moved: Exit:TickCount=1
+tick 8   Succeeded |  | recorded=7 | 
+tick 9   Succeeded |  | recorded=7 | 
+tick 10  Succeeded |  | recorded=7 | 
+tick 11  Succeeded |  | recorded=7 | 
+tick 12  Succeeded |  | recorded=7 | 
+tick 13  Succeeded |  | recorded=7 | 
+tick 14  Succeeded |  | recorded=7 | 
+tick 15  Succeeded |  | recorded=7 | 
+tick 16  Succeeded |  | recorded=7 | 
+tick 17  Succeeded |  | recorded=7 | 
+tick 18  Succeeded |  | recorded=7 | 
+tick 19  Succeeded |  | recorded=7 | 
+tick 20  Succeeded |  | recorded=7 | 
+tick 21  Succeeded |  | recorded=7 | 
+tick 22  Succeeded |  | recorded=7 | 
+tick 23  Succeeded |  | recorded=7 | 
+stop     Succeeded | recorded=7 | 
+--- recorded transitions
+Root/Sum
+Root/Negated
+Root/Whole
+Root/Logic
+Root/Folded
+Root/Calls
+Root/Vector
+--- log
+Plain: Enter:Input=4 Scale=3 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Plain: Tick:1
+Plain: Done:Succeeded
+Plain: Exit:TickCount=1
+Minus: Enter:Input=-4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Minus: Tick:1
+Minus: Done:Succeeded
+Minus: Exit:TickCount=1
+Count: Enter:Input=4 Scale=1 Amount=7 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Count: Tick:1
+Count: Done:Succeeded
+Count: Exit:TickCount=1
+Flags: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Flags: Tick:1
+Flags: Done:Succeeded
+Flags: Exit:TickCount=1
+Fixed: Enter:Input=4 Scale=6 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Fixed: Tick:1
+Fixed: Tick:2
+Fixed: Done:Succeeded
+Fixed: Exit:TickCount=2
+Called: Enter:Input=4 Scale=8 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Called: Tick:1
+Called: Done:Succeeded
+Called: Exit:TickCount=1
+Moved: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=1)
+Moved: Tick:1
+Moved: Done:Succeeded
+Moved: Exit:TickCount=1

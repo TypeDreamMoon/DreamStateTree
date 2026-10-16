@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/NoEventToRead", Schema=TestAgent)
+{
+    State Root {
+        do Delay(Duration = Event.Amount)
+    }
+}
+// EXPECT DST5007 (4,29)

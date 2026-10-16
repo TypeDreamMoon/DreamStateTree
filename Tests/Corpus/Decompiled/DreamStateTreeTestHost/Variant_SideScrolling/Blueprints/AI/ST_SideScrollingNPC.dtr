@@ -1,0 +1,37 @@
+StateTree(Name="Variant_SideScrolling/Blueprints/AI/ST_SideScrollingNPC", Schema=AIComponent(AIController = BP_SideScrollingAIController, Actor = BP_SideScrollingNPC))
+{
+    Parameters = { double RangeMax = 500; Pawn Current_Target; bool Has_Valid_Target; }
+
+    Colors = {
+        `Default Color` = (R = 0.013702, G = 0.309469, B = 0.386429);
+        `NPC Active`    = (R = 0.01648, G = 0.208333, B = 0.043083);
+        `NPC Inactive`  = (R = 0.4, G = 0.015416, B = 0.015416);
+    }
+
+    State Root {
+        State `NPC Behavior` {
+            State `Select Target` {
+                do GetPlayer(TargetPlayer -> Params.Current_Target, ValidTarget -> Params.Has_Valid_Target)
+                -> Next on Succeeded
+                -> Deactivated on Failed
+            }
+            State Active [ Color = `NPC Active` ] {
+                if Params.Has_Valid_Target and Actor.bDeactivated == false
+                -> Deactivated on Tick if Actor.bDeactivated
+                State `Follow Player` [ Color = `NPC Active` ] {
+                    do MoveTo(TargetActor = Params.Current_Target),
+                       DebugText("Follow", ReferenceActor = Params.Current_Target)
+                    -> Next
+                }
+                State Wait [ Color = `NPC Active` ] {
+                    do Delay(0.16), DebugText("Wait", ReferenceActor = Actor)
+                    -> Root
+                }
+            }
+        }
+        State Deactivated [ Color = `NPC Inactive` ] {
+            do Delay(0.1), DebugText("Deactivated", ReferenceActor = Actor)
+            -> Root
+        }
+    }
+}

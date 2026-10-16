@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/MissingProperty", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+
+    State Root {
+        State Param {
+            do Delay(Duration = Params.Missing)
+        }
+        State Context {
+            do Delay(Duration = Owner.Mana)
+        }
+    }
+}
+// EXPECT DST5002 (7,33)
+// EXPECT DST5002 (10,33)

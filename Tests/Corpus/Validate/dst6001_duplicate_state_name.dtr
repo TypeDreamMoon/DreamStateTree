@@ -1,0 +1,12 @@
+StateTree(Name="DreamStateTreeTests/Validate/DuplicateStateName", Schema=TestAgent)
+{
+    State Root {
+        State Dup {
+            do Delay(1)
+        }
+        State Dup {
+            do Delay(2)
+        }
+    }
+}
+// EXPECT DST6001 (7,15)

@@ -1,0 +1,62 @@
+run ticks=30 dt=0.1 seed=1
+owner Level=1 Health=100 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Short | recorded=1 | Hop: Enter:Speed=2 Sprint=1
+tick 0   Running | Root/Named | recorded=2 | Hop: Tick:Travelled=4 ; Step: Enter:Speed=3 Sprint=1
+tick 1   Running | Root/Alias | recorded=3 | Step: Tick:Travelled=6 ; Dash: Enter:Speed=1.5 Sprint=0
+tick 2   Running | Root/Global | recorded=4 | Dash: Tick:Travelled=1.5 ; Rush: Enter:Speed=4 Sprint=0
+tick 3   Running | Root/Full | recorded=5 | Rush: Tick:Travelled=4 ; Walk: Enter:Speed=1 Sprint=0
+tick 4   Running | Root/Reflected | recorded=6 | Walk: Tick:Travelled=1 ; Stroll: Enter:Speed=0.5 Sprint=0
+tick 5   Running | Root/Move To | recorded=7 | Stroll: Tick:Travelled=0.5 ; Take Off: Enter:Speed=1 Sprint=0
+tick 6   Running | Root/巡逻 | recorded=8 | Take Off: Tick:Travelled=1 ; 连击: Enter:Speed=2 Sprint=0
+tick 7   Succeeded |  | recorded=8 | 连击: Tick:Travelled=2
+tick 8   Succeeded |  | recorded=8 | 
+tick 9   Succeeded |  | recorded=8 | 
+tick 10  Succeeded |  | recorded=8 | 
+tick 11  Succeeded |  | recorded=8 | 
+tick 12  Succeeded |  | recorded=8 | 
+tick 13  Succeeded |  | recorded=8 | 
+tick 14  Succeeded |  | recorded=8 | 
+tick 15  Succeeded |  | recorded=8 | 
+tick 16  Succeeded |  | recorded=8 | 
+tick 17  Succeeded |  | recorded=8 | 
+tick 18  Succeeded |  | recorded=8 | 
+tick 19  Succeeded |  | recorded=8 | 
+tick 20  Succeeded |  | recorded=8 | 
+tick 21  Succeeded |  | recorded=8 | 
+tick 22  Succeeded |  | recorded=8 | 
+tick 23  Succeeded |  | recorded=8 | 
+tick 24  Succeeded |  | recorded=8 | 
+tick 25  Succeeded |  | recorded=8 | 
+tick 26  Succeeded |  | recorded=8 | 
+tick 27  Succeeded |  | recorded=8 | 
+tick 28  Succeeded |  | recorded=8 | 
+tick 29  Succeeded |  | recorded=8 | 
+stop     Succeeded | recorded=8 | 
+--- recorded transitions
+Root/Short
+Root/Named
+Root/Alias
+Root/Global
+Root/Full
+Root/Reflected
+Root/Move To
+Root/巡逻
+--- log
+Hop: Enter:Speed=2 Sprint=1
+Hop: Tick:Travelled=4
+Step: Enter:Speed=3 Sprint=1
+Step: Tick:Travelled=6
+Dash: Enter:Speed=1.5 Sprint=0
+Dash: Tick:Travelled=1.5
+Rush: Enter:Speed=4 Sprint=0
+Rush: Tick:Travelled=4
+Walk: Enter:Speed=1 Sprint=0
+Walk: Tick:Travelled=1
+Stroll: Enter:Speed=0.5 Sprint=0
+Stroll: Tick:Travelled=0.5
+Take Off: Enter:Speed=1 Sprint=0
+Take Off: Tick:Travelled=1
+连击: Enter:Speed=2 Sprint=0
+连击: Tick:Travelled=2

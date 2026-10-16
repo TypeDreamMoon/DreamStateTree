@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/TwoConstants", Schema=TestAgent)
+{
+    State Root {
+        if 1 < 2
+        do Delay(1)
+    }
+}
+// EXPECT DST5009 (4,12)

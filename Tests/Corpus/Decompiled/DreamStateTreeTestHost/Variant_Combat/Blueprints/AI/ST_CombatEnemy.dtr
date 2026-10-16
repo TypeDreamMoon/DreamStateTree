@@ -1,0 +1,150 @@
+StateTree(Name="Variant_Combat/Blueprints/AI/ST_CombatEnemy", Schema=AIComponent(AIController = BP_CombatAIController, Actor = BP_CombatEnemy))
+{
+    Parameters = {
+        double    TargetMeleeDistance       = 100;
+        Vector    FallbackTarget;
+        Vector    FlankingTarget;
+        double    EvadeProbabilityIdle      = 0.8;
+        double    EvadeProbabilityMoving    = 0.6;
+        double    EvadeProbabilityAttacking = 0.25;
+        Character Current_Target;
+        Vector    Current_Target_Location;
+        float     Distance_To_Target;
+    }
+
+    Colors = {
+        Combat          = (R = 0.248264, G = 0.010701, B = 0.000323);
+        Dead            = (R = 0.4, G = 0.4, B = 0.4);
+        `Default Color` = (R = 0.013702, G = 0.309469, B = 0.386429);
+        Evading         = (R = 0.07036, G = 0.021219, B = 0.254152);
+        Launched        = (R = 0.50868, G = 0.327295);
+        Moving          = (R = 0.019268, G = 0.15625, B = 0.012435);
+    }
+
+    State Root {
+        -> Dead on Tick if Actor.CurrentHP <= 0
+        State Dead [ Color = Dead ] {
+            if Actor.CurrentHP <= 0
+            do DebugText("Dead", ReferenceActor = Actor)
+            -> TreeSucceeded
+            -> TreeSucceeded on Tick
+        }
+        State `Find Target` {
+            do GetPlayerInfo(
+                TargetPlayerCharacter -> Params.Current_Target,
+                TargetPlayerLocation  -> Params.Current_Target_Location,
+                DistanceToTarget      -> Params.Distance_To_Target
+            )
+            -> Next on Succeeded
+            -> Default on Failed
+        }
+        State `Select Behaviors at Random` [ Color = Combat ] {
+            if ObjectIsValid(Params.Current_Target)
+            pick Random
+            -> Launched on Tick if CharacterGrounded(MustBeOnAir = true)
+            State Attacking [ Color = Combat ] {
+                do DebugText("Attacking", ReferenceActor = Actor)
+                State `Close in for Melee` [ Color = Moving ] {
+                    if Params.Distance_To_Target > Params.TargetMeleeDistance
+                    do MoveTo(TargetActor = Params.Current_Target, AcceptableRadius = 50), SetCharacterSpeed()
+                    -> Next on Succeeded
+                    -> Evading on Tick if Random(Params.EvadeProbabilityAttacking) and IsInDanger()
+                }
+                State Melee [ Color = Combat ] {
+                    if Params.Distance_To_Target <= Params.TargetMeleeDistance
+                    State MeleeAttack [ Color = Combat ] {
+                        pick Random
+                        do FaceActor(ActorToFaceTowards = Params.Current_Target)
+                        State `Combo Attack` [ Color = Combat ]   { do ComboAttack()  -> `Find Fallback Point` }
+                        State `Charged Attack` [ Color = Combat ] { do ChargedAttack()  -> `Find Fallback Point` }
+                    }
+                    State `Find Fallback Point` [ Color = Combat ] {
+                        do RunEnvQuery(
+                            EnvQuery_Fallback,
+                            Result      = ref Params.FallbackTarget,
+                            QueryConfig = [
+                                (ParamName = "Min Fallback Distance", bAllowBBKey = false, Value = 150),
+                                (ParamName = "Max Fallback Distance", bAllowBBKey = false, Value = 300)
+                            ],
+                            RunMode     = RandomBest25Pct
+                        )
+                        -> Next on Succeeded
+                    }
+                    State `Move to Fallback Point` [ Color = Combat ] {
+                        do MoveTo(Params.FallbackTarget, TrackMovingGoal = false),
+                           SetCharacterSpeed(Speed = 300),
+                           FaceLocation(FaceLocation = Params.Current_Target_Location)
+                        -> Next
+                        -> Evading on Tick if Random(Params.EvadeProbabilityMoving) and IsInDanger()
+                    }
+                    State `Wait After Melee` [ Color = Combat ] {
+                        do Delay(0.5, 0.25), FaceActor(ActorToFaceTowards = Params.Current_Target)
+                        -> Evading on Tick if Random(Params.EvadeProbabilityIdle) and IsInDanger()
+                        -> Root
+                    }
+                }
+            }
+            State Idling [ Color = Moving ] {
+                do Delay(0.5, 0.2),
+                   FaceActor(ActorToFaceTowards = Params.Current_Target),
+                   DebugText("Idling", ReferenceActor = Actor)
+                -> Root
+                -> Evading on Tick if Random(Params.EvadeProbabilityIdle) and IsInDanger()
+            }
+            State Flanking [ Color = Moving ] {
+                do DebugText("Flanking", ReferenceActor = Actor)
+                -> Evading on Tick if Random(Params.EvadeProbabilityMoving) and IsInDanger()
+                State `Find Flanking Point` [ Color = Moving ] {
+                    do RunEnvQuery(
+                        EnvQuery_Flank,
+                        Result      = ref Params.FlankingTarget,
+                        QueryConfig = [
+                            (ParamName = "Min Flank Distance", bAllowBBKey = false, Value = 350),
+                            (ParamName = "Max Flank Distance", bAllowBBKey = false, Value = 750)
+                        ],
+                        RunMode     = RandomBest25Pct
+                    )
+                    -> Next on Succeeded
+                }
+                State `Move to Flanking Point` [ Color = Moving ] {
+                    do MoveTo(Params.FlankingTarget, TrackMovingGoal = false),
+                       SetCharacterSpeed(Speed = 300),
+                       FaceActor(ActorToFaceTowards = Params.Current_Target)
+                    -> Next on Succeeded
+                }
+                State `Wait After Flank` [ Color = Moving ] {
+                    do Delay(0.4, 0.2), FaceActor(ActorToFaceTowards = Params.Current_Target)
+                }
+            }
+        }
+        State Launched [ Color = Launched ] {
+            if CharacterGrounded(MustBeOnAir = true)
+            do DebugText("Launched", ReferenceActor = Actor)
+            State `Wait For Landing` [ Color = Launched ]   { do WaitForLanding()  -> Next }
+            State `Wait after Landing` [ Color = Launched ] { do Delay(0.3, 0.2)  -> Root }
+        }
+        State Evading [ Color = Evading ] {
+            do DebugText("Evading", ReferenceActor = Actor), FaceActor(ActorToFaceTowards = Params.Current_Target)
+            State `Find Evasion Point` [ Color = Evading ] {
+                do RunEnvQuery(
+                    EnvQuery_Evade,
+                    Result      = ref Params.FlankingTarget,
+                    QueryConfig = [
+                        (ParamName = "Min Sample Distance", bAllowBBKey = false, Value = 100),
+                        (ParamName = "Max Sample Distance", bAllowBBKey = false, Value = 250),
+                        (ParamName = "Min Evasion Distance", bAllowBBKey = false, Value = 120),
+                        (ParamName = "Max Evasion Distance", bAllowBBKey = false, Value = 300)
+                    ],
+                    RunMode     = RandomBest5Pct
+                )
+                -> Next on Succeeded
+            }
+            State `Move to Evasion Point` [ Color = Evading ] {
+                do MoveTo(Params.FlankingTarget, AllowStrafe = true, TrackMovingGoal = false), SetCharacterSpeed()
+                -> Next on Succeeded
+            }
+            State `Wait After Evasion` [ Color = Evading ] { do Delay(0.3, 0.2) }
+        }
+        State Default { do Delay() }
+    }
+}

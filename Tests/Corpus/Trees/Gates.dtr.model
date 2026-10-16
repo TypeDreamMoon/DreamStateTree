@@ -1,0 +1,73 @@
+Tree /Game/DreamStateTreeTests/Generated/Gates.Gates
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Strong
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/DreamStateTreeTests.DstTestCondition
+        Key Root/Strong/EnterCondition[0]
+        Bind Strong
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 80.000000
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Strong/Task[0]
+        Bind StrongTask
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Rested
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Rested/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 70.000000
+        Arg Node Operator = GreaterOrEqual
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Rested/Task[0]
+        Bind RestedTask
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Seasoned
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Seasoned/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Level
+        Arg Instance Right = 3
+        Arg Node Operator = Greater
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Seasoned/Task[0]
+        Bind SeasonedTask
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Calm
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Calm/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Level
+        Arg Instance Right = 2
+        Arg Node Operator = Greater
+        Arg Node bInvert = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareEnumCondition
+        Key Root/Calm/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Context:Owner:Mode
+        Arg Instance Right = (Value=1,Enum="/Script/CoreUObject.Enum'/Script/DreamStateTreeTests.EDstTestMode'")
+      EnterCondition /Script/DreamStateTreeTests.DstTestCondition
+        Key Root/Calm/EnterCondition[2]
+        Bind Fine
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 10.000000
+        Arg Node Compare = Less
+        Arg Node bInvert = True
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Calm/Task[0]
+        Bind CalmTask
+        Arg Instance InputValue <- Parameters:Speed

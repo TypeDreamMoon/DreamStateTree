@@ -1,0 +1,10 @@
+StateTree(Name="DreamStateTreeTests/Validate/ParenthesesTooDeep", Schema=TestAgent)
+{
+    Parameters = { bool A; bool B; bool C; bool D; bool E; bool F; bool G; }
+
+    State Root {
+        if Params.A and (Params.B or (Params.C and (Params.D or (Params.E and (Params.F or Params.G)))))
+        do Delay(1)
+    }
+}
+// EXPECT DST5012 (6,12)

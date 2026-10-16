@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownTransitionTarget", Schema=TestAgent)
+{
+    State Root {
+        do Delay(1)
+        -> Nowhere
+    }
+}
+// EXPECT DST6002 (5,12)

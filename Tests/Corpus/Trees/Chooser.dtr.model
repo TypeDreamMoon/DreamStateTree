@@ -1,0 +1,49 @@
+Tree /Game/DreamStateTreeTests/Generated/Chooser.Chooser
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenWithHighestUtility
+    Complete Any
+    State Root/Timid
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Consideration /Script/StateTreeModule.StateTreeConstantConsideration
+        Key Root/Timid/Consideration[0]
+        Arg Instance Constant = 0.200000
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Timid/Task[0]
+        Bind TimidTask
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Bold
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Consideration /Script/DreamStateTreeTests.DstTestConsideration
+        Key Root/Bold/Consideration[0]
+        Arg Instance Score = 0.900000
+      Consideration /Script/StateTreeModule.StateTreeConstantConsideration
+        Key Root/Bold/Consideration[1]
+        Operand Multiply
+        Arg Instance Constant = 0.900000
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Bold/Task[0]
+        Bind BoldTask
+        Arg Instance InputValue <- Parameters:Speed
+    State Root/Hurt
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Consideration /Script/StateTreeModule.StateTreeFloatInputConsideration
+        Key Root/Hurt/Consideration[0]
+        Arg Instance Input <- Context:Owner:Health
+        Arg Instance Interval = (Min=0.000000,Max=100.000000)
+      Consideration /Script/StateTreeModule.StateTreeConstantConsideration
+        Key Root/Hurt/Consideration[1]
+        Operand Multiply
+        Arg Instance Constant = 0.800000
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Hurt/Task[0]
+        Bind HurtTask
+        Arg Instance InputValue <- Parameters:Speed

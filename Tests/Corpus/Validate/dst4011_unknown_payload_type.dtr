@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownPayloadType", Schema=TestAgent)
+{
+    State Root {
+        on DreamStateTreeTest.Event.Hit(NoSuchPayload)
+        do Delay(1)
+    }
+}
+// EXPECT DST4011 (4,41)

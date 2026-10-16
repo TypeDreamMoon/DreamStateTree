@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/AmbiguousName", Schema=TestAgent)
+{
+    State Root {
+        do Twin()
+    }
+}
+// EXPECT DST4002 (4,12)

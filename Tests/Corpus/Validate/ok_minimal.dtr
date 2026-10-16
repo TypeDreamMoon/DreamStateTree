@@ -1,0 +1,6 @@
+StateTree(Name="DreamStateTreeTests/Validate/OkMinimal", Schema=TestAgent)
+{
+    State Root {
+        do Delay(1)
+    }
+}

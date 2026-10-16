@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/ArgumentTwice", Schema=TestAgent)
+{
+    State Root {
+        do Delay(1, Duration = 2)
+    }
+}
+// EXPECT DST4017 (4,21)

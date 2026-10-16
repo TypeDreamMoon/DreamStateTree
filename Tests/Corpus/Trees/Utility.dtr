@@ -1,0 +1,58 @@
+// Utility: constants, consideration nodes, products, and and / or with parentheses, under every utility pick.
+StateTree(Name="DreamStateTreeTests/Generated/Utility", Schema=TestAgent)
+{
+    Parameters = { float Desire = 0.4; }
+
+    State Root {
+        pick HighestUtility
+
+        State Constant {
+            utility 0.5
+            do Delay(1)
+        }
+        State Scored {
+            utility DstTestConsideration(Score = 0.9)
+            do Delay(1)
+        }
+        State Product {
+            utility DstTestConsideration(Score = 0.8) * DstTestConsideration(Score = 0.5) * 0.5
+            do Delay(1)
+        }
+        State Either {
+            utility (DstTestConsideration(Score = 0.2) or DstTestConsideration(Score = 0.6)) and 0.3
+            do Delay(1)
+        }
+        State Curve {
+            utility FloatInput(Owner.Health, (0, 100))
+            do Delay(1)
+        }
+        State Mixed {
+            utility FloatInput(Input = Owner.Health, Interval = (0, 200)) * 0.5
+            do Delay(1)
+        }
+        State Weighted {
+            utility 0.1
+            pick WeightedUtility
+            State Low {
+                utility 0.2
+                do Delay(1)
+            }
+            State High {
+                utility 0.9
+                do Delay(1)
+            }
+        }
+        State Relative {
+            utility 0.1
+            pick RelativeUtility
+            State Low {
+                utility 0.2
+                do Delay(1)
+            }
+            State High {
+                utility 0.9
+                do Delay(1)
+            }
+        }
+    }
+}

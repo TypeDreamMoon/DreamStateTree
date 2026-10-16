@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/LinkTargetNotASubtree", Schema=TestAgent)
+{
+    State Root {
+        link NoSuchSubtree
+    }
+}
+// EXPECT DST6006 (4,14)

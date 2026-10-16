@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownColor", Schema=TestAgent)
+{
+    State Root [ Color = Pink ] {
+        do Delay(1)
+    }
+}
+// EXPECT DST4020 (3,26)

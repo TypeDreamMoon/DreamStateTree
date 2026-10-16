@@ -1,0 +1,9 @@
+StateTree(Name="DreamStateTreeTests/Validate/GlobalNotAnEvaluatorOrTask", Schema=TestAgent)
+{
+    Globals = { Check = DstTestCondition(); }
+
+    State Root {
+        do Delay(1)
+    }
+}
+// EXPECT DST6014 (3,25)

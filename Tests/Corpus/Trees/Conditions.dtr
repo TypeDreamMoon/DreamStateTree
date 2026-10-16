@@ -1,0 +1,67 @@
+// Conditions: every grouping of and / or / parentheses, comparisons, bool paths, not, and condition nodes.
+StateTree(Name="DreamStateTreeTests/Generated/Conditions", Schema=TestAgent)
+{
+    Parameters = {
+        bool Alert;
+        bool Hostile;
+        bool Ready;
+        bool Calm;
+        float Speed = 4;
+    }
+
+    Globals = { Stats = DstTestEvaluator(); }
+
+    State Root {
+        State Chain {
+            if Params.Alert and Params.Hostile and Params.Ready
+            do Delay(1)
+        }
+        State Grouped {
+            if Params.Alert and (Params.Hostile or Params.Ready)
+            do Delay(1)
+        }
+        State Nested {
+            if Params.Alert and (Params.Hostile or (Params.Ready and Params.Calm))
+            do Delay(1)
+        }
+        State Leading {
+            if (Params.Alert or Params.Hostile) and Params.Ready
+            do Delay(1)
+        }
+        State Precedence {
+            if Params.Alert or Params.Hostile and Params.Ready
+            do Delay(1)
+        }
+        State Folded {
+            if ((Params.Alert or Params.Hostile) and Params.Ready) or Params.Calm
+            do Delay(1)
+        }
+        State Twice {
+            if Params.Alert
+            if Params.Hostile or Params.Ready
+            do Delay(1)
+        }
+        State Negated {
+            if not Params.Alert and not (Owner.Level > 3)
+            do Delay(1)
+        }
+        State Compared {
+            if Owner.Health < 50 and Params.Speed >= 3 and Owner.Level == 2 and Owner.Level != 5
+            if 3 < Owner.Level
+            if Owner.bAlerted == false
+            if Owner.Mode == Combat
+            if Owner.Mode != Idle
+            if Owner.Health >= Params.Speed * 10
+            if Stats.Counter > 1
+            do Delay(1)
+        }
+        State Nodes {
+            if DstTestCondition(Left = Owner.Health, Right = 50, Compare = Less)
+            if not DstTestCondition(Left = Owner.Health, Right = 20)
+            if Random(0.3) [ Evaluation = ForcedTrue ]
+            if ObjectIsValid(Owner)
+            if DstTestCondition(Left = Owner.Health, Right = 80, Compare = Greater) [ Name = "Healthy" ]
+            do Delay(1)
+        }
+    }
+}

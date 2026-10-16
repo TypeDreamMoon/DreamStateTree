@@ -1,0 +1,81 @@
+Tree /Game/DreamStateTreeTests/Generated/Names.Names
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Distance
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Short
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Short/Task[0]
+        Bind Hop
+        Arg Instance Speed = 2.000000
+        Arg Instance bSprint = True
+      Transition OnStateCompleted -> NextState
+    State Root/Named
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Named/Task[0]
+        Bind Step
+        Arg Instance Speed = 3.000000
+        Arg Instance Travelled -> Parameters:Distance
+        Arg Instance bSprint = True
+      Transition OnStateCompleted -> NextState
+    State Root/Alias
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Alias/Task[0]
+        Bind Dash
+        Arg Instance Speed = 1.500000
+      Transition OnStateCompleted -> NextState
+    State Root/Global
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Global/Task[0]
+        Bind Rush
+        Arg Instance Speed = 4.000000
+      Transition OnStateCompleted -> NextState
+    State Root/Full
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Full/Task[0]
+        Bind Walk
+      Transition OnStateCompleted -> NextState
+    State Root/Reflected
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Reflected/Task[0]
+        Bind Stroll
+        Arg Instance Speed = 0.500000
+      Transition OnStateCompleted -> NextState
+    State Root/Move To
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/Move To/Task[0]
+        Bind Take Off
+      Transition OnStateCompleted -> NextState
+    State Root/巡逻
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Description 中文描述
+      Task /Script/DreamStateTreeTests.DstTestMoveTask
+        Key Root/巡逻/Task[0]
+        Bind 连击
+        Arg Instance Speed = 2.000000
+      Transition OnStateCompleted -> Succeeded

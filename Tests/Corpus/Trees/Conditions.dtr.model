@@ -1,0 +1,285 @@
+Tree /Game/DreamStateTreeTests/Generated/Conditions.Conditions
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter bool Alert
+  Parameter bool Hostile
+  Parameter bool Ready
+  Parameter bool Calm
+  Parameter float Speed = 4.000000
+  Global /Script/DreamStateTreeTests.DstTestEvaluator
+    Role Evaluator
+    Key Global[0]
+    Bind Stats
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Chain
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Chain/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Chain/EnterCondition[1]
+        Operand And
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Chain/EnterCondition[2]
+        Operand And
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Chain/Task[0]
+    State Root/Grouped
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Grouped/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Grouped/EnterCondition[1]
+        Operand And
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Grouped/EnterCondition[2]
+        Operand Or
+        Indent 1
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Grouped/Task[0]
+    State Root/Nested
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Nested/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Nested/EnterCondition[1]
+        Operand And
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Nested/EnterCondition[2]
+        Operand Or
+        Indent 1
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Nested/EnterCondition[3]
+        Operand And
+        Indent 2
+        Arg Instance bLeft <- Parameters:Calm
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Nested/Task[0]
+    State Root/Leading
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Leading/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Leading/EnterCondition[1]
+        Operand Or
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Leading/EnterCondition[2]
+        Operand And
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Leading/Task[0]
+    State Root/Precedence
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Precedence/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Precedence/EnterCondition[1]
+        Operand Or
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Precedence/EnterCondition[2]
+        Operand And
+        Indent 1
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Precedence/Task[0]
+    State Root/Folded
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Folded/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Folded/EnterCondition[1]
+        Operand Or
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Folded/EnterCondition[2]
+        Operand And
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Folded/EnterCondition[3]
+        Operand Or
+        Arg Instance bLeft <- Parameters:Calm
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Folded/Task[0]
+    State Root/Twice
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Twice/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Twice/EnterCondition[1]
+        Operand And
+        Arg Instance bLeft <- Parameters:Hostile
+        Arg Instance bRight = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Twice/EnterCondition[2]
+        Operand Or
+        Indent 1
+        Arg Instance bLeft <- Parameters:Ready
+        Arg Instance bRight = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Twice/Task[0]
+    State Root/Negated
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Negated/EnterCondition[0]
+        Arg Instance bLeft <- Parameters:Alert
+        Arg Instance bRight = True
+        Arg Node bInvert = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Negated/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Context:Owner:Level
+        Arg Instance Right = 3
+        Arg Node Operator = Greater
+        Arg Node bInvert = True
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Negated/Task[0]
+    State Root/Compared
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Compared/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 50.000000
+        Arg Node Operator = Less
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Compared/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Parameters:Speed
+        Arg Instance Right = 3.000000
+        Arg Node Operator = GreaterOrEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Compared/EnterCondition[2]
+        Operand And
+        Arg Instance Left <- Context:Owner:Level
+        Arg Instance Right = 2
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Compared/EnterCondition[3]
+        Operand And
+        Arg Instance Left <- Context:Owner:Level
+        Arg Instance Right = 5
+        Arg Node Operator = NotEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Compared/EnterCondition[4]
+        Operand And
+        Arg Instance Left <- Context:Owner:Level
+        Arg Instance Right = 3
+        Arg Node Operator = Greater
+      EnterCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+        Key Root/Compared/EnterCondition[5]
+        Operand And
+        Arg Instance bLeft <- Context:Owner:bAlerted
+      EnterCondition /Script/StateTreeModule.StateTreeCompareEnumCondition
+        Key Root/Compared/EnterCondition[6]
+        Operand And
+        Arg Instance Left <- Context:Owner:Mode
+        Arg Instance Right = (Value=2,Enum="/Script/CoreUObject.Enum'/Script/DreamStateTreeTests.EDstTestMode'")
+      EnterCondition /Script/StateTreeModule.StateTreeCompareEnumCondition
+        Key Root/Compared/EnterCondition[7]
+        Operand And
+        Arg Instance Left <- Context:Owner:Mode
+        Arg Instance Right = (Value=0,Enum="/Script/CoreUObject.Enum'/Script/DreamStateTreeTests.EDstTestMode'")
+        Arg Node bInvert = True
+      EnterCondition /Script/StateTreeModule.StateTreeCompareFloatCondition
+        Key Root/Compared/EnterCondition[8]
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Root/Compared/EnterCondition[8]/Fn:Right
+            Arg Instance Left <- Parameters:Speed
+            Arg Instance Right = 10.000000
+        Arg Node Operator = GreaterOrEqual
+      EnterCondition /Script/StateTreeModule.StateTreeCompareIntCondition
+        Key Root/Compared/EnterCondition[9]
+        Operand And
+        Arg Instance Left <- Global:Global[0]:Counter
+        Arg Instance Right = 1
+        Arg Node Operator = Greater
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Compared/Task[0]
+    State Root/Nodes
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      EnterCondition /Script/DreamStateTreeTests.DstTestCondition
+        Key Root/Nodes/EnterCondition[0]
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 50.000000
+        Arg Node Compare = Less
+      EnterCondition /Script/DreamStateTreeTests.DstTestCondition
+        Key Root/Nodes/EnterCondition[1]
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 20.000000
+        Arg Node bInvert = True
+      EnterCondition /Script/StateTreeModule.StateTreeRandomCondition
+        Key Root/Nodes/EnterCondition[2]
+        Operand And
+        Arg Instance Threshold = 0.300000
+        Arg Node EvaluationMode = ForcedTrue
+      EnterCondition /Script/StateTreeModule.StateTreeObjectIsValidCondition
+        Key Root/Nodes/EnterCondition[3]
+        Operand And
+        Arg Instance Object <- Context:Owner
+      EnterCondition /Script/DreamStateTreeTests.DstTestCondition
+        Key Root/Nodes/EnterCondition[4]
+        Bind Healthy
+        Operand And
+        Arg Instance Left <- Context:Owner:Health
+        Arg Instance Right = 80.000000
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Nodes/Task[0]

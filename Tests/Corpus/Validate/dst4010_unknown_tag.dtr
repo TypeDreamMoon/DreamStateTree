@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownTag", Schema=TestAgent)
+{
+    State Root {
+        on Not.A.Tag
+        do Delay(1)
+    }
+}
+// EXPECT DST4010 (4,12)

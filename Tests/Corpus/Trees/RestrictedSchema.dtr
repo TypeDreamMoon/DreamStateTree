@@ -1,0 +1,13 @@
+// A schema that allows one task per state, no groups, no parameters, no evaluators, no enter conditions and no utility.
+StateTree(Name="DreamStateTreeTests/Generated/RestrictedSchema", Schema=RestrictedAgent)
+{
+    State Root {
+        State Idle {
+            do Delay(1)
+            -> Work
+        }
+        State Work {
+            do DstTestTask(InputValue = Owner.Health)
+        }
+    }
+}

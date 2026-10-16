@@ -1,0 +1,28 @@
+// Which state a set of enter conditions lets in. The one condition node that logs shows when it was asked.
+// RUN ticks=4 dt=0.1 seed=1
+// OWNER Level=2 Health=60
+StateTree(Name="DreamStateTreeTests/Generated/Gates", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        State Strong {
+            if DstTestCondition(Left = Owner.Health, Right = 80, Compare = Greater) [ Name = "Strong" ]
+            do StrongTask = DstTestTask(InputValue = Params.Speed)
+        }
+        State Rested {
+            if Owner.Health >= 70
+            do RestedTask = DstTestTask(InputValue = Params.Speed)
+        }
+        State Seasoned {
+            if 3 < Owner.Level
+            do SeasonedTask = DstTestTask(InputValue = Params.Speed)
+        }
+        State Calm {
+            if not (Owner.Level > 2)
+               and Owner.Mode == Patrol
+               and not DstTestCondition(Left = Owner.Health, Right = 10, Compare = Less) [ Name = "Fine" ]
+            do CalmTask = DstTestTask(InputValue = Params.Speed)
+        }
+    }
+}

@@ -1,0 +1,8 @@
+Tree /Game/DreamStateTreeTests/Generated/Minimal.Minimal
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Task /Script/StateTreeModule.StateTreeDelayTask
+      Key Root/Task[0]

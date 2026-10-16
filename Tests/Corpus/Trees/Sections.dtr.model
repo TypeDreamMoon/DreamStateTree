@@ -1,0 +1,50 @@
+Tree /Game/DreamStateTreeTests/Generated/Sections.Sections
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Setting GlobalTasksCompletion = All
+  Parameter float Speed = 4.000000
+    Meta Category = Movement
+  Parameter int32 Level = 3
+  Parameter int64 Seed = 1234567890123
+  Parameter double Precision = 0.001000
+  Parameter bool Alert = True
+  Parameter bool Calm
+  Parameter Name Label = Guard
+  Parameter String Title = Night watch
+  Parameter Struct:/Script/CoreUObject.Vector Home = (X=100.000000,Y=0.000000,Z=50.000000)
+  Parameter Enum:/Script/DreamStateTreeTests.EDstTestMode Mode = Combat
+  Parameter Array<int32> Route = (1,2,3)
+  Parameter Object:/Script/DreamStateTreeTests.DstTestOwner Boss
+  Parameter Class:/Script/Engine.Actor Kind
+  Global /Script/DreamStateTreeTests.DstTestEvaluator
+    Role Evaluator
+    Key Global[0]
+    Bind Stats
+    Arg Instance Step <- Parameters:Level
+  Global /Script/DreamStateTreeTests.DstTestTask
+    Role GlobalTask
+    Key Global[1]
+    Bind Beacon
+    Arg Instance InputValue <- Parameters:Speed
+    Arg Instance TicksToComplete = 1000000
+  Color Calm = (R=0.200000,G=0.400000,B=0.800000,A=1.000000)
+  Color Combat = (R=0.800000,G=0.250000,B=0.200000,A=1.000000)
+  Color Dim = (R=0.100000,G=0.100000,B=0.100000,A=0.500000)
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Tag DreamStateTreeTest.State.Combat
+    Color Combat
+    Description Start here
+    Task /Script/StateTreeModule.StateTreeDelayTask
+      Key Root/Task[0]
+      Arg Instance Duration <- Parameters:Speed
+    Transition OnStateCompleted -> GotoState Root/Resting
+    State Root/Resting
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Color Calm
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Resting/Task[0]
+        Arg Instance Duration = 2.000000

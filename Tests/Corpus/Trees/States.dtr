@@ -1,0 +1,33 @@
+// States: settings, a disabled state, a group, backtick names and names in other scripts.
+StateTree(Name="DreamStateTreeTests/Generated/States", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    Colors = { Warm = (0.9, 0.5, 0.1); }
+
+    State Root {
+        pick InOrder
+        -> Root on Tick
+
+        State Idle [ Description = "Waiting"; Complete = All; TickRate = 0.2; Weight = 2; Tag = DreamStateTreeTest.State.Explore ] {
+            do Delay(1), Delay(2)
+        }
+        State Disabled [ Enabled = false ] {
+            do Delay(1)
+        }
+        State Folder [ Group ] {
+            State Inner {
+                do Delay(1)
+            }
+        }
+        State `Move To` [ Color = Warm ] {
+            do Delay(1)
+        }
+        State 巡逻 {
+            do `连 击` = DstTestTask(InputValue = Params.Speed)
+        }
+        State Cheap [ bCopyParameterBindingsOnTick; bCheckPrerequisitesWhenActivatingChildDirectly = false ] {
+            do Delay(1)
+        }
+    }
+}

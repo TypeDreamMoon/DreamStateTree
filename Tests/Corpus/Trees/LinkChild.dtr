@@ -1,0 +1,9 @@
+// The tree LinkParent links.
+StateTree(Name="DreamStateTreeTests/Generated/LinkChild", Schema=TestAgent)
+{
+    Parameters = { float Radius = 2; int Count = 3; }
+
+    State ChildRoot {
+        do Probe = DstTestTask(InputValue = Params.Radius, Scale = Params.Radius, TicksToComplete = Params.Count)
+    }
+}

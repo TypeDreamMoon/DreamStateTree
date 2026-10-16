@@ -1,0 +1,33 @@
+run ticks=4 dt=0.1 seed=1
+owner Level=2 Health=60 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Calm | recorded=1 | Strong: Test:Left=60 Right=80 Result=false ; Fine: Test:Left=60 Right=10 Result=true ; CalmTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+tick 0   Running | Root/Calm | recorded=1 | CalmTask: Tick:1
+tick 1   Running | Root/Calm | recorded=2 | CalmTask: Tick:2 ; CalmTask: Done:Succeeded ; Strong: Test:Left=60 Right=80 Result=false ; Fine: Test:Left=60 Right=10 Result=true ; CalmTask: Exit:TickCount=2 ; CalmTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+tick 2   Running | Root/Calm | recorded=2 | CalmTask: Tick:1
+tick 3   Running | Root/Calm | recorded=3 | CalmTask: Tick:2 ; CalmTask: Done:Succeeded ; Strong: Test:Left=60 Right=80 Result=false ; Fine: Test:Left=60 Right=10 Result=true ; CalmTask: Exit:TickCount=2 ; CalmTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+stop     Stopped | recorded=3 | CalmTask: Exit:TickCount=0
+--- recorded transitions
+Root/Calm
+Root/Calm
+Root/Calm
+--- log
+Strong: Test:Left=60 Right=80 Result=false
+Fine: Test:Left=60 Right=10 Result=true
+CalmTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+CalmTask: Tick:1
+CalmTask: Tick:2
+CalmTask: Done:Succeeded
+Strong: Test:Left=60 Right=80 Result=false
+Fine: Test:Left=60 Right=10 Result=true
+CalmTask: Exit:TickCount=2
+CalmTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+CalmTask: Tick:1
+CalmTask: Tick:2
+CalmTask: Done:Succeeded
+Strong: Test:Left=60 Right=80 Result=false
+Fine: Test:Left=60 Right=10 Result=true
+CalmTask: Exit:TickCount=2
+CalmTask: Enter:Input=4 Scale=1 Amount=0 Severity=0 Mode=0 Route=0 Ref=unbound Owner(Level=2)
+CalmTask: Exit:TickCount=0

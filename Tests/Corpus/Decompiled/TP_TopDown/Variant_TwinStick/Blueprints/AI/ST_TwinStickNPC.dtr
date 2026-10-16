@@ -1,0 +1,23 @@
+StateTree(Name="Variant_TwinStick/Blueprints/AI/ST_TwinStickNPC", Schema=AIComponent(AIController = BP_TwinStickAIController, Actor = BP_TwinStickNPC))
+{
+    Globals = { GetPlayer = GetPlayer(); }
+    Colors  = { Active = (G = 0.4, B = 0.094); Dead = (R = 0.234375); }
+
+    State Root {
+        State Active [ Color = Active ] {
+            if Actor.bHit == false
+            -> Dead on Tick if Actor.bHit
+            State `Move to Player` [ Color = Active ] {
+                do MoveTo(
+                    TargetActor         = GetPlayer.TargetPlayerCharacter,
+                    FilterClass         = NavFilter_AIControllerDefault,
+                    ProjectGoalLocation = false
+                )
+                -> Next
+            }
+            State Wait [ Color = Active ] { do Delay()  -> Root }
+        }
+    }
+
+    State Dead [ Color = Dead ] { do Delay(0.01)  -> TreeSucceeded }
+}

@@ -1,0 +1,8 @@
+StateTreeLibrary(Name="DreamStateTreeTests/Validate/BrokenSubtree")
+{
+    Subtree Broken {
+        State Inside {
+            do NoSuchTask()
+        }
+    }
+}

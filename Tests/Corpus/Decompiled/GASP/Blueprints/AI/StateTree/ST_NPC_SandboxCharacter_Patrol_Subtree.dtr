@@ -1,0 +1,11 @@
+StateTree(Name="Blueprints/AI/StateTree/ST_NPC_SandboxCharacter_Patrol_Subtree", Schema=AIComponent)
+{
+    Colors = { `Default Color` = (R = 0.013702, G = 0.309469, B = 0.386429); }
+
+    State FindRandomLocation [ Description = "Find a random location and set the character input state, then evaluate children states." ] {
+        do STT_SetCharacterInputState(WantsToWalk = true),
+           STT_FindRandomLocation = STT_FindRandomLocation(SearchRadius = 1000, SearchExcludeDistance = 400)
+        State MoveToRandomLocation { do MoveTo(STT_FindRandomLocation.`Random Location`)  -> Next }
+        State Wait                 { do Delay(3)  -> TreeSucceeded on Succeeded }
+    }
+}

@@ -1,0 +1,9 @@
+StateTree(Name="DreamStateTreeTests/Validate/TypesDoNotFit", Schema=TestAgent)
+{
+    Parameters = { String Label; }
+
+    State Root {
+        do Delay(Duration = Params.Label)
+    }
+}
+// EXPECT DST5003 (6,29)

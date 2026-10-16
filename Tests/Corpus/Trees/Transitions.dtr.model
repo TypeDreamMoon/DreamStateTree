@@ -1,0 +1,80 @@
+Tree /Game/DreamStateTreeTests/Generated/Transitions.Transitions
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Transition OnStateSucceeded -> Succeeded
+    Transition OnStateFailed -> Failed
+    State Root/Idle
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestTask
+        Key Root/Idle/Task[0]
+        Bind Worker
+        Arg Instance InputValue <- Parameters:Speed
+      Transition OnStateCompleted -> GotoState Root/Patrol
+      Transition OnTick -> GotoState Root/Combat/Strike
+        Priority High
+        TransitionCondition /Script/StateTreeModule.StateTreeCompareBoolCondition
+          Key Root/Idle/Transition[1]/Condition[0]
+          Arg Instance bLeft <- Context:Owner:bAlerted
+          Arg Instance bRight = True
+      Transition OnEvent -> GotoState Root/Combat
+        Event tag=DreamStateTreeTest.Event.Hit payload=/Script/DreamStateTreeTests.DstTestPayload consume=false
+        Priority Medium
+      Transition OnTick -> GotoState Root/Patrol
+        Priority Low
+        Delay enabled=true duration=1.000000 variance=0.250000
+      Transition OnEvent -> GotoState Root/Alarm
+        Event tag=DreamStateTreeTest.Event.Ask payload= consume=true
+        Priority Critical
+        Reactivate true
+      Transition OnTick -> GotoState Root/Patrol
+        Enabled false
+      Transition OnDelegate -> NextState
+        Delegate Node:Root/Idle/Task[0]
+        Completion Succeeds
+      Transition OnDelegate -> NextState
+        Delegate Node:Root/Idle/Task[0]
+        Completion Fails
+      Transition OnDelegate -> Parent
+        Delegate Node:Root/Idle/Task[0]
+        Completion Completes
+      Transition OnDelegate -> Parent
+        Delegate Node:Root/Idle/Task[0]:OnFinished
+    State Root/Patrol
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Patrol/Task[0]
+      Transition OnStateCompleted -> NextSelectableState
+    State Root/Combat
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      State Root/Combat/Strike
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/StateTreeModule.StateTreeDelayTask
+          Key Root/Combat/Strike/Task[0]
+        Transition OnStateSucceeded -> Parent
+        Transition OnStateFailed -> NextParent
+      State Root/Combat/Guard
+        Type State
+        Selection TrySelectChildrenInOrder
+        Complete Any
+        Task /Script/StateTreeModule.StateTreeDelayTask
+          Key Root/Combat/Guard/Task[0]
+        Transition OnStateFailed -> NextSelectableParent
+    State Root/Alarm
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Event tag=DreamStateTreeTest.Event.Ask payload= consume=true
+      Task /Script/StateTreeModule.StateTreeDelayTask
+        Key Root/Alarm/Task[0]

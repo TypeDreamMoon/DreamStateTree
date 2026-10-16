@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/OkComponentSchema", Schema=Component(Actor = Pawn))
+{
+    State Root {
+        if ObjectIsValid(Actor)
+        do Delay(1)
+    }
+}

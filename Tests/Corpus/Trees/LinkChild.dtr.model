@@ -1,0 +1,14 @@
+Tree /Game/DreamStateTreeTests/Generated/LinkChild.LinkChild
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Radius = 2.000000
+  Parameter int32 Count = 3
+  State ChildRoot
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Task /Script/DreamStateTreeTests.DstTestTask
+      Key ChildRoot/Task[0]
+      Bind Probe
+      Arg Instance InputValue <- Parameters:Radius
+      Arg Instance Scale <- Parameters:Radius
+      Arg Instance TicksToComplete <- Parameters:Count

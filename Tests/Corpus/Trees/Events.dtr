@@ -1,0 +1,43 @@
+// Events: states that wait for one, payloads read with Event, a parent's event seen by a child, an event condition on a
+// transition, and the event's tag bound into a node.
+StateTree(Name="DreamStateTreeTests/Generated/Events", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    Tags = { DreamStateTreeTest.Event; }
+
+    State Root {
+        -> Fight on Hit(DstTestPayload) if Event.Severity > 0.5
+        -> Observe on Hit.Light(DstTestPayload)
+        -> Chat on Ask
+        -> Root on Tick
+
+        State Idle {
+            do Delay(1)
+        }
+        State Fight {
+            on Hit(DstTestPayload)
+            do Strike = DstTestTask(InputValue = Params.Speed,
+                                    PayloadAmount = Event.Amount,
+                                    PayloadSeverity = Event.Severity,
+                                    bFlag = Event.bCritical)
+            State Light {
+                on Hit.Light(DstTestPayload)
+                do LightTask = DstTestTask(InputValue = Params.Speed,
+                                           PayloadAmount = Fight.Event.Amount,
+                                           PayloadSeverity = Event.Severity)
+            }
+            State Generic {
+                do GenericTask = DstTestTask(InputValue = Params.Speed, PayloadAmount = Event.Amount)
+            }
+        }
+        State Observe [ ConsumeEvent = false ] {
+            on Hit.Light(DstTestPayload)
+            do Watch = DstTestTask(InputValue = Params.Speed, PayloadAmount = Event.Amount)
+        }
+        State Chat {
+            on Ask
+            do Echoing = DstTestSendEventTask(Tag = Event.Tag)
+        }
+    }
+}

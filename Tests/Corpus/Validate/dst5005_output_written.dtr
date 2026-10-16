@@ -1,0 +1,9 @@
+StateTree(Name="DreamStateTreeTests/Validate/OutputWritten", Schema=TestAgent)
+{
+    Parameters = { float Speed; }
+
+    State Root {
+        do DstTestTask(InputValue = Params.Speed, TickCount = 3)
+    }
+}
+// EXPECT DST5005 (6,63)

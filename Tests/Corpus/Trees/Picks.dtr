@@ -1,0 +1,51 @@
+// Every way a state picks among its children. UniformRandom is another spelling of Random.
+StateTree(Name="DreamStateTreeTests/Generated/Picks", Schema=TestAgent)
+{
+    State Root {
+        pick InOrder
+
+        State Ordered {
+            pick InOrder
+            State A { do Delay(1) }
+            State B { do Delay(1) }
+        }
+        State Shuffled {
+            pick Random
+            State A { do Delay(1) }
+            State B { do Delay(1) }
+        }
+        State Even {
+            pick UniformRandom
+            State A { do Delay(1) }
+            State B { do Delay(1) }
+        }
+        State Best {
+            pick HighestUtility
+            State A { utility 0.3  do Delay(1) }
+            State B { utility 0.8  do Delay(1) }
+        }
+        State Lucky {
+            pick WeightedUtility
+            State A { utility 0.3  do Delay(1) }
+            State B { utility 0.8  do Delay(1) }
+        }
+        State Relative {
+            pick RelativeUtility
+            State A { utility 0.3  do Delay(1) }
+            State B { utility 0.8  do Delay(1) }
+        }
+        State Gate {
+            pick FollowTransitions
+            -> Entered on Tick
+            State Never { do Delay(1) }
+        }
+        State Entered {
+            pick Enter
+            State Hidden { do Delay(1) }
+        }
+        State Mute {
+            pick None
+            State Silent { do Delay(1) }
+        }
+    }
+}

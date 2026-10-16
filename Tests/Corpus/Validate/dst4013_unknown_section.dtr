@@ -1,0 +1,9 @@
+StateTree(Name="DreamStateTreeTests/Validate/UnknownSection", Schema=TestAgent)
+{
+    Stuff = { }
+
+    State Root {
+        do Delay(1)
+    }
+}
+// EXPECT DST4013 (3,5)

@@ -1,0 +1,15 @@
+StateTree(Name="DreamStateTreeTests/Validate/ValueDoesNotFit", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        State Text {
+            do Delay(Duration = "long")
+        }
+        State Enum {
+            do DstTestTask(InputValue = Params.Speed, Mode = Nowhere)
+        }
+    }
+}
+// EXPECT DST4008 (7,33)
+// EXPECT DST4008 (10,62)

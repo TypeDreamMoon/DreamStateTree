@@ -1,0 +1,7 @@
+StateTree(Name="DreamStateTreeTests/Validate/NotAStateTreeAsset", Schema=TestAgent)
+{
+    State Root {
+        link asset NoSuchTreeAsset
+    }
+}
+// EXPECT DST6008 (4,20)

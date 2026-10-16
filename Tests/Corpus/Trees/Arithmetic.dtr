@@ -1,0 +1,45 @@
+// Arithmetic and logic in arguments: each operation becomes a property function bound into the property.
+// RUN ticks=24 dt=0.1 seed=1
+StateTree(Name="DreamStateTreeTests/Generated/Arithmetic", Schema=TestAgent)
+{
+    Parameters = {
+        float Speed = 4;
+        int Level = 3;
+        bool Alert = true;
+        bool Calm;
+        FVector Home = (1, 2, 3);
+    }
+
+    State Root {
+        State Sum {
+            do Plain = DstTestTask(InputValue = Params.Speed, Scale = 1 + Params.Speed * 0.5, TicksToComplete = 1)
+            -> Next
+        }
+        State Negated {
+            do Minus = DstTestTask(InputValue = -Params.Speed, Scale = Params.Speed / 2 - 1, TicksToComplete = 1)
+            -> Next
+        }
+        State Whole {
+            do Count = DstTestTask(InputValue = Params.Speed, PayloadAmount = Params.Level * 2 + 1, TicksToComplete = 1)
+            -> Next
+        }
+        State Logic {
+            do Flags = DstTestTask(InputValue = Params.Speed, bFlag = Params.Alert and not Params.Calm, TicksToComplete = 1)
+            -> Next
+        }
+        State Folded {
+            do Fixed = DstTestTask(InputValue = Params.Speed, Scale = 2 * 3, TicksToComplete = 1 + 1)
+            -> Next
+        }
+        State Calls {
+            do Called = DstTestTask(InputValue = AbsoluteFloat(Input = Params.Speed),
+                                    Scale = AbsoluteFloat(Input = Params.Speed) * 2,
+                                    TicksToComplete = 1)
+            -> Next
+        }
+        State Vector {
+            do Moved = DstTestTask(InputValue = Params.Speed, Location = (Params.Home.X, 0, Params.Speed * 2), TicksToComplete = 1)
+            -> TreeSucceeded
+        }
+    }
+}

@@ -1,0 +1,8 @@
+StateTree(Name="DreamStateTreeTests/Validate/ComparisonNotSupported", Schema=TestAgent)
+{
+    State Root {
+        if Owner.Mode < Combat
+        do Delay(1)
+    }
+}
+// EXPECT DST5008 (4,12)

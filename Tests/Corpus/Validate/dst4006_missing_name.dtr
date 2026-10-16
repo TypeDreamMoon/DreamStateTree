@@ -1,0 +1,7 @@
+StateTree(Schema=TestAgent)
+{
+    State Root {
+        do Delay(1)
+    }
+}
+// EXPECT DST4006 (1,1)
