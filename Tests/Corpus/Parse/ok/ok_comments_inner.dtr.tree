@@ -1,0 +1,43 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_InnerComments"
+  Arg Schema
+    Name Villager
+  State Root
+    Clause Do
+      Task
+        Call
+          Name F
+          Arg
+            Number 1
+          Arg
+            Number 2
+          Arg
+            Number 3
+    Clause Do
+      Task
+        Call
+          Name G
+          Arg
+            List
+              Number 1
+              Number 2
+          Arg
+            Tuple
+              Arg X
+                Number 1
+              Arg Y
+                Number 2
+    Clause If
+      Binary and
+        Name A
+        Name B
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Name C
+      Meta
+        MetaEntry Delay
+          Number 1

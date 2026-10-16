@@ -1,0 +1,10 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Subtree Dup(float A, float A) { }
+    Subtree Order(float A = 1, float B) { }
+    Template Same(X, X) = X;
+}
+// A name twice; one without a default after one with.
+// EXPECT DST2014 (3,32)
+// EXPECT DST2014 (4,38)
+// EXPECT DST2014 (5,22)

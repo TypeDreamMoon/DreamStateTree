@@ -1,0 +1,13 @@
+//   header   comment   
+StateTree(Name="AI/ST_MessyComments", Schema=Villager)   //   trailing
+{
+    /*   block   */   Parameters = { float A = 1; }      // after
+    State Root {   // after brace
+          // over-indented
+        if X   // t1  
+        do Wait(1)       /* t2 */
+// at column 1
+        -> Root
+    }   // after state
+         // before close
+}

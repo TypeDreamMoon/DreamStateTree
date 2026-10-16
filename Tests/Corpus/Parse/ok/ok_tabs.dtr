@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_Tabs", Schema=Villager)
+{
+	Parameters = { float A = 1; }
+	State Root {
+		if A > 0
+		do Wait(1)
+		-> Root
+		State Child {	do Wait(2)	}
+	}
+}

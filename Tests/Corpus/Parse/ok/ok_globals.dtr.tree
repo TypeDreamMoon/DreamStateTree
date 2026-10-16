@@ -1,0 +1,27 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Globals"
+  Arg Schema
+    Name Villager
+  Section Globals
+    Assign Info
+      Call
+        Name GetPlayerInfo
+        Arg MaxRange
+          Number 2500
+    Assign Player
+      Call
+        Name NearestPlayer
+    Assign Timer
+      Call
+        Name Delay
+        Arg
+          Number 2
+        Arg
+          Number 0.5
+        Meta
+          MetaEntry Name
+            String "Timer"
+    Assign Mood
+      Member Mood
+        Name Villager

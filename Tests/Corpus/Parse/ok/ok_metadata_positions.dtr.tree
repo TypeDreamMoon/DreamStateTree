@@ -1,0 +1,79 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_MetaPositions"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl float A
+      Number 1
+      Meta
+        MetaEntry Category
+          String "x"
+  State One
+    Meta
+      MetaEntry Tag
+        Name Combat
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+          Meta
+            MetaEntry Name
+              String "w"
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      Meta
+        MetaEntry Delay
+          Number 1
+  State Two
+    Meta
+      MetaEntry A
+        Number 1
+      MetaEntry B
+      MetaEntry C
+        String "x"
+      MetaEntry D
+        Name Combat
+      MetaEntry E
+        Number 2.5
+  State Three
+    Meta
+      MetaEntry Group
+  State Four
+    Clause If
+      Call
+        Name Random
+        Arg
+          Number 0.3
+        Meta
+          MetaEntry Evaluation
+            Name ForcedTrue
+    Clause Do
+      Task
+        Call
+          Name First
+          Meta
+            MetaEntry Name
+              String "a"
+      Task
+        Call
+          Name Second
+          Meta
+            MetaEntry Enabled
+              Bool false
+    Clause Transition
+      Name Root
+      On
+        Name Failed
+      Meta
+        MetaEntry Priority
+          Name High
+        MetaEntry Delay
+          Number 0.5
+        MetaEntry Variance
+          Number 0.2
+        MetaEntry Reactivate

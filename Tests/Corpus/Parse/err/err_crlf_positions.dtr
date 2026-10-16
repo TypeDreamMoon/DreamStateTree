@@ -1,0 +1,9 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        Wait(1)
+        do Wait(2)
+    }
+}
+// This file has CRLF line ends; lines and columns count the same as with LF.
+// EXPECT DST2012 (4,9)

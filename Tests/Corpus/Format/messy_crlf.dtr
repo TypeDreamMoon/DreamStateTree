@@ -1,0 +1,8 @@
+StateTree(Name="AI/ST_MessyCrlf", Schema=Villager)
+{
+	State Root {
+		if X
+		do Wait(1)
+		-> Root
+	}
+}

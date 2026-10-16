@@ -1,0 +1,15 @@
+StateTree(Name="AI/ST_MetaPositions", Schema=Villager)
+{
+    Parameters = { float A = 1 [ Category = "x" ]; }
+    State One [ Tag = Combat ] {
+        do Wait(1) [ Name = "w" ]
+        -> Root on Tick [ Delay = 1 ]
+    }
+    State Two [ A = 1; B; C = "x"; D = Combat; E = 2.5 ] { }
+    State Three [ Group ] { }
+    State Four {
+        if Random(0.3) [ Evaluation = ForcedTrue ]
+        do First() [ Name = "a" ], Second() [ Enabled = false ]
+        -> Root on Failed [ Priority = High; Delay = 0.5; Variance = 0.2; Reactivate ]
+    }
+}

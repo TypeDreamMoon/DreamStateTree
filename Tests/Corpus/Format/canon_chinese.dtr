@@ -1,0 +1,19 @@
+StateTree(Name="AI/ST_村民", Schema=Villager)
+{
+    Parameters = { float 勇气 = 0.5 [ Category = "性格" ]; FVector 家; }
+    Globals    = { 玩家 = 最近玩家(); }
+
+    State 根 {
+        -> 根
+
+        State 攻击 {
+            if 勇气检查(Params.勇气) and 玩家.距离 < 800
+            do 播放动画(动画 = AM_攻击, 速率 = 1.5)
+            -> 休息 on 成功
+        }
+        State 休息 { do 等待(3) }
+        State 巡逻 [ Description = "沿路线巡逻" ] {
+            State 走 { do 移动(目的地 = Params.家) }
+        }
+    }
+}

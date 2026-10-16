@@ -1,0 +1,36 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_NumbersStrings"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl float A
+      Number 0
+    Decl float B
+      Number 12
+    Decl float C
+      Number 0.5
+    Decl float D
+      Number .5
+    Decl float E
+      Number 1e3
+    Decl float F
+      Number 1E3
+    Decl float G
+      Number 2.5E+4
+    Decl float H
+      Number 1e-3
+    Decl float I
+      Unary -
+        Number 5
+    Decl float J
+      Unary -
+        Number 0.25
+    Decl String K
+      String ""
+    Decl String L
+      String "plain"
+    Decl String M
+      String "quote \" and backslash \\ and tab \t"
+    Decl String N
+      String "走路 / 歩く / walk"

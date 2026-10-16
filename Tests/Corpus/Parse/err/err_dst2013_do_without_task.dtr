@@ -1,0 +1,9 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        do
+        -> Root
+    }
+}
+// do with nothing after it.
+// EXPECT DST2013 (5,9)

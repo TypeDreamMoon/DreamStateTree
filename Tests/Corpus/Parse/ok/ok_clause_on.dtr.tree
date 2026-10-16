@@ -1,0 +1,36 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseOn"
+  Arg Schema
+    Name Villager
+  State A
+    Clause On
+      Name Hit
+  State B
+    Clause On
+      Member Stagger
+        Name Hit
+  State C
+    Clause On
+      Member Hit
+        Member Villager
+          Member Event
+            Name Game
+  State D
+    Clause On
+      Call
+        Name Trade
+        Arg
+          Name VillagerTradeOffer
+  State E
+    Clause On
+      String "Game.Event.Hit"
+  State F
+    Clause On
+      Call
+        Member Stagger
+          Name Hit
+        Arg
+          Member Stagger
+            Member Payloads
+              Name Game

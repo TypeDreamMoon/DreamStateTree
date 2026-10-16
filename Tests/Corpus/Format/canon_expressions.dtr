@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_CanonExpressions", Schema=Villager)
+{
+    State A {
+        if (Alert or Armed) and not Hidden
+        utility Desire() * 0.5 + 0.1
+        do F([1, 2], (0, 3000), (X = 1, Y = 2), ref Params.Spot, "text", true, Dist -> Params.D)
+        do G(-1, 1 - -2, `Move To`.x, A.B.C, None, 1e3, .5)
+    }
+}

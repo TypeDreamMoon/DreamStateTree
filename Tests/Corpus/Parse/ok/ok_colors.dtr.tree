@@ -1,0 +1,32 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Colors"
+  Arg Schema
+    Name Villager
+  Section Colors
+    Assign Combat
+      Tuple
+        Arg
+          Number 0.8
+        Arg
+          Number 0.25
+        Arg
+          Number 0.2
+    Assign Calm
+      Tuple
+        Arg R
+          Number 0.2
+        Arg G
+          Number 0.4
+        Arg B
+          Number 0.8
+    Assign Dim
+      Tuple
+        Arg
+          Number 0.1
+        Arg
+          Number 0.1
+        Arg
+          Number 0.1
+        Arg
+          Number 0.5

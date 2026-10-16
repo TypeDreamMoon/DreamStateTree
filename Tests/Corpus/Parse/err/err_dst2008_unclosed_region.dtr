@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    #Region "Open"
+    State Root { }
+}
+// A warning, not an error.
+// EXPECT DST2008 (3,5)

@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    #include "Late.dth"
+    State Root { }
+}
+// EXPECT DST2006 (3,5)

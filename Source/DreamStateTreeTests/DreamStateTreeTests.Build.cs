@@ -30,6 +30,7 @@ public class DreamStateTreeTests : ModuleRules
 			"UnrealEd",
 			"AssetTools",
 			"AssetRegistry",
+			"Projects",
 			"DreamStateTreeLang",
 			"DreamStateTreeCompiler",
 		});

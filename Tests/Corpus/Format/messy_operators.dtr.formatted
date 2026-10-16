@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_MessyOperators", Schema=Villager)
+{
+    State A {
+        if ((a)) and (((b)))
+        if a + b * c < d
+        if not a and not (b)
+        if -a < -1
+        do F((1), ((2)))
+    }
+}

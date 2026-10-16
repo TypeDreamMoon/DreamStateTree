@@ -1,0 +1,14 @@
+StateTree(Name="AI/ST_Precedence", Schema=Villager)
+{
+    State A {
+        if a or b and c
+        if (a or b) and c
+        if not a and b
+        if not (a and b)
+        if a < b and c > d
+        if a == b or c != d
+        if a + b * c > d - e / f
+        if ((a))
+        if (a and (b or (c and d)))
+    }
+}

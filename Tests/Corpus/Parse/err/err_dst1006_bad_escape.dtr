@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Parameters = { String S = "a\qb"; }
+}
+// \q is no escape; the report is on the backslash.
+// EXPECT DST1006 (3,33)

@@ -1,0 +1,27 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_SettingsValues"
+  Arg Schema
+    Name Villager
+  Section Settings
+    Assign GlobalTasksCompletion
+      Name Any
+    Assign bFlag
+      Bool true
+    Assign Speed
+      Number 2.5
+    Assign Count
+      Number 3
+    Assign Label
+      String "text"
+    Assign Pair
+      Tuple
+        Arg
+          Number 1
+        Arg
+          Number 2
+    Assign Items
+      List
+        Number 1
+        Number 2
+        Number 3

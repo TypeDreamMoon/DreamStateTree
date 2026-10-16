@@ -1,0 +1,69 @@
+Document StateTreeLibrary
+  Arg Name
+    String "AI/VillagerCommon"
+  Section Tags
+    Expr
+      Member Villager
+        Member Event
+          Name Game
+    Expr
+      Member Villager
+        Member Ask
+          Name Game
+  Template Nervous
+    Call
+      Name Chance
+      Arg
+        Binary -
+          Number 1
+          Member Courage
+            Name Params
+  Template Daytime
+    Param From
+    Param To
+    Binary and
+      Call
+        Name Hour
+        Arg
+          Name From
+        Arg
+          Name To
+      Unary not
+        Call
+          Name Raining
+  Subtree HitReaction
+    Param float Toughness
+      Number 1
+    Clause If
+      Call
+        Name ObjectIsValid
+        Arg
+          Name Actor
+    State Stagger
+      Clause On
+        Member Stagger
+          Name Hit
+      Clause Do
+        Task
+          Call
+            Name Stagger
+            Arg
+              Binary /
+                Number 0.8
+                Member Toughness
+                  Name Params
+    State KnockDown
+      Clause On
+        Member KnockDown
+          Name Hit
+      Clause Do
+        Task
+          Call
+            Name Fall
+      Clause Transition
+        Name Next
+    State GetUp
+      Clause Do
+        Task
+          Call
+            Name GetUp

@@ -1,0 +1,16 @@
+StateTree(Name="AI/ST_Nested", Schema=Villager)
+{
+    State L1 {
+        State L2 {
+            State L3 {
+                State L4 {
+                    State L5 {
+                        State L6 { do Wait(1) -> L1 }
+                    }
+                    State L5b { }
+                }
+            }
+        }
+        State L2b { if X }
+    }
+}

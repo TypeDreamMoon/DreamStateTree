@@ -1,0 +1,12 @@
+StateTree(Name="AI/ST_InnerComments", Schema=Villager)
+{
+    State Root {
+        do F(1, /* mid */ 2,
+             // own line in the arguments
+             3) // end of the call
+        do G([1, // one
+              2], (X = 1, /* y */ Y = 2))
+        if A /* inside an expression */ and B
+        -> Root /* before on */ on Tick /* before if */ if C /* before meta */ [ Delay = 1 /* in meta */ ]
+    }
+}

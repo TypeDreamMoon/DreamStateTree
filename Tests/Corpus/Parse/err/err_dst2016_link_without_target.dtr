@@ -1,0 +1,8 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Hurt {
+        link
+    }
+}
+// link needs a subtree to link to.
+// EXPECT DST2016 (5,5)

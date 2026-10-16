@@ -1,0 +1,7 @@
+StateTree(Name="AI/ST_MessyMeta", Schema=Villager)
+{
+    State A [Tag=Combat;Color=Combat;Description="x"]{do Wait(1)}
+    State B [  Group  ] { State C { do Wait(2) } }
+    State D { do Wait(1) [Name="w";Enabled=false] , Tell(Fled)[Name="t"] }
+    State E { -> Root[Delay=1;Variance=0.2] }
+}

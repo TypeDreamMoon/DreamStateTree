@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { }
+}
+/* never closed
+// The comment runs to the end of the file, so these lines are inside it.
+// EXPECT DST1003 (5,1)

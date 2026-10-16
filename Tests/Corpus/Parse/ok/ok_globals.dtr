@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_Globals", Schema=Villager)
+{
+    Globals = {
+        Info = GetPlayerInfo(MaxRange = 2500);
+        Player = NearestPlayer();
+        Timer = Delay(2, 0.5) [ Name = "Timer" ];
+        Mood = Villager.Mood;
+    }
+}

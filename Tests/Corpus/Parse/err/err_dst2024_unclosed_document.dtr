@@ -1,0 +1,5 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { do Wait(1) }
+// The end of the file with a bracket still open: reported once, on the innermost one still open.
+// EXPECT DST2024 (2,1)

@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_StateSettings", Schema=Villager)
+{
+    State A [ Tag = Combat; Color = Combat; Description = "Fights"; Enabled = false; Complete = Any; TickRate = 0.2; Weight = 2; ConsumeEvent = false ] { }
+    State B [ Group ] {
+        State Child { }
+    }
+    State C [ bCopyParameterBindingsOnTick; bCheckPrerequisitesWhenActivatingChildDirectly = false ] { }
+    State D [ Tag = Game.Combat.Melee ] { }
+    State E [ Description = "描述" ] { do Wait(1) }
+}

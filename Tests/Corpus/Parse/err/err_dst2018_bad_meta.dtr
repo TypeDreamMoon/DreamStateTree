@@ -1,0 +1,8 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State A [ = 2 ] { }
+    State B { -> Root [ 3 ] }
+}
+// A metadata entry starts with a key.
+// EXPECT DST2018 (3,15)
+// EXPECT DST2018 (4,25)

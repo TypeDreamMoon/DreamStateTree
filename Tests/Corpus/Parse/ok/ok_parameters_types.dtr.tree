@@ -1,0 +1,41 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ParameterTypes"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl bool Alert
+      Bool true
+    Decl int Count
+      Number 3
+    Decl int64 Seed
+      Number 9007199254740993
+    Decl float Courage
+      Number 0.5
+      Meta
+        MetaEntry Category
+          String "性格"
+    Decl double Scale
+      Number 1.0
+    Decl Name Label
+      String "Idle"
+    Decl String Greeting
+      String "hello"
+    Decl Text Caption
+    Decl FVector Home
+    Decl Vector Workplace
+      Tuple
+        Arg
+          Number 0
+        Arg
+          Number 0
+        Arg
+          Number 100
+    Decl EWalkSpeed Pace
+      Name Walk
+    Decl Actor Target
+    Decl Class<Actor> TargetClass
+    Decl Array<float> Weights
+      List
+        Number 1
+        Number 2.5

@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State { }
+    State Next { }
+}
+// A state needs a name.
+// EXPECT DST2022 (3,11)

@@ -1,0 +1,23 @@
+StateTree(Name="AI/ST_OneLine", Schema=Villager)
+{
+    State Short {
+        do Wait(1)
+    }
+    State Two {
+        if X
+        do Wait(1)
+    }
+    State Three { if X  if Y  do Wait(1) }
+    State WithChild { State Inner { do Wait(1) } }
+    State Narrow {
+        on Hit
+        do Wait(1)
+        -> Root
+    }
+    State Aligned1 { do A() }
+    State B { do Wait(1) }
+    State CCC { do Wait(2) }
+    State WithMeta [ Tag = Combat ] {
+        do Wait(1)
+    }
+}

@@ -1,0 +1,8 @@
+StateTree(Name="AI/ST_EmptyForms", Schema=Villager)
+{
+    Settings = {}
+    Tags = {}
+    State A {}
+    State B { State C {} }
+    Subtree D() {}
+}

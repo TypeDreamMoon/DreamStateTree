@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_Engine", Root="Engine", Schema=AIComponent)
+{
+    State Root { }
+}

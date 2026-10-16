@@ -1,0 +1,15 @@
+// Header comment.
+StateTree(Name="AI/ST_Trivia", Schema=Villager)
+{
+    // The parameters.
+    Parameters = { float A = 1; }
+
+    #Region "States"
+    State Root {
+        // Why this one.
+        -> Root
+
+        State Child { do Wait(1) }
+    }
+    #EndRegion
+}

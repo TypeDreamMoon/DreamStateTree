@@ -1,0 +1,25 @@
+StateTree(Name="AI/ST_Continuation", Schema=Villager)
+{
+    State Flee {
+        if Player.Sees and Player.Distance < 800
+           and Chance(1 - Params.Courage)
+        if A
+           or B
+        if A and
+           B
+        if (A or
+            B) and C
+        if Total > 1 +
+           2
+        do Flee(From = Player.Pawn,
+                Distance = 2000)
+        do First(),
+           Second()
+        do Many([1,
+                 2],
+                (X = 1,
+                 Y = 2))
+        -> Root on Tick if A
+                          and B
+    }
+}

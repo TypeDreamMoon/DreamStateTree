@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+}
+#include "Late.dth"
+// #include goes above the document.
+// EXPECT DST2006 (4,1)

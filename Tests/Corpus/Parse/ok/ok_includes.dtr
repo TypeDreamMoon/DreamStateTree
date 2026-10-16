@@ -1,0 +1,8 @@
+// Shared pieces.
+#include "VillagerCommon.dth"
+#include "lib/Reactions.dth"
+
+StateTree(Name="AI/ST_Includes", Schema=Villager)
+{
+    State Root { link HitReaction }
+}

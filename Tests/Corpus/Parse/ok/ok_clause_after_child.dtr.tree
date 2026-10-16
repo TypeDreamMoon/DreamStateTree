@@ -1,0 +1,18 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseAfterChild"
+  Arg Schema
+    Name Villager
+  State A
+    State Child
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+    Clause Transition
+      Name Child
+    State Other
+    Clause If
+      Name X

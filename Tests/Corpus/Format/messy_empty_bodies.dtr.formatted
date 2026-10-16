@@ -1,0 +1,12 @@
+StateTree(Name="AI/ST_EmptyBodies", Schema=Villager)
+{
+    Settings = {}
+
+    State Empty {}
+
+    State Spread {}
+
+    State Parent {
+        State Child {}
+    }
+}

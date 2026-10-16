@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_EmptyStates", Schema=Villager)
+{
+    State Root { }
+    State Idle {
+    }
+    State Outer {
+        State Inner { }
+    }
+}

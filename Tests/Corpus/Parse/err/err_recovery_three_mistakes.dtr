@@ -1,0 +1,13 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Parameters = { float A = 1 float B = 2; }
+    State One {
+        Wait(1)
+        do Wait(2)
+    }
+    State Two { if a && b }
+}
+// Three independent mistakes: each is reported, none hides another.
+// EXPECT DST2010 (3,32)
+// EXPECT DST2012 (5,9)
+// EXPECT DST2017 (8,22)

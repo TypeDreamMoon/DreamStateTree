@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_WideSpaces", Schema=Villager)
+{
+    State 根 { do 等待(3) }
+}

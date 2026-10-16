@@ -1,0 +1,14 @@
+StateTree(Name="AI/ST_Templates", Schema=Villager)
+{
+    Template Nervous = Chance(1 - Params.Courage);
+    Template Daytime(From, To) = Hour(From, To) and not Raining();
+    Template Brisk() = Walk(Factor = 1.5);
+    Template Scaled(Value, Rate = 2, Cap = 10) = Value * Rate + Cap;
+    Template Near(Who, Limit = 800) = Who.Distance < Limit;
+    Template Tagged(Label) = Walk(1) [ Name = Label ];
+
+    State Root {
+        if Nervous
+        do Brisk()
+    }
+}

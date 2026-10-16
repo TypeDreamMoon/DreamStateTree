@@ -1,0 +1,10 @@
+StateTree( Name = "AI/ST_Spacing" , Schema = Villager( Actor = Pawn ) )
+{
+    State Root{do Wait( 1 , 2 ),Tell( Fled )->Root on Tick if A and not ( B or C )}
+    State Other [Tag=Combat;Weight=2]{if X->Root[Delay=1]}
+    State Calls {
+        do   F( A=1,B =Params.X,C-> Params.Out ,  D=ref   Params.Ref )
+        do G([1,2,3],(1,2),(X=1,Y=2))
+        if a+b*c<d-e/f
+    }
+}

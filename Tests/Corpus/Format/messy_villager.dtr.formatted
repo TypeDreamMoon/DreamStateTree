@@ -1,0 +1,51 @@
+StateTree(Name="AI/ST_Villager", Schema=Villager)
+{
+    Parameters = { float Courage = 0.5; float Hurry = 0; FVector Home; FVector Workplace; }
+    Globals    = { Player = NearestPlayer(); }
+    Tags       = { Game.Event.Villager; Game.Ask.Villager; }
+
+    State Root {
+        -> Root
+        -> Hurt on Hit [ Priority = High ]
+
+        State Haggle {
+            on Trade
+            State Accept { if Chance(Params.Courage) and Event.Offer > 3  do AnswerTrade(true) }
+            State Refuse { do AnswerTrade(false) }
+        }
+        State Hurt { link HitReaction(Toughness = 1 + Params.Courage) }
+        State Flee {
+            if Player.Sees and Player.Distance < 800 and Chance(1 - Params.Courage)
+            do Flee(From = Player.Pawn, Distance = 2000), Walk(Run = true), Tell(Fled)
+            -> Root on Tick if Player.Distance > 2500 [ Delay = 1 ]
+        }
+        State Night {
+            if Hour(22, 5)
+            do GoTo(Params.Home), Walk(Factor = 0.8)
+            -> Root on Tick if not Hour(22, 5)
+        }
+        State Work {
+            if Hour(9, 17)
+            do GoTo(Params.Workplace)
+            do Walk(Factor = 1 + Params.Hurry * 0.5)
+            -> Root on Tick if not Hour(9, 17)
+        }
+        State Idle {
+            pick HighestUtility
+            State Chat {
+                if Player.Distance < 1500
+                utility FloatInput(Player.Distance, (0, 3000))
+                do PlayAnimation(AM_Chat, 6)
+            }
+            State Wander { utility 0.5  do Wander(Radius = 800), Wait(20, 10) }
+            State Rest   { utility 0.2  do Sit(), Wait(8) }
+        }
+    }
+
+    Subtree HitReaction(float Toughness = 1) {
+        if ObjectIsValid(Actor)
+        State Stagger   { on Hit.Stagger  do Stagger(0.8 / Params.Toughness) }
+        State KnockDown { on Hit.KnockDown  do Fall()  -> Next }
+        State GetUp     { do GetUp() }
+    }
+}

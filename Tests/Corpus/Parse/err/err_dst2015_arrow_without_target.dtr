@@ -1,0 +1,9 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        do Wait(1)
+        ->
+    }
+}
+// -> needs a target; the closing brace of the state is what follows it.
+// EXPECT DST2015 (6,5)

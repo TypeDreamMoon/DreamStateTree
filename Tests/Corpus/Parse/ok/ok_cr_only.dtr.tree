@@ -1,0 +1,23 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_CrOnly"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl float A
+      Number 1
+  State Root
+    Clause If
+      Binary >
+        Name A
+        Number 0
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+    Clause Transition
+      Name Root
+      On
+        Name Tick

@@ -1,0 +1,73 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Precedence"
+  Arg Schema
+    Name Villager
+  State A
+    Clause If
+      Binary or
+        Name a
+        Binary and
+          Name b
+          Name c
+    Clause If
+      Binary and
+        Paren
+          Binary or
+            Name a
+            Name b
+        Name c
+    Clause If
+      Binary and
+        Unary not
+          Name a
+        Name b
+    Clause If
+      Unary not
+        Paren
+          Binary and
+            Name a
+            Name b
+    Clause If
+      Binary and
+        Binary <
+          Name a
+          Name b
+        Binary >
+          Name c
+          Name d
+    Clause If
+      Binary or
+        Binary ==
+          Name a
+          Name b
+        Binary !=
+          Name c
+          Name d
+    Clause If
+      Binary >
+        Binary +
+          Name a
+          Binary *
+            Name b
+            Name c
+        Binary -
+          Name d
+          Binary /
+            Name e
+            Name f
+    Clause If
+      Paren
+        Paren
+          Name a
+    Clause If
+      Paren
+        Binary and
+          Name a
+          Paren
+            Binary or
+              Name b
+              Paren
+                Binary and
+                  Name c
+                  Name d

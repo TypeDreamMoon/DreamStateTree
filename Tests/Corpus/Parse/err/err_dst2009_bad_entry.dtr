@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Settings = { = 5; }
+}
+// An entry is Key = Value, Type Name [= Value] or a value.
+// EXPECT DST2009 (3,18)

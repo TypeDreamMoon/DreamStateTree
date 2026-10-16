@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_OneLineCards", Schema=Villager)
+{
+    State Careful { do AnswerTrade(false) }
+    State Stagger { on Hit.Stagger  do Stagger(0.8) }
+    State Rest { utility 0.2  do Sit(), Wait(8) }
+    State KnockDown { on Hit.KnockDown  do Fall()  -> Next }
+    State Quick { do A() do B() }
+    State Same { if X if Y do Z() -> W }
+}

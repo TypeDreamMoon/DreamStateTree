@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_Brawler", Schema=AIComponent(Actor = CombatEnemy, AIController = AIC_Brawler))
+{
+    State Root { -> Root }
+}

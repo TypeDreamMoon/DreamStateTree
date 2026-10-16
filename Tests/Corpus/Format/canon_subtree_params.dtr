@@ -1,0 +1,12 @@
+StateTree(Name="AI/ST_SubtreeParams", Schema=Villager)
+{
+    State Root { link Typed(Count = 1) }
+
+    Subtree Typed(int Count, Array<float> Weights, FVector Spot = (0, 0, 0)) [ Tag = Combat ] {
+        State X { do Wait(1) }
+    }
+
+    Subtree Plain {
+        State Y { do Wait(2) }
+    }
+}

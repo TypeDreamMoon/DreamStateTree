@@ -1,0 +1,11 @@
+StateTree(Name="AI/ST_MessyRegions", Schema=Villager)
+{
+    #Region "Data"
+    Parameters = { float A = 1; }
+    #EndRegion
+    State Root {
+        #Region "Inner"
+        State A { do X() }
+        #EndRegion
+    }
+}

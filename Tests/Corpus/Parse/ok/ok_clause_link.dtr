@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_ClauseLink", Schema=Villager)
+{
+    State A { link HitReaction }
+    State B { link HitReaction(Toughness = 2) }
+    State C { link HitReaction(Toughness = 1 + Params.Courage) }
+    State D { link asset ST_Other }
+    State E { link asset ST_Other(Speed = Params.Speed, Mode = Walk) }
+    State F { link asset Path(Game, "AI/ST_Other") }
+}

@@ -1,0 +1,10 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State A { if a && b }
+    State B { if a || b }
+    State C { if !a }
+}
+// Write and, or, not. The expression still parses as if they had been.
+// EXPECT DST2017 (3,20)
+// EXPECT DST2017 (4,20)
+// EXPECT DST2017 (5,18)

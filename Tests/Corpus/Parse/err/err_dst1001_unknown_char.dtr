@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Parameters = { float A = 1 @; }
+}
+// A character no token starts with. The lexer reports it; the parser has nothing more to add.
+// EXPECT DST1001 (3,32)

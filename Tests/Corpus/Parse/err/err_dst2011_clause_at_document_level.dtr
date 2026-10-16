@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    do Wait(1)
+    State Root { }
+}
+// A clause belongs inside a State.
+// EXPECT DST2011 (3,5)

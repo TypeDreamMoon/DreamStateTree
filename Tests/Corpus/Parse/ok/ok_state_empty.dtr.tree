@@ -1,0 +1,9 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_EmptyStates"
+  Arg Schema
+    Name Villager
+  State Root
+  State Idle
+  State Outer
+    State Inner

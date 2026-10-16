@@ -1,0 +1,6 @@
+#include "VillagerCommon.dth" // after the first
+/* between */
+#include "lib/Reactions.dth"
+StateTree(Name="AI/ST_IncludeComments", Schema=Villager)
+{
+}

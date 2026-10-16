@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_SectionRegions", Schema=Villager)
+{
+    Parameters = {
+        #Region "Tuning"
+        float Courage = 0.5;
+        float Hurry = 0;
+        #EndRegion
+        FVector Home;
+    }
+}

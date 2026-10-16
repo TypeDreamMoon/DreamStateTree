@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_Pawn", Schema=Component(ContextActorClass = Pawn))
+{
+    State Root { }
+}

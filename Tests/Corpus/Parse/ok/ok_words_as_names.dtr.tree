@@ -1,0 +1,38 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_WordsAsNames"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl int on
+      Number 1
+    Decl int pick
+      Number 2
+  State on
+  State pick
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Member on
+              Name Params
+  State do
+    Clause Do
+      Task
+        Call
+          Name F
+          Arg on
+            Number 1
+          Arg if
+            Number 2
+          Arg utility
+            Member do
+              Name Info
+    Clause Transition
+      Name on
+  State Next
+    Clause Transition
+      Name Next
+  State Parent
+  State Succeeded

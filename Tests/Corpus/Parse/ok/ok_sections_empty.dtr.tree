@@ -1,0 +1,10 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_EmptySections"
+  Arg Schema
+    Name Villager
+  Section Settings
+  Section Parameters
+  Section Globals
+  Section Tags
+  Section Colors

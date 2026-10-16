@@ -1,0 +1,7 @@
+StateTree(Name="AI/ST_NestedGenerics", Schema=Villager)
+{
+    Parameters = {
+        Array<Class<Actor>> Classes;
+        Array<Array<int>> Grid = [[1, 2], [3]];
+    }
+}

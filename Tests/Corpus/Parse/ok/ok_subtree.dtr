@@ -1,0 +1,15 @@
+StateTree(Name="AI/ST_Subtree", Schema=Villager)
+{
+    State Root { link Reaction(Toughness = 2) }
+
+    Subtree Reaction(float Toughness = 1) {
+        State Stagger { do Stagger(0.8 / Params.Toughness) }
+    }
+    Subtree Plain {
+        State X { }
+    }
+    Subtree Empty() { }
+    Subtree Typed(int Count, Array<float> Weights, FVector Spot = (0, 0, 0), Name Label = "x") [ Tag = Combat ] {
+        State Y { }
+    }
+}

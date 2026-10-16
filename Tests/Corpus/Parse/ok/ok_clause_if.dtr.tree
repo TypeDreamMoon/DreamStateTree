@@ -1,0 +1,86 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseIf"
+  Arg Schema
+    Name Villager
+  State A
+    Clause If
+      Name Alert
+  State B
+    Clause If
+      Unary not
+        Name Alert
+  State C
+    Clause If
+      Binary and
+        Name Alert
+        Binary >
+          Name Count
+          Number 2
+  State D
+    Clause If
+      Binary or
+        Name Alert
+        Binary and
+          Unary not
+            Name Armed
+          Binary ==
+            Name Count
+            Number 3
+  State E
+    Clause If
+      Binary and
+        Paren
+          Binary or
+            Name Alert
+            Name Armed
+        Binary >=
+          Name Count
+          Number 1
+  State F
+    Clause If
+      Binary and
+        Call
+          Name ObjectIsValid
+          Arg
+            Member Target
+              Name Info
+        Binary <
+          Member Distance
+            Name Info
+          Member AttackRange
+            Name Params
+  State G
+    Clause If
+      Call
+        Name Random
+        Arg
+          Number 0.3
+        Meta
+          MetaEntry Evaluation
+            Name ForcedTrue
+  State H
+    Clause If
+      Binary !=
+        Name Count
+        Number 0
+    Clause If
+      Name Alert
+  State I
+    Clause If
+      Binary >
+        Member Offer
+          Name Event
+        Number 3
+  State J
+    Clause If
+      Binary <
+        Number 3
+        Name Count
+  State K
+    Clause If
+      Name A
+    Clause If
+      Name B
+    Clause If
+      Name C

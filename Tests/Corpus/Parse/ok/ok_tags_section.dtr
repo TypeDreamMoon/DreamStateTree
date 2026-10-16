@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_Tags", Schema=Villager)
+{
+    Tags = { Game.Event.Villager; Game.Ask.Villager; Game.Event.Combat; "Game.Tag.AsString"; }
+}

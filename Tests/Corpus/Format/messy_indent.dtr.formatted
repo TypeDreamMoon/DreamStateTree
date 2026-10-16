@@ -1,0 +1,15 @@
+StateTree(Name="AI/ST_Messy", Schema=Villager)
+{
+    Parameters = { float Courage = 0.5; FVector Home; }
+    Globals    = { Player = NearestPlayer(); }
+
+    State Root {
+        -> Root
+        State Attack {
+            if Alert and Armed
+            do Wait(1), Tell(Fled)
+            -> Root on Tick
+        }
+        State Rest { do Sit() }
+    }
+}

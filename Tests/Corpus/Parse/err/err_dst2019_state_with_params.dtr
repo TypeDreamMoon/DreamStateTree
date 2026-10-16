@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root(float A) { }
+}
+// Only a Subtree takes parameters.
+// EXPECT DST2019 (3,15)

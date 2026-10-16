@@ -1,0 +1,7 @@
+// Comments between the pieces of the header.
+StateTree(Name="AI/ST_Comments",  // the asset
+          Schema=Villager)        // the schema
+// before the brace
+{
+    State Root { }
+}

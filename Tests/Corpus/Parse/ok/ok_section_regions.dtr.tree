@@ -1,0 +1,13 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_SectionRegions"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Region "Tuning"
+    Decl float Courage
+      Number 0.5
+    Decl float Hurry
+      Number 0
+    EndRegion
+    Decl FVector Home

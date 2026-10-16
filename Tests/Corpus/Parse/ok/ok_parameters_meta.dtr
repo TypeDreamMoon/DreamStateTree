@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_ParameterMeta", Schema=Villager)
+{
+    Parameters = {
+        float A = 1 [ Category = "x"; Tooltip = "y" ];
+        int B [ Category = "z" ];
+        FVector C [ Hidden ];
+    }
+    Settings = { Mode = Fast [ Note = "n" ]; }
+}

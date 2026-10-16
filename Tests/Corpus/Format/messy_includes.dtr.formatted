@@ -1,0 +1,9 @@
+#include "A.dth"
+#include "B.dth" // trailing
+
+#include "C.dth"
+
+StateTree(Name="AI/ST_MessyIncludes", Schema=Villager)
+{
+    State Root {}
+}

@@ -1,0 +1,13 @@
+StateTree(Name="AI/ST_WordsAsNames", Schema=Villager)
+{
+    Parameters = { int on = 1; int pick = 2; }
+    State on { }
+    State pick { do Wait(Params.on) }
+    State do {
+        do F(on = 1, if = 2, utility = Info.do)
+        -> `on`
+    }
+    State Next { -> `Next` }
+    State Parent { }
+    State Succeeded { }
+}

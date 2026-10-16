@@ -1,0 +1,13 @@
+StateTree(Name="AI/ST_Expressions", Schema=Villager)
+{
+    State A {
+        if a and b or c
+        if a + 1 < b * 2 - 3 / 4
+        if -a < 3
+        do F(1, 2.5, .5, 1e3, 2.5E+4, "text", true, false, None, Walk)
+        do F([1, 2, 3], [], [[1], [2]], (1, 2), (X = 1, Y = 2), (1))
+        do F(Obj.Member.Deep, `Move To`.x, Info.Dist(1), F(G(H(1))))
+        do F(A = 1, B = Params.X, C -> Params.Out, D = ref Params.Ref)
+        do F("esc \"quoted\" \\ \n \t \r end", "")
+    }
+}

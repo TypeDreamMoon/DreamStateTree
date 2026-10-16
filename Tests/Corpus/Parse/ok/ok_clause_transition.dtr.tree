@@ -1,0 +1,141 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseTransition"
+  Arg Schema
+    Name Villager
+  State Root
+    Clause Transition
+      Name Root
+    Clause Transition
+      Member Phone
+        Name Idle
+    Clause Transition
+      Name `Move To`
+    Clause Transition
+      Name Next
+    Clause Transition
+      Name NextSelectable
+    Clause Transition
+      Name Parent
+    Clause Transition
+      Name NextParent
+    Clause Transition
+      Name NextSelectableParent
+    Clause Transition
+      Name TreeSucceeded
+    Clause Transition
+      Name TreeFailed
+    Clause Transition
+      Name Root
+      On
+        Name Succeeded
+    Clause Transition
+      Name Root
+      On
+        Name Failed
+    Clause Transition
+      Name Root
+      On
+        Name Completed
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Binary >
+          Member Distance
+            Name Player
+          Number 2500
+    Clause Transition
+      Name Root
+      On
+        Name Hit
+    Clause Transition
+      Name Root
+      On
+        Member Stagger
+          Name Hit
+    Clause Transition
+      Name Root
+      On
+        Member Hit
+          Member Villager
+            Member Event
+              Name Game
+    Clause Transition
+      Name Root
+      On
+        Call
+          Name Trade
+          Arg
+            Name VillagerTradeOffer
+    Clause Transition
+      Name Root
+      On
+        Call
+          Name Delegate
+          Arg
+            Member Succeeds
+              Name Combo
+    Clause Transition
+      Name Root
+      On
+        Call
+          Name Delegate
+          Arg
+            Member OnTargetLost
+              Name Info
+    Clause Transition
+      Name Root
+      If
+        Name Alert
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Binary and
+          Name Alert
+          Unary not
+            Name Armed
+    Clause Transition
+      Name Root
+      Meta
+        MetaEntry Delay
+          Number 1
+    Clause Transition
+      Name Root
+      On
+        Name Failed
+      Meta
+        MetaEntry Delay
+          Number 0.5
+        MetaEntry Variance
+          Number 0.2
+    Clause Transition
+      Name Hurt
+      On
+        Name Hit
+      Meta
+        MetaEntry Priority
+          Name High
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Binary >
+          Name Count
+          Number 3
+      Meta
+        MetaEntry Priority
+          Name Critical
+        MetaEntry Reactivate
+        MetaEntry Enabled
+          Bool false
+        MetaEntry ConsumeEvent
+          Bool false

@@ -1,0 +1,43 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseLink"
+  Arg Schema
+    Name Villager
+  State A
+    Clause Link
+      Name HitReaction
+  State B
+    Clause Link
+      Call
+        Name HitReaction
+        Arg Toughness
+          Number 2
+  State C
+    Clause Link
+      Call
+        Name HitReaction
+        Arg Toughness
+          Binary +
+            Number 1
+            Member Courage
+              Name Params
+  State D
+    Clause Link asset
+      Name ST_Other
+  State E
+    Clause Link asset
+      Call
+        Name ST_Other
+        Arg Speed
+          Member Speed
+            Name Params
+        Arg Mode
+          Name Walk
+  State F
+    Clause Link asset
+      Call
+        Name Path
+        Arg
+          Name Game
+        Arg
+          String "AI/ST_Other"

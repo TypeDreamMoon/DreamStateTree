@@ -1,0 +1,17 @@
+StateTree(Name="AI/ST_ClauseOrder", Schema=Villager)
+{
+    State Root {
+        State Child { do Wait(1) }
+        -> Root
+        do Wait(2)
+        pick Random
+        link HitReaction
+        utility 0.5
+        if X
+        on Hit
+        do Wait(3)
+        if Y
+        -> Child on Tick
+        State Other { do Wait(4) }
+    }
+}

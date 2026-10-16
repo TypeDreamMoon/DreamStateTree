@@ -1,0 +1,13 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Brawler"
+  Arg Schema
+    Call
+      Name AIComponent
+      Arg Actor
+        Name CombatEnemy
+      Arg AIController
+        Name AIC_Brawler
+  State Root
+    Clause Transition
+      Name Root

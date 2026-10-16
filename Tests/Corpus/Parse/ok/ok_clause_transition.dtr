@@ -1,0 +1,32 @@
+StateTree(Name="AI/ST_ClauseTransition", Schema=Villager)
+{
+    State Root {
+        -> Root
+        -> Idle.Phone
+        -> `Move To`
+        -> Next
+        -> NextSelectable
+        -> Parent
+        -> NextParent
+        -> NextSelectableParent
+        -> TreeSucceeded
+        -> TreeFailed
+        -> Root on Succeeded
+        -> Root on Failed
+        -> Root on Completed
+        -> Root on Tick
+        -> Root on Tick if Player.Distance > 2500
+        -> Root on Hit
+        -> Root on Hit.Stagger
+        -> Root on Game.Event.Villager.Hit
+        -> Root on Trade(VillagerTradeOffer)
+        -> Root on Delegate(Combo.Succeeds)
+        -> Root on Delegate(Info.OnTargetLost)
+        -> Root if Alert
+        -> Root on Tick if Alert and not Armed
+        -> Root [ Delay = 1 ]
+        -> Root on Failed [ Delay = 0.5; Variance = 0.2 ]
+        -> Hurt on Hit [ Priority = High ]
+        -> Root on Tick if Count > 3 [ Priority = Critical; Reactivate; Enabled = false; ConsumeEvent = false ]
+    }
+}

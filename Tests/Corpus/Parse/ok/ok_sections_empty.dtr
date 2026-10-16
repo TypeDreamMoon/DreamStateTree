@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_EmptySections", Schema=Villager)
+{
+    Settings = { }
+    Parameters = {
+    }
+    Globals = { }
+    Tags = { }
+    Colors = { }
+}

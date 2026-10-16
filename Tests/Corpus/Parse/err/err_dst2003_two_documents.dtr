@@ -1,0 +1,8 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+}
+StateTree(Name="Tests/F", Schema=Villager)
+{
+}
+// A file holds exactly one document.
+// EXPECT DST2003 (4,1)

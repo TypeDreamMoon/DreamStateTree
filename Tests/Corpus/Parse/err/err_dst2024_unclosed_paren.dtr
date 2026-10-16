@@ -1,0 +1,5 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { do Wait(1
+// The parenthesis is the innermost of three open brackets.
+// EXPECT DST2024 (3,25)

@@ -1,0 +1,132 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseDo"
+  Arg Schema
+    Name Villager
+  State A
+    Clause Do
+      Task
+        Name Wait
+  State B
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+  State C
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+          Arg
+            Number 0.3
+      Task
+        Call
+          Name Tell
+          Arg
+            Name Fled
+  State D
+    Clause Do
+      Task Combo
+        Call
+          Name ComboAttack
+    Clause Do
+      Task Aim
+        Call
+          Name AimAt
+          Arg Target
+            Member Target
+              Name Info
+          Meta
+            MetaEntry Name
+              String "Aim"
+            MetaEntry ConsideredForCompletion
+              Bool false
+  State E
+    Clause Do
+      Task
+        Call
+          Name Delay
+          Arg Duration
+            Number 2
+          Meta
+            MetaEntry Enabled
+              Bool false
+            MetaEntry TransitionPriority
+              Name High
+  State F
+    Clause Do
+      Task
+        Member Path
+          Name Node
+      Task
+        Member Path
+          Member Deep
+            Name Other
+  State G
+    Clause Do
+      Task
+        Call
+          Name RunEnvQuery
+          Arg
+            Name EQ_Wander
+          Arg Result
+            Ref
+              Member WanderSpot
+                Name Params
+  State H
+    Clause Do
+      Task
+        Call
+          Name Measure
+          Arg Distance ->
+            Member Dist
+              Name Params
+  State I
+    Clause Do
+      Task
+        Call
+          Name SetCharacterSpeed
+          Arg Speed
+            Number 500
+    Clause Do
+      Task
+        Call
+          Name MoveTo
+          Arg TargetActor
+            Member Target
+              Name Info
+          Arg AcceptableRadius
+            Binary *
+              Member AttackRange
+                Name Params
+              Number 0.75
+  State J
+    Clause Do
+      Task
+        Call
+          Name Flee
+          Arg From
+            Member Pawn
+              Name Player
+          Arg Distance
+            Number 2000
+      Task
+        Call
+          Name Walk
+          Arg Run
+            Bool true
+  State K
+    Clause Do
+      Task First
+        Call
+          Name A
+      Task Second
+        Call
+          Name B
+      Task
+        Call
+          Name C

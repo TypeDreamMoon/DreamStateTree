@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_PluginTree", Root="Plugin.DreamStateTree", Schema=Component)
+{
+    State Root { }
+}

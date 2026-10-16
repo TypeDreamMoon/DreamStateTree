@@ -1,0 +1,22 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_BacktickNames"
+  Arg Schema
+    Name Villager
+  State `Move To`
+    Clause Transition
+      Name `Move To`
+  State State
+  State Idle
+    State `Phone Call`
+    Clause Transition
+      Member `Phone Call`
+        Name Idle
+  State X
+    Clause Do
+      Task
+        Call
+          Name `Do Thing`
+          Arg Arg
+            Member `Deep Member`
+              Name `Some Value`

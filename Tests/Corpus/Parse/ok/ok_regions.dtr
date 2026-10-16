@@ -1,0 +1,22 @@
+StateTree(Name="AI/ST_Regions", Schema=Villager)
+{
+    #Region "Data"
+    Parameters = { float A = 1; }
+    #EndRegion
+
+    #Region "States"
+    State Root {
+        #Region "Reactions"
+        State Hurt { }
+        State Dead { }
+        #EndRegion
+        -> Root
+    }
+    #EndRegion
+
+    #Region "Outer"
+    #Region "Inner"
+    State Extra { }
+    #EndRegion
+    #EndRegion
+}

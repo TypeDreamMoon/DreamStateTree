@@ -1,0 +1,92 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_TransitionBrackets"
+  Arg Schema
+    Name Villager
+  State A
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Call
+          Name Hour
+          Arg
+            Number 22
+          Arg
+            Number 5
+      Meta
+        MetaEntry Delay
+          Number 1
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Call
+          Name Hour
+          Arg
+            Number 22
+          Arg
+            Number 5
+          Meta
+            MetaEntry Name
+              String "Night"
+      Meta
+        MetaEntry Delay
+          Number 1
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Paren
+          Call
+            Name Hour
+            Arg
+              Number 22
+            Arg
+              Number 5
+      Meta
+        MetaEntry Delay
+          Number 1
+    Clause Transition
+      Name Root
+      If
+        Binary and
+          Call
+            Name Random
+            Arg
+              Number 0.3
+            Meta
+              MetaEntry Evaluation
+                Name ForcedTrue
+          Name Alert
+      Meta
+        MetaEntry Delay
+          Number 2
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Unary not
+          Call
+            Name Hour
+            Arg
+              Number 22
+            Arg
+              Number 5
+      Meta
+        MetaEntry Delay
+          Number 1
+    Clause If
+      Call
+        Name Hour
+        Arg
+          Number 22
+        Arg
+          Number 5
+        Meta
+          MetaEntry Name
+            String "Night"

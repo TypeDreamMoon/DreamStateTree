@@ -1,0 +1,19 @@
+StateTree(Name="AI/ST_ParameterTypes", Schema=Villager)
+{
+    Parameters = {
+        bool Alert = true;
+        int Count = 3;
+        int64 Seed = 9007199254740993;
+        float Courage = 0.5 [ Category = "性格" ];
+        double Scale = 1.0;
+        Name Label = "Idle";
+        String Greeting = "hello";
+        Text Caption;
+        FVector Home;
+        Vector Workplace = (0, 0, 100);
+        EWalkSpeed Pace = Walk;
+        Actor Target;
+        Class<Actor> TargetClass;
+        Array<float> Weights = [1, 2.5];
+    }
+}

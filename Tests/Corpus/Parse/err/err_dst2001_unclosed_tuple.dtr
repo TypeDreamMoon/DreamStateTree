@@ -1,0 +1,5 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Colors = { Combat = (0.8, 0.25; }
+}
+// EXPECT DST2001 (3,35)

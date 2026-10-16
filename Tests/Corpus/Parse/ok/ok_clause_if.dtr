@@ -1,0 +1,18 @@
+StateTree(Name="AI/ST_ClauseIf", Schema=Villager)
+{
+    State A { if Alert }
+    State B { if not Alert }
+    State C { if Alert and Count > 2 }
+    State D { if Alert or not Armed and Count == 3 }
+    State E { if (Alert or Armed) and Count >= 1 }
+    State F { if ObjectIsValid(Info.Target) and Info.Distance < Params.AttackRange }
+    State G { if Random(0.3) [ Evaluation = ForcedTrue ] }
+    State H { if Count != 0  if Alert }
+    State I { if Event.Offer > 3 }
+    State J { if 3 < Count }
+    State K {
+        if A
+        if B
+        if C
+    }
+}

@@ -1,0 +1,8 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Settings"
+  Arg Schema
+    Name Villager
+  Section Settings
+    Assign GlobalTasksCompletion
+      Name Any

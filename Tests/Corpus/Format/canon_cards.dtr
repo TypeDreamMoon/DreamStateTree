@@ -1,0 +1,14 @@
+StateTree(Name="AI/ST_Cards", Schema=Villager)
+{
+    State Root {
+        -> Root
+
+        State Stagger   { on Hit.Stagger  do Stagger(0.8) }
+        State KnockDown { on Hit.KnockDown  do Fall()  -> Next }
+        State GetUp     { do GetUp() }
+    }
+
+    State Careful { do AnswerTrade(false) }
+
+    State Quick { do Run() }
+}

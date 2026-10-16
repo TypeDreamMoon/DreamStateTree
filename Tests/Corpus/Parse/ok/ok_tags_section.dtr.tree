@@ -1,0 +1,20 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Tags"
+  Arg Schema
+    Name Villager
+  Section Tags
+    Expr
+      Member Villager
+        Member Event
+          Name Game
+    Expr
+      Member Villager
+        Member Ask
+          Name Game
+    Expr
+      Member Combat
+        Member Event
+          Name Game
+    Expr
+      String "Game.Tag.AsString"

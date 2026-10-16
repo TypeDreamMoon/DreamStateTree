@@ -1,0 +1,14 @@
+StateTree(Name="AI/ST_Blank", Schema=Villager)
+{
+    Parameters = { float A = 1; }
+
+    State Root {
+        if X
+
+        do Wait(1)
+
+        State Child { do Wait(2) }
+
+        State Other { do Wait(3) }
+    }
+}

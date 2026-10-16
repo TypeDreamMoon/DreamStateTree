@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { do Wait(1) Sit() }
+}
+// Tasks of one do are separated by commas.
+// EXPECT DST2013 (3,29)

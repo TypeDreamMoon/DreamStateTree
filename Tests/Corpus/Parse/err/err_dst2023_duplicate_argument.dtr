@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { do Wait(Duration = 1, Duration = 2) }
+}
+// An argument name is given once; the report is on the second.
+// EXPECT DST2023 (3,40)

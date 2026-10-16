@@ -1,0 +1,283 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Villager"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl float Courage
+      Number 0.5
+    Decl float Hurry
+      Number 0
+    Decl FVector Home
+    Decl FVector Workplace
+  Section Globals
+    Assign Player
+      Call
+        Name NearestPlayer
+  Section Tags
+    Expr
+      Member Villager
+        Member Event
+          Name Game
+    Expr
+      Member Villager
+        Member Ask
+          Name Game
+  State Root
+    Clause Transition
+      Name Root
+    Clause Transition
+      Name Hurt
+      On
+        Name Hit
+      Meta
+        MetaEntry Priority
+          Name High
+    State Haggle
+      Clause On
+        Name Trade
+      State Accept
+        Clause If
+          Binary and
+            Call
+              Name Chance
+              Arg
+                Member Courage
+                  Name Params
+            Binary >
+              Member Offer
+                Name Event
+              Number 3
+        Clause Do
+          Task
+            Call
+              Name AnswerTrade
+              Arg
+                Bool true
+      State Refuse
+        Clause Do
+          Task
+            Call
+              Name AnswerTrade
+              Arg
+                Bool false
+    State Hurt
+      Clause Link
+        Call
+          Name HitReaction
+          Arg Toughness
+            Binary +
+              Number 1
+              Member Courage
+                Name Params
+    State Flee
+      Clause If
+        Binary and
+          Binary and
+            Member Sees
+              Name Player
+            Binary <
+              Member Distance
+                Name Player
+              Number 800
+          Call
+            Name Chance
+            Arg
+              Binary -
+                Number 1
+                Member Courage
+                  Name Params
+      Clause Do
+        Task
+          Call
+            Name Flee
+            Arg From
+              Member Pawn
+                Name Player
+            Arg Distance
+              Number 2000
+        Task
+          Call
+            Name Walk
+            Arg Run
+              Bool true
+        Task
+          Call
+            Name Tell
+            Arg
+              Name Fled
+      Clause Transition
+        Name Root
+        On
+          Name Tick
+        If
+          Binary >
+            Member Distance
+              Name Player
+            Number 2500
+        Meta
+          MetaEntry Delay
+            Number 1
+    State Night
+      Clause If
+        Call
+          Name Hour
+          Arg
+            Number 22
+          Arg
+            Number 5
+      Clause Do
+        Task
+          Call
+            Name GoTo
+            Arg
+              Member Home
+                Name Params
+        Task
+          Call
+            Name Walk
+            Arg Factor
+              Number 0.8
+      Clause Transition
+        Name Root
+        On
+          Name Tick
+        If
+          Unary not
+            Call
+              Name Hour
+              Arg
+                Number 22
+              Arg
+                Number 5
+    State Work
+      Clause If
+        Call
+          Name Hour
+          Arg
+            Number 9
+          Arg
+            Number 17
+      Clause Do
+        Task
+          Call
+            Name GoTo
+            Arg
+              Member Workplace
+                Name Params
+      Clause Do
+        Task
+          Call
+            Name Walk
+            Arg Factor
+              Binary +
+                Number 1
+                Binary *
+                  Member Hurry
+                    Name Params
+                  Number 0.5
+      Clause Transition
+        Name Root
+        On
+          Name Tick
+        If
+          Unary not
+            Call
+              Name Hour
+              Arg
+                Number 9
+              Arg
+                Number 17
+    State Idle
+      Clause Pick
+        Name HighestUtility
+      State Chat
+        Clause If
+          Binary <
+            Member Distance
+              Name Player
+            Number 1500
+        Clause Utility
+          Call
+            Name FloatInput
+            Arg
+              Member Distance
+                Name Player
+            Arg
+              Tuple
+                Arg
+                  Number 0
+                Arg
+                  Number 3000
+        Clause Do
+          Task
+            Call
+              Name PlayAnimation
+              Arg
+                Name AM_Chat
+              Arg
+                Number 6
+      State Wander
+        Clause Utility
+          Number 0.5
+        Clause Do
+          Task
+            Call
+              Name Wander
+              Arg Radius
+                Number 800
+          Task
+            Call
+              Name Wait
+              Arg
+                Number 20
+              Arg
+                Number 10
+      State Rest
+        Clause Utility
+          Number 0.2
+        Clause Do
+          Task
+            Call
+              Name Sit
+          Task
+            Call
+              Name Wait
+              Arg
+                Number 8
+  Subtree HitReaction
+    Param float Toughness
+      Number 1
+    Clause If
+      Call
+        Name ObjectIsValid
+        Arg
+          Name Actor
+    State Stagger
+      Clause On
+        Member Stagger
+          Name Hit
+      Clause Do
+        Task
+          Call
+            Name Stagger
+            Arg
+              Binary /
+                Number 0.8
+                Member Toughness
+                  Name Params
+    State KnockDown
+      Clause On
+        Member KnockDown
+          Name Hit
+      Clause Do
+        Task
+          Call
+            Name Fall
+      Clause Transition
+        Name Next
+    State GetUp
+      Clause Do
+        Task
+          Call
+            Name GetUp

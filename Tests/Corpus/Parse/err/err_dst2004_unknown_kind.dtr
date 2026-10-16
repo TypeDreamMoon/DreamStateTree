@@ -1,0 +1,5 @@
+StateGraph(Name="Tests/E", Schema=Villager)
+{
+}
+// Only StateTree and StateTreeLibrary exist.
+// EXPECT DST2004 (1,1)

@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_Crlf", Schema=Villager)
+{
+    Parameters = { float A = 1; }
+    State Root {
+        // a comment
+        if A > 0
+        do Wait(1)
+        -> Root on Tick
+    }
+}

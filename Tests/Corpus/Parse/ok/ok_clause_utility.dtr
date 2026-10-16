@@ -1,0 +1,8 @@
+StateTree(Name="AI/ST_ClauseUtility", Schema=Villager)
+{
+    State A { utility 0.5 }
+    State B { utility FloatInput(Player.Distance, (0, 3000)) }
+    State C { utility FloatInput(Player.Distance, (0, 3000)) * 0.5 }
+    State D { utility (Desire() or Hunger()) and 0.3 }
+    State E { utility Desire() * Hunger() * 2 }
+}

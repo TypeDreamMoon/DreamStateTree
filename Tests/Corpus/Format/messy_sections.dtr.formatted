@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_MessySections", Schema=Villager)
+{
+    Colors     = { Combat = (0.8, 0.25, 0.2); }
+    Tags       = { Game.Event.Villager; Game.Ask.Villager; }
+    Parameters = { float Courage = 0.5; FVector Home; }
+    Globals    = { Player = NearestPlayer(); }
+    Settings   = { GlobalTasksCompletion = Any; }
+
+    State Root { -> Root }
+}

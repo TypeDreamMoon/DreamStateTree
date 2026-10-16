@@ -1,0 +1,2 @@
+# The corpus keeps its bytes: some cases use CRLF or a lone CR for line ends, or start with a byte-order mark, on purpose.
+* -text

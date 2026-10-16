@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State 根 { Wait(1) }
+}
+// Columns count characters, not bytes: the Chinese name is one column wide.
+// EXPECT DST2012 (3,15)

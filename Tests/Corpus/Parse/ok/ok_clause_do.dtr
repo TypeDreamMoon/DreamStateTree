@@ -1,0 +1,24 @@
+StateTree(Name="AI/ST_ClauseDo", Schema=Villager)
+{
+    State A { do Wait }
+    State B { do Wait(1) }
+    State C { do Wait(1, 0.3), Tell(Fled) }
+    State D {
+        do Combo = ComboAttack()
+        do Aim = AimAt(Target = Info.Target) [ Name = "Aim"; ConsideredForCompletion = false ]
+    }
+    State E { do Delay(Duration = 2) [ Enabled = false; TransitionPriority = High ] }
+    State F { do Node.Path, Other.Deep.Path }
+    State G { do RunEnvQuery(EQ_Wander, Result = ref Params.WanderSpot) }
+    State H { do Measure(Distance -> Params.Dist) }
+    State I {
+        do SetCharacterSpeed(Speed = 500)
+        do MoveTo(TargetActor = Info.Target, AcceptableRadius = Params.AttackRange * 0.75)
+    }
+    State J {
+        do Flee(From = Player.Pawn,
+                Distance = 2000),
+           Walk(Run = true)
+    }
+    State K { do First = A(), Second = B(), C() }
+}

@@ -1,0 +1,64 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_OneLineCards"
+  Arg Schema
+    Name Villager
+  State Careful
+    Clause Do
+      Task
+        Call
+          Name AnswerTrade
+          Arg
+            Bool false
+  State Stagger
+    Clause On
+      Member Stagger
+        Name Hit
+    Clause Do
+      Task
+        Call
+          Name Stagger
+          Arg
+            Number 0.8
+  State Rest
+    Clause Utility
+      Number 0.2
+    Clause Do
+      Task
+        Call
+          Name Sit
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 8
+  State KnockDown
+    Clause On
+      Member KnockDown
+        Name Hit
+    Clause Do
+      Task
+        Call
+          Name Fall
+    Clause Transition
+      Name Next
+  State Quick
+    Clause Do
+      Task
+        Call
+          Name A
+    Clause Do
+      Task
+        Call
+          Name B
+  State Same
+    Clause If
+      Name X
+    Clause If
+      Name Y
+    Clause Do
+      Task
+        Call
+          Name Z
+    Clause Transition
+      Name W

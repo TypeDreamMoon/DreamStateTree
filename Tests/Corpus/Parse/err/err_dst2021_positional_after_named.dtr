@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { do Wait(Duration = 1, 2) }
+}
+// Positional arguments come first.
+// EXPECT DST2021 (3,40)

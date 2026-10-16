@@ -1,0 +1,15 @@
+StateTree(Name="AI/ST_Transitions", Schema=Villager)
+{
+    State Root {
+        -> Root
+        -> Idle.Phone
+        -> `Move To`
+        -> Root on Succeeded
+        -> Root on Tick if Player.Distance > 2500
+        -> Root on Hit.Stagger
+        -> Root on Delegate(Combo.Succeeds)
+        -> Root on Failed [ Delay = 0.5; Variance = 0.2 ]
+        -> Hurt on Hit [ Priority = High ]
+        -> Root on Tick if Count > 3 [ Priority = Critical; Reactivate; Enabled = false ]
+    }
+}

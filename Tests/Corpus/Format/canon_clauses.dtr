@@ -1,0 +1,18 @@
+StateTree(Name="AI/ST_Clauses", Schema=Villager)
+{
+    State Root {
+        State Attack [ Tag = Combat ] {
+            on Hit.Stagger
+            if ObjectIsValid(Info.Target) and Info.Distance < Params.Range
+            if Alert
+            pick Random
+            utility FloatInput(Info.Distance, (0, 3000)) * 0.5
+            do Combo = Attack(1) [ Name = "c" ], Wait
+            do Aim(Target = Info.Target)
+            -> Next on Succeeded if not Tired [ Delay = 0.5 ]
+            -> Root
+            State Child { link asset ST_Other(Speed = 2) }
+            State Sub   { link HitReaction(Toughness = 2)  -> Root }
+        }
+    }
+}

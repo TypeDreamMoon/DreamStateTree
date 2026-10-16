@@ -1,0 +1,14 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_NestedGenerics"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl Array<Class<Actor>> Classes
+    Decl Array<Array<int>> Grid
+      List
+        List
+          Number 1
+          Number 2
+        List
+          Number 3

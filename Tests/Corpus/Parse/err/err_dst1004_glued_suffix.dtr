@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Parameters = { float A = 2px; }
+}
+// Numbers take no suffix.
+// EXPECT DST1004 (3,30)

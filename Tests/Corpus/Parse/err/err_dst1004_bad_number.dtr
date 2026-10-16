@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Parameters = { float A = 1e; }
+}
+// An exponent with no digits.
+// EXPECT DST1004 (3,30)

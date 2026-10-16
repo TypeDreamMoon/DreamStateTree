@@ -1,0 +1,11 @@
+StateTree(Name="AI/ST_TransitionBrackets", Schema=Villager)
+{
+    State A {
+        if Hour(22, 5) [ Name = "Night" ]
+        -> Root on Tick if Hour(22, 5) [ Delay = 1 ]
+        -> Root on Tick if Hour(22, 5) [ Name = "Night" ] [ Delay = 1 ]
+        -> Root on Tick if (Hour(22, 5)) [ Delay = 1 ]
+        -> Root if Random(0.3) [ Evaluation = ForcedTrue ] and Alert [ Delay = 2 ]
+        -> Root on Tick if not Hour(22, 5) [ Delay = 1 ]
+    }
+}

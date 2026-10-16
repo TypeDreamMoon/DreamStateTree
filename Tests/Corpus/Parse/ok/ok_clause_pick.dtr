@@ -1,0 +1,12 @@
+StateTree(Name="AI/ST_ClausePick", Schema=Villager)
+{
+    State A1 { pick InOrder }
+    State A2 { pick Random }
+    State A3 { pick UniformRandom }
+    State A4 { pick HighestUtility }
+    State A5 { pick WeightedUtility }
+    State A6 { pick RelativeUtility }
+    State A7 { pick FollowTransitions }
+    State A8 { pick Enter }
+    State A9 { pick None }
+}

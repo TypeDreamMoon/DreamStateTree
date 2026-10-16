@@ -1,0 +1,50 @@
+Document StateTreeLibrary
+  Arg Name
+    String "AI/Reactions"
+  Subtree Flinch
+    State Start
+      Clause Do
+        Task
+          Call
+            Name Flinch
+      Clause Transition
+        Name Next
+    State Recover
+      Clause Do
+        Task
+          Call
+            Name Wait
+            Arg
+              Number 0.5
+  Subtree Knockback
+    Param FVector Direction
+    Param float Force
+      Number 600
+    Meta
+      MetaEntry Tag
+        Name Combat
+    Clause Pick
+      Name Random
+    State Light
+      Clause If
+        Binary <
+          Name Force
+          Number 300
+      Clause Do
+        Task
+          Call
+            Name Push
+            Arg
+              Name Force
+    State Heavy
+      Clause Do
+        Task
+          Call
+            Name Push
+            Arg
+              Binary *
+                Name Force
+                Number 2
+        Task
+          Call
+            Name Fall

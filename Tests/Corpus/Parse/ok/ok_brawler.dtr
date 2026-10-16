@@ -1,0 +1,30 @@
+StateTree(Name="AI/ST_Brawler", Schema=AIComponent(Actor = CombatEnemy))
+{
+    Parameters = { float AttackRange = 200; FVector WanderSpot; }
+    Globals    = { Info = GetPlayerInfo(MaxRange = 2500); }
+
+    State Root {
+        -> Root
+
+        State Attack {
+            if ObjectIsValid(Info.TargetPlayerCharacter) and Info.DistanceToTarget < Params.AttackRange
+            pick Random
+            do FaceActor(ActorToFaceTowards = Info.TargetPlayerCharacter)
+            -> Recover
+            State Combo   { do ComboAttack() }
+            State Charged { do ChargedAttack() }
+        }
+        State Chase {
+            if ObjectIsValid(Info.TargetPlayerCharacter)
+            do SetCharacterSpeed(Speed = 500)
+            do MoveTo(TargetActor = Info.TargetPlayerCharacter, AcceptableRadius = Params.AttackRange * 0.75)
+            -> Attack on Succeeded
+            -> Root on Failed [ Delay = 0.5 ]
+        }
+        State Patrol {
+            State FindSpot { do RunEnvQuery(EQ_Wander, Result = ref Params.WanderSpot)  -> Next on Succeeded }
+            State Walk     { do SetCharacterSpeed(Speed = 200), MoveTo(Destination = Params.WanderSpot) }
+        }
+        State Recover { do Delay(1, 0.3) }
+    }
+}

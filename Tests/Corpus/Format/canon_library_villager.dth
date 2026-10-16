@@ -1,0 +1,14 @@
+StateTreeLibrary(Name="AI/VillagerCommon")
+{
+    Tags = { Game.Event.Villager; Game.Ask.Villager; }
+
+    Template Nervous = Chance(1 - Params.Courage);
+    Template Daytime(From, To) = Hour(From, To) and not Raining();
+
+    Subtree HitReaction(float Toughness = 1) {
+        if ObjectIsValid(Actor)
+        State Stagger   { on Hit.Stagger  do Stagger(0.8 / Params.Toughness) }
+        State KnockDown { on Hit.KnockDown  do Fall()  -> Next }
+        State GetUp     { do GetUp() }
+    }
+}

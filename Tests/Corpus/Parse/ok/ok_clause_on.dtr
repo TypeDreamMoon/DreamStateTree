@@ -1,0 +1,9 @@
+StateTree(Name="AI/ST_ClauseOn", Schema=Villager)
+{
+    State A { on Hit }
+    State B { on Hit.Stagger }
+    State C { on Game.Event.Villager.Hit }
+    State D { on Trade(VillagerTradeOffer) }
+    State E { on "Game.Event.Hit" }
+    State F { on Hit.Stagger(Game.Payloads.Stagger) }
+}

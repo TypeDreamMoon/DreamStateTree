@@ -1,0 +1,10 @@
+#include "VillagerCommon.dth"
+#include "lib/Reactions.dth"
+
+StateTree(Name="AI/ST_Includes", Schema=Villager)
+{
+    Template Nervous = Chance(1 - Params.Courage);
+    Template Near(Who, Limit = 800) = Who.Distance < Limit;
+
+    State Root { if Nervous  link HitReaction(Toughness = 1 + Params.Courage) }
+}

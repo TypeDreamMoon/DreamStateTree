@@ -1,0 +1,45 @@
+StateTree(Name="AI/ST_LongLines", Schema=Villager)
+{
+    State Flee {
+        if Player.CanSeeTheVillagerFromWhereTheyStand
+           and Player.DistanceToTheVillagerInMeters < 800
+           and Chance(1 - Params.Courage)
+           and Player.IsVisible
+        do Flee(
+               From      = Player.Pawn,
+               Distance  = 2000,
+               Speed     = Params.FleeSpeedMultiplier * 1.5,
+               Direction = Player.AwayFromTheVillagerDirection
+           ),
+           Walk(Run = true),
+           Tell(Fled)
+        -> Root on Tick if Player.DistanceToTheVillagerInMeters > 2500
+                           and not Player.CanSeeTheVillagerFromWhereTheyStand [ Delay = 1 ]
+    }
+
+    State Compact {
+        do A(),
+           B(),
+           C(),
+           D(),
+           E(),
+           F(),
+           G(),
+           H(),
+           I(),
+           J(),
+           K(),
+           L(),
+           M(),
+           N(),
+           O(),
+           P(),
+           Q(),
+           R(),
+           S(),
+           T(),
+           U(),
+           V(),
+           W()
+    }
+}

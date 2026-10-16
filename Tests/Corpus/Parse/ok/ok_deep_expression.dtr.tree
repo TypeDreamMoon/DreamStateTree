@@ -1,0 +1,85 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_DeepExpression"
+  Arg Schema
+    Name Villager
+  State A
+    Clause If
+      Paren
+        Binary and
+          Paren
+            Binary or
+              Paren
+                Binary and
+                  Paren
+                    Binary or
+                      Paren
+                        Binary and
+                          Paren
+                            Binary or
+                              Paren
+                                Binary and
+                                  Paren
+                                    Binary or
+                                      Paren
+                                        Binary and
+                                          Paren
+                                            Binary or
+                                              Name a
+                                              Name b
+                                          Name c
+                                      Name d
+                                  Name e
+                              Name f
+                          Name g
+                      Name h
+                  Name i
+              Name j
+          Name k
+    Clause Do
+      Task
+        Call
+          Name F
+          Arg
+            Call
+              Name G
+              Arg
+                Call
+                  Name H
+                  Arg
+                    Call
+                      Name I
+                      Arg
+                        Call
+                          Name J
+                          Arg
+                            Call
+                              Name K
+                              Arg
+                                Call
+                                  Name L
+                                  Arg
+                                    Call
+                                      Name M
+                                      Arg
+                                        Call
+                                          Name N
+                                          Arg
+                                            Call
+                                              Name O
+                                              Arg
+                                                Number 1
+    Clause Do
+      Task
+        Call
+          Name F
+          Arg
+            List
+              List
+                List
+                  List
+                    List
+                      List
+                        List
+                          List
+                            Number 1

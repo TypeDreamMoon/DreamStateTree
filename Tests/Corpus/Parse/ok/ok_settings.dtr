@@ -1,0 +1,4 @@
+StateTree(Name="AI/ST_Settings", Schema=Villager)
+{
+    Settings = { GlobalTasksCompletion = Any; }
+}

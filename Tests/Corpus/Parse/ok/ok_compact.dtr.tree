@@ -1,0 +1,40 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Compact"
+  Arg Schema
+    Name Villager
+  State Root
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+      Task
+        Call
+          Name Tell
+          Arg
+            Name Fled
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Binary and
+          Name A
+          Name B
+  State Other
+    Clause If
+      Name X
+    Clause Transition
+      Name Root
+  State Third
+    Clause On
+      Member Stagger
+        Name Hit
+    Clause Do
+      Task
+        Call
+          Name Stagger
+          Arg
+            Number 0.8

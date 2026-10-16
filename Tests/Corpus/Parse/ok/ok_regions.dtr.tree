@@ -1,0 +1,24 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Regions"
+  Arg Schema
+    Name Villager
+  Region "Data"
+  Section Parameters
+    Decl float A
+      Number 1
+  EndRegion
+  Region "States"
+  State Root
+    Region "Reactions"
+    State Hurt
+    State Dead
+    EndRegion
+    Clause Transition
+      Name Root
+  EndRegion
+  Region "Outer"
+  Region "Inner"
+  State Extra
+  EndRegion
+  EndRegion

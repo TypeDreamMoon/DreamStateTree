@@ -1,0 +1,48 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_StateSettings"
+  Arg Schema
+    Name Villager
+  State A
+    Meta
+      MetaEntry Tag
+        Name Combat
+      MetaEntry Color
+        Name Combat
+      MetaEntry Description
+        String "Fights"
+      MetaEntry Enabled
+        Bool false
+      MetaEntry Complete
+        Name Any
+      MetaEntry TickRate
+        Number 0.2
+      MetaEntry Weight
+        Number 2
+      MetaEntry ConsumeEvent
+        Bool false
+  State B
+    Meta
+      MetaEntry Group
+    State Child
+  State C
+    Meta
+      MetaEntry bCopyParameterBindingsOnTick
+      MetaEntry bCheckPrerequisitesWhenActivatingChildDirectly
+        Bool false
+  State D
+    Meta
+      MetaEntry Tag
+        Member Melee
+          Member Combat
+            Name Game
+  State E
+    Meta
+      MetaEntry Description
+        String "描述"
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1

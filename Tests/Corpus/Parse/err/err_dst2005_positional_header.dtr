@@ -1,0 +1,5 @@
+StateTree("Tests/E", Schema=Villager)
+{
+}
+// The header takes named arguments only.
+// EXPECT DST2005 (1,11)

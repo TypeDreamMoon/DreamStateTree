@@ -1,0 +1,8 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_PluginTree"
+  Arg Root
+    String "Plugin.DreamStateTree"
+  Arg Schema
+    Name Component
+  State Root

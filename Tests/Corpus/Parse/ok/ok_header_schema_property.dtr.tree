@@ -1,0 +1,9 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Pawn"
+  Arg Schema
+    Call
+      Name Component
+      Arg ContextActorClass
+        Name Pawn
+  State Root

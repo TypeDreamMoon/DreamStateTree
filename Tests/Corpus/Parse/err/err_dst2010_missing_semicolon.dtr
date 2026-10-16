@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Parameters = { float A = 1 float B = 2; }
+}
+// The entry ends at the next entry: the report is on the token where the ; was due.
+// EXPECT DST2010 (3,32)

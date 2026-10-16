@@ -1,0 +1,24 @@
+// File header comment.
+#include "Common.dth" // after the include
+/* a block before the document */
+StateTree(Name="AI/ST_Comments", Schema=Villager) // after the header
+// between the header and the brace
+{
+    // first in the document
+    Parameters = {
+        // in the section
+        float A = 1; // trailing an entry
+        /* a block */ float B = 2;
+        // last in the section
+    }
+    State Root { // after the brace
+        // before a clause
+        if X // after a clause
+        /* between clauses */ do Y() // trailing a task
+        -> Root // after a transition
+        State Child { /* inline */ } // after a child
+        // after the last child
+    } // after the state
+    // before the closing brace
+} // after the document
+// at the end of the file

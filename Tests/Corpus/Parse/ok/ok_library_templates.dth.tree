@@ -1,0 +1,39 @@
+Document StateTreeLibrary
+  Arg Name
+    String "AI/VillagerTemplates"
+  Section Tags
+    Expr
+      Member Villager
+        Member Event
+          Name Game
+  Region "Conditions"
+  Template Nervous
+    Call
+      Name Chance
+      Arg
+        Binary -
+          Number 1
+          Member Courage
+            Name Params
+  Template Daytime
+    Param From
+    Param To
+    Binary and
+      Call
+        Name Hour
+        Arg
+          Name From
+        Arg
+          Name To
+      Unary not
+        Call
+          Name Raining
+  EndRegion
+  Template Near
+    Param Who
+    Param Limit
+      Number 800
+    Binary <
+      Member Distance
+        Name Who
+      Name Limit

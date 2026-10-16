@@ -1,0 +1,66 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Templates"
+  Arg Schema
+    Name Villager
+  Template Nervous
+    Call
+      Name Chance
+      Arg
+        Binary -
+          Number 1
+          Member Courage
+            Name Params
+  Template Daytime
+    Param From
+    Param To
+    Binary and
+      Call
+        Name Hour
+        Arg
+          Name From
+        Arg
+          Name To
+      Unary not
+        Call
+          Name Raining
+  Template Brisk ()
+    Call
+      Name Walk
+      Arg Factor
+        Number 1.5
+  Template Scaled
+    Param Value
+    Param Rate
+      Number 2
+    Param Cap
+      Number 10
+    Binary +
+      Binary *
+        Name Value
+        Name Rate
+      Name Cap
+  Template Near
+    Param Who
+    Param Limit
+      Number 800
+    Binary <
+      Member Distance
+        Name Who
+      Name Limit
+  Template Tagged
+    Param Label
+    Call
+      Name Walk
+      Arg
+        Number 1
+      Meta
+        MetaEntry Name
+          Name Label
+  State Root
+    Clause If
+      Name Nervous
+    Clause Do
+      Task
+        Call
+          Name Brisk

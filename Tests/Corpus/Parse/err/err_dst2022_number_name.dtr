@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State 42 { }
+    State Next { }
+}
+// A number is not a name; backticks make anything a name.
+// EXPECT DST2022 (3,11)

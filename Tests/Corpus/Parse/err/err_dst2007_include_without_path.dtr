@@ -1,0 +1,6 @@
+#include
+StateTree(Name="Tests/E", Schema=Villager)
+{
+}
+// #include wants a string; the next token is what is wrong.
+// EXPECT DST2007 (2,1)

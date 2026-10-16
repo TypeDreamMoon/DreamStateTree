@@ -1,0 +1,9 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        on "Game.Event.Hit
+        do Wait(1)
+    }
+}
+// A string does not span lines: the quote is reported and the next line is read as usual.
+// EXPECT DST1002 (4,12)

@@ -1,0 +1,12 @@
+// Templates and tags shared by the villager trees.
+StateTreeLibrary(Name="AI/VillagerTemplates")
+{
+    Tags = { Game.Event.Villager; }
+
+    #Region "Conditions"
+    Template Nervous = Chance(1 - Params.Courage);
+    Template Daytime(From, To) = Hour(From, To) and not Raining();
+    #EndRegion
+
+    Template Near(Who, Limit = 800) = Who.Distance < Limit;
+}

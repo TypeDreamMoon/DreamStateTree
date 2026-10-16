@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_BacktickNames", Schema=Villager)
+{
+    State `Move To` { -> `Move To` }
+    State `State` { }
+    State Idle {
+        State `Phone Call` { }
+        -> Idle.`Phone Call`
+    }
+    State X { do `Do Thing`(Arg = `Some Value`.`Deep Member`) }
+}

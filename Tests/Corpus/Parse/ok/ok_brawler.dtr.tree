@@ -1,0 +1,129 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Brawler"
+  Arg Schema
+    Call
+      Name AIComponent
+      Arg Actor
+        Name CombatEnemy
+  Section Parameters
+    Decl float AttackRange
+      Number 200
+    Decl FVector WanderSpot
+  Section Globals
+    Assign Info
+      Call
+        Name GetPlayerInfo
+        Arg MaxRange
+          Number 2500
+  State Root
+    Clause Transition
+      Name Root
+    State Attack
+      Clause If
+        Binary and
+          Call
+            Name ObjectIsValid
+            Arg
+              Member TargetPlayerCharacter
+                Name Info
+          Binary <
+            Member DistanceToTarget
+              Name Info
+            Member AttackRange
+              Name Params
+      Clause Pick
+        Name Random
+      Clause Do
+        Task
+          Call
+            Name FaceActor
+            Arg ActorToFaceTowards
+              Member TargetPlayerCharacter
+                Name Info
+      Clause Transition
+        Name Recover
+      State Combo
+        Clause Do
+          Task
+            Call
+              Name ComboAttack
+      State Charged
+        Clause Do
+          Task
+            Call
+              Name ChargedAttack
+    State Chase
+      Clause If
+        Call
+          Name ObjectIsValid
+          Arg
+            Member TargetPlayerCharacter
+              Name Info
+      Clause Do
+        Task
+          Call
+            Name SetCharacterSpeed
+            Arg Speed
+              Number 500
+      Clause Do
+        Task
+          Call
+            Name MoveTo
+            Arg TargetActor
+              Member TargetPlayerCharacter
+                Name Info
+            Arg AcceptableRadius
+              Binary *
+                Member AttackRange
+                  Name Params
+                Number 0.75
+      Clause Transition
+        Name Attack
+        On
+          Name Succeeded
+      Clause Transition
+        Name Root
+        On
+          Name Failed
+        Meta
+          MetaEntry Delay
+            Number 0.5
+    State Patrol
+      State FindSpot
+        Clause Do
+          Task
+            Call
+              Name RunEnvQuery
+              Arg
+                Name EQ_Wander
+              Arg Result
+                Ref
+                  Member WanderSpot
+                    Name Params
+        Clause Transition
+          Name Next
+          On
+            Name Succeeded
+      State Walk
+        Clause Do
+          Task
+            Call
+              Name SetCharacterSpeed
+              Arg Speed
+                Number 200
+          Task
+            Call
+              Name MoveTo
+              Arg Destination
+                Member WanderSpot
+                  Name Params
+    State Recover
+      Clause Do
+        Task
+          Call
+            Name Delay
+            Arg
+              Number 1
+            Arg
+              Number 0.3

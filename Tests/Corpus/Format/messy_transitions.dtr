@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_MessyTransitions", Schema=Villager)
+{
+    State Root {
+        ->Root
+        -> Next   on   Succeeded
+        ->Parent on Tick if A and B[Delay=1]
+        ->`Move To` on Hit [ Priority=High ]
+        -> Root on Delegate( Combo.Succeeds )
+    }
+}

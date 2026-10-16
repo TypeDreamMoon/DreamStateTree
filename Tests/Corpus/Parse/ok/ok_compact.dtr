@@ -1,0 +1,6 @@
+StateTree(Name="AI/ST_Compact",Schema=Villager)
+{
+State Root{do Wait(1),Tell(Fled)->Root on Tick if A and B}
+State Other{if X->Root}
+State Third{on Hit.Stagger do Stagger(0.8)}
+}

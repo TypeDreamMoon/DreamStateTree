@@ -1,0 +1,1 @@
+StateTree(Name="Tests/E", Schema=Villager){    State Root {        Wait(1)        do Wait(2)    }}// This file has lone CR line ends; each is one line.// EXPECT DST2012 (4,9)

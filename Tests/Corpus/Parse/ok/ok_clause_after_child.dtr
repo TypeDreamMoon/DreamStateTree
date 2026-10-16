@@ -1,0 +1,10 @@
+StateTree(Name="AI/ST_ClauseAfterChild", Schema=Villager)
+{
+    State A {
+        State Child { }
+        do Wait(1)
+        -> Child
+        State Other { }
+        if X
+    }
+}

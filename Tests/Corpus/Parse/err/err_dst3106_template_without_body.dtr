@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    Template Empty(X);
+    State Root { }
+}
+// A template is Template Name(params) = body; the parser reports one without a body.
+// EXPECT DST3106 (3,14)

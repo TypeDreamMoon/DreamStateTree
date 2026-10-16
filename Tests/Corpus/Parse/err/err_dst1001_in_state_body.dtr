@@ -1,0 +1,9 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        do Wait(1) @
+        -> Root
+    }
+}
+// The stray character sits where a clause could start; it is reported once, by the lexer.
+// EXPECT DST1001 (4,20)

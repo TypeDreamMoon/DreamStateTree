@@ -1,0 +1,3 @@
+// Nothing but a comment.
+// A file with no document is reported at its start.
+// EXPECT DST2002 (1,1)

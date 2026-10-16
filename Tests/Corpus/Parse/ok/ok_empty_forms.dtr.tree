@@ -1,0 +1,11 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_EmptyForms"
+  Arg Schema
+    Name Villager
+  Section Settings
+  Section Tags
+  State A
+  State B
+    State C
+  Subtree D ()

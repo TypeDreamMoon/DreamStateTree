@@ -1,0 +1,55 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ClauseUtility"
+  Arg Schema
+    Name Villager
+  State A
+    Clause Utility
+      Number 0.5
+  State B
+    Clause Utility
+      Call
+        Name FloatInput
+        Arg
+          Member Distance
+            Name Player
+        Arg
+          Tuple
+            Arg
+              Number 0
+            Arg
+              Number 3000
+  State C
+    Clause Utility
+      Binary *
+        Call
+          Name FloatInput
+          Arg
+            Member Distance
+              Name Player
+          Arg
+            Tuple
+              Arg
+                Number 0
+              Arg
+                Number 3000
+        Number 0.5
+  State D
+    Clause Utility
+      Binary and
+        Paren
+          Binary or
+            Call
+              Name Desire
+            Call
+              Name Hunger
+        Number 0.3
+  State E
+    Clause Utility
+      Binary *
+        Binary *
+          Call
+            Name Desire
+          Call
+            Name Hunger
+        Number 2

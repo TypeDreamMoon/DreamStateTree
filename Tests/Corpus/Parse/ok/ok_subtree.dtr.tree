@@ -1,0 +1,44 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Subtree"
+  Arg Schema
+    Name Villager
+  State Root
+    Clause Link
+      Call
+        Name Reaction
+        Arg Toughness
+          Number 2
+  Subtree Reaction
+    Param float Toughness
+      Number 1
+    State Stagger
+      Clause Do
+        Task
+          Call
+            Name Stagger
+            Arg
+              Binary /
+                Number 0.8
+                Member Toughness
+                  Name Params
+  Subtree Plain
+    State X
+  Subtree Empty ()
+  Subtree Typed
+    Param int Count
+    Param Array<float> Weights
+    Param FVector Spot
+      Tuple
+        Arg
+          Number 0
+        Arg
+          Number 0
+        Arg
+          Number 0
+    Param Name Label
+      String "x"
+    Meta
+      MetaEntry Tag
+        Name Combat
+    State Y

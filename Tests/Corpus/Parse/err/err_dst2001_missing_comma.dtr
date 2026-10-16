@@ -1,0 +1,8 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        do Wait(1 2)
+    }
+}
+// Expected , or ) after the argument.
+// EXPECT DST2001 (4,19)

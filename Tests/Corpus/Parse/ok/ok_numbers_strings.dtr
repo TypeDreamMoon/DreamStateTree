@@ -1,0 +1,19 @@
+StateTree(Name="AI/ST_NumbersStrings", Schema=Villager)
+{
+    Parameters = {
+        float A = 0;
+        float B = 12;
+        float C = 0.5;
+        float D = .5;
+        float E = 1e3;
+        float F = 1E3;
+        float G = 2.5E+4;
+        float H = 1e-3;
+        float I = -5;
+        float J = -0.25;
+        String K = "";
+        String L = "plain";
+        String M = "quote \" and backslash \\ and tab \t";
+        String N = "走路 / 歩く / walk";
+    }
+}

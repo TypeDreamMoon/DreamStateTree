@@ -1,0 +1,23 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Nested"
+  Arg Schema
+    Name Villager
+  State L1
+    State L2
+      State L3
+        State L4
+          State L5
+            State L6
+              Clause Do
+                Task
+                  Call
+                    Name Wait
+                    Arg
+                      Number 1
+              Clause Transition
+                Name L1
+          State L5b
+    State L2b
+      Clause If
+        Name X

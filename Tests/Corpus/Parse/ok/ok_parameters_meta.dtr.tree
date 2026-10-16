@@ -1,0 +1,26 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_ParameterMeta"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl float A
+      Number 1
+      Meta
+        MetaEntry Category
+          String "x"
+        MetaEntry Tooltip
+          String "y"
+    Decl int B
+      Meta
+        MetaEntry Category
+          String "z"
+    Decl FVector C
+      Meta
+        MetaEntry Hidden
+  Section Settings
+    Assign Mode
+      Name Fast
+      Meta
+        MetaEntry Note
+          String "n"

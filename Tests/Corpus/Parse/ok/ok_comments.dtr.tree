@@ -1,0 +1,21 @@
+Include "Common.dth"
+Document StateTree
+  Arg Name
+    String "AI/ST_Comments"
+  Arg Schema
+    Name Villager
+  Section Parameters
+    Decl float A
+      Number 1
+    Decl float B
+      Number 2
+  State Root
+    Clause If
+      Name X
+    Clause Do
+      Task
+        Call
+          Name Y
+    Clause Transition
+      Name Root
+    State Child

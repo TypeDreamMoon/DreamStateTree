@@ -1,0 +1,10 @@
+Include "VillagerCommon.dth"
+Include "lib/Reactions.dth"
+Document StateTree
+  Arg Name
+    String "AI/ST_Includes"
+  Arg Schema
+    Name Villager
+  State Root
+    Clause Link
+      Name HitReaction

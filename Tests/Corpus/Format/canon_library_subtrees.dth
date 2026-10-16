@@ -1,0 +1,13 @@
+StateTreeLibrary(Name="AI/Reactions")
+{
+    Subtree Flinch {
+        State Start   { do Flinch()  -> Next }
+        State Recover { do Wait(0.5) }
+    }
+
+    Subtree Knockback(FVector Direction, float Force = 600) [ Tag = Combat ] {
+        pick Random
+        State Light { if Force < 300  do Push(Force) }
+        State Heavy { do Push(Force * 2), Fall() }
+    }
+}

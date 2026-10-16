@@ -1,0 +1,8 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        -> `Idle
+    }
+}
+// A name in backticks does not span lines either.
+// EXPECT DST1007 (4,12)

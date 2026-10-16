@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+#pragma once
+    Parameters = { float A = 1; }
+}
+// Only #include, #Region and #EndRegion exist.
+// EXPECT DST1005 (3,1)

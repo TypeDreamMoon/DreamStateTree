@@ -1,0 +1,81 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_Continuation"
+  Arg Schema
+    Name Villager
+  State Flee
+    Clause If
+      Binary and
+        Binary and
+          Member Sees
+            Name Player
+          Binary <
+            Member Distance
+              Name Player
+            Number 800
+        Call
+          Name Chance
+          Arg
+            Binary -
+              Number 1
+              Member Courage
+                Name Params
+    Clause If
+      Binary or
+        Name A
+        Name B
+    Clause If
+      Binary and
+        Name A
+        Name B
+    Clause If
+      Binary and
+        Paren
+          Binary or
+            Name A
+            Name B
+        Name C
+    Clause If
+      Binary >
+        Name Total
+        Binary +
+          Number 1
+          Number 2
+    Clause Do
+      Task
+        Call
+          Name Flee
+          Arg From
+            Member Pawn
+              Name Player
+          Arg Distance
+            Number 2000
+    Clause Do
+      Task
+        Call
+          Name First
+      Task
+        Call
+          Name Second
+    Clause Do
+      Task
+        Call
+          Name Many
+          Arg
+            List
+              Number 1
+              Number 2
+          Arg
+            Tuple
+              Arg X
+                Number 1
+              Arg Y
+                Number 2
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Binary and
+          Name A
+          Name B

@@ -1,0 +1,8 @@
+StateTree(Name="AI/ST_DeepExpression", Schema=Villager)
+{
+    State A {
+        if ((((((((((a or b) and c) or d) and e) or f) and g) or h) and i) or j) and k)
+        do F(G(H(I(J(K(L(M(N(O(1))))))))))
+        do F([[[[[[[[1]]]]]]]])
+    }
+}

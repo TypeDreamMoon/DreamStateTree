@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        -> ``
+    }
+}
+// EXPECT DST1007 (4,12)

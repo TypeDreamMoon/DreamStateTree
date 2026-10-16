@@ -1,0 +1,12 @@
+StateTree(Name="AI/ST_SettingsValues", Schema=Villager)
+{
+    Settings = {
+        GlobalTasksCompletion = Any;
+        bFlag = true;
+        Speed = 2.5;
+        Count = 3;
+        Label = "text";
+        Pair = (1, 2);
+        Items = [1, 2, 3];
+    }
+}

@@ -1,0 +1,6 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root {
+        do Wait(1)
+// Both the state and the document are open; the state is the innermost.
+// EXPECT DST2024 (3,16)

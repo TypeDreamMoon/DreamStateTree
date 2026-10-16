@@ -1,0 +1,7 @@
+StateTree(Name="Tests/E", Schema=Villager)
+{
+    State Root { }
+}
+State Late { }
+// Anything after the closing brace of the document.
+// EXPECT DST2003 (5,1)
