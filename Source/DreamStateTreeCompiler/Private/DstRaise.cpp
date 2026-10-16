@@ -1005,11 +1005,13 @@ namespace UE::DreamStateTree::Compiler::Raising
 			{
 				// A struct parameter with some fields fed from elsewhere keeps its constant fields as the parameter's own value.
 				FModelArg ConstantPart;
-				const bool bHasWhole = Group.ContainsByPredicate([](const FModelArg* Arg) { return Arg->Property.Segments.Num() == 1; });
+				const bool bHasWhole = Group.ContainsByPredicate([](const FModelArg* Arg) { return Arg->Property.Segments.Num() == 1 && Arg->Property.Segments[0].ArrayIndex == INDEX_NONE; });
 				if (!bHasWhole && !Parameter.ValueText.IsEmpty())
 				{
 					ConstantPart.Side = Model::EDstPropertySide::Instance;
-					ConstantPart.Property.Segments.Add(Group[0]->Property.Segments[0]);
+					Model::FDstPathSegment ParameterSegment;
+					ParameterSegment.Name = Group[0]->Property.Segments[0].Name;
+					ConstantPart.Property.Segments.Add(MoveTemp(ParameterSegment));
 					ConstantPart.Kind = Model::EDstValueKind::Constant;
 					ConstantPart.ConstantText = Parameter.ValueText;
 					Group.Add(&ConstantPart);

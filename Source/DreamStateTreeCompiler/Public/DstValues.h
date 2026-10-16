@@ -16,15 +16,19 @@
 //   object, soft object          an asset's short name `EQ_Wander` (unique in the asset registry), `Path(Root, "Rel")`,
 //                                `None`
 //   class, soft class            a class name (`Actor`, `BP_Enemy`) or `Path(...)`, `None`
+//   reference to a StateTree     the tree's asset, with the parameters it overrides: `ST_Shoot`, `ST_Shoot(Range = 800)`,
+//                                `Path(Game, "AI/ST_Shoot")(Range = 800)`, `None`
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Lang/DstAst.h"
+#include "Model/DstModel.h"
 
 class FProperty;
 class UClass;
+class UStruct;
 
 namespace UE::DreamStateTree::Compiler
 {
@@ -73,4 +77,48 @@ namespace UE::DreamStateTree::Compiler
 
 	/** The asset as the decompiler writes it: its short name when unique among assets of AssetClass, else `Path(Root, "Rel")`. */
 	DREAMSTATETREECOMPILER_API Lang::FDstExprPtr MakeDstAssetExpr(const FString& ObjectPath, const UClass* AssetClass);
+
+	// ------------------------------------------------------------------------------------------------------------------
+	// Values with parts fed from elsewhere
+	// ------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * The fields a tuple reads by position, in declaration order (a base struct's first): the ones a text can set, which are
+	 * not transient or deprecated.
+	 */
+	DREAMSTATETREECOMPILER_API TArray<const FProperty*> GetDstTupleFields(const UStruct& Struct);
+
+	/**
+	 * A literal for the value a field or element has when the text leaves it out: what a constant holds at a place that is
+	 * fed from elsewhere. A struct's literal is the empty tuple. Null when the property has no literal.
+	 */
+	DREAMSTATETREECOMPILER_API Lang::FDstExprPtr MakeDstDefaultLiteral(const FProperty& Property, const FDstValueContext& Context);
+
+	/** Whether Property is an FStateTreeReference: a tree asset and the values it gives that tree's parameters. */
+	DREAMSTATETREECOMPILER_API bool IsDstStateTreeReferenceProperty(const FProperty& Property);
+
+	/**
+	 * The parameter of the tree at TreeObjectPath, as a property of the parameter bag that tree gives its references. Null
+	 * when the tree cannot be loaded or has no parameter of that name.
+	 */
+	DREAMSTATETREECOMPILER_API const FProperty* FindDstTreeParameter(const FString& TreeObjectPath, const FString& ParameterName);
+
+	/**
+	 * Puts the part of the value that a binding path leads to back to the default a text gives it (see FDstArg). Path[0] names
+	 * Property itself (its ArrayIndex picks an element when Property is an array), the rest are members; through a reference
+	 * to a tree the path is `Parameters`, `Value<PropertyBag>` and the parameter. False with OutError when the path leads
+	 * nowhere: no such member, an element the array does not have.
+	 */
+	DREAMSTATETREECOMPILER_API bool ResetDstBoundValue(const FProperty& Property, void* Value, TConstArrayView<Model::FDstPathSegment> Path,
+		FString& OutError);
+
+	/**
+	 * The export text of Property in Container the way the model holds it when parts of it are fed by bindings: the parts
+	 * BoundPaths lead to put back to their defaults (ResetDstBoundValue); for a reference to a tree, also its parameters
+	 * brought in step with the tree, the overridden ones in the order of the tree's parameters, the fed ones overridden.
+	 * Container is not changed. OutSameAsDefault tells whether that value equals Property in DefaultContainer (null: never).
+	 * False with OutError when a path leads nowhere.
+	 */
+	DREAMSTATETREECOMPILER_API bool ExportDstValueWithBoundParts(const FProperty& Property, const void* Container, const void* DefaultContainer,
+		TConstArrayView<Model::FDstPropertyPath> BoundPaths, FString& OutText, bool& bOutSameAsDefault, FString& OutError);
 }

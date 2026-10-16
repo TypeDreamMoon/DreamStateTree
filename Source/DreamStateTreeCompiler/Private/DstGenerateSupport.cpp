@@ -9,6 +9,7 @@
 #include "Misc/StringOutputDevice.h"
 #include "StateTreeNodeBase.h"
 #include "StateTreePropertyBindings.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Class.h"
 #include "UObject/UObjectGlobals.h"
 #include "UObject/UnrealType.h"
@@ -311,14 +312,28 @@ namespace UE::DreamStateTree::Compiler::GeneratePrivate
 		return false;
 	}
 
-	FPropertyBindingPath MakeBindingPath(const FGuid& StructId, const Model::FDstPropertyPath& Path)
+	FPropertyBindingPath MakeBindingPath(const FGuid& StructId, const Model::FDstPropertyPath& Path, const UStruct* RootStruct, const void* RootMemory)
 	{
 		FPropertyBindingPath Result(StructId);
+		const UStruct* CurrentStruct = RootStruct;
+		const void* CurrentMemory = RootMemory;
 		for (const Model::FDstPathSegment& Segment : Path.Segments)
 		{
+			const FProperty* Property = CurrentStruct ? CurrentStruct->FindPropertyByName(FName(*Segment.Name)) : nullptr;
 			const UStruct* InstanceType = nullptr;
 			EPropertyBindingPropertyAccessType Access = EPropertyBindingPropertyAccessType::Unset;
-			if (!Segment.InstanceType.IsEmpty())
+			if (Segment.InstanceType.Equals(Model::PropertyBagInstanceType, ESearchCase::CaseSensitive))
+			{
+				// The bag of a reference to a tree: whatever struct the reference holds on the way (the engine made it from the
+				// tree's parameters). Left unset when the data on the way does not hold one.
+				const FStructProperty* StructProperty = CastField<FStructProperty>(Property);
+				if (StructProperty && StructProperty->Struct == FInstancedStruct::StaticStruct() && CurrentMemory)
+				{
+					InstanceType = StructProperty->ContainerPtrToValuePtr<FInstancedStruct>(CurrentMemory)->GetScriptStruct();
+					Access = EPropertyBindingPropertyAccessType::StructInstance;
+				}
+			}
+			else if (!Segment.InstanceType.IsEmpty())
 			{
 				const UObject* Found = FindOrLoadObject(Segment.InstanceType);
 				if (const UClass* Class = Cast<UClass>(Found))
@@ -333,8 +348,26 @@ namespace UE::DreamStateTree::Compiler::GeneratePrivate
 				}
 			}
 			Result.AddPathSegment(FName(*Segment.Name), Segment.ArrayIndex, InstanceType, Access);
+
+			// On into the struct this segment names, while the data on the way is known.
+			const FStructProperty* StructProperty = CastField<FStructProperty>(Property);
+			if (StructProperty && StructProperty->Struct && Segment.ArrayIndex == INDEX_NONE && InstanceType == nullptr)
+			{
+				CurrentStruct = StructProperty->Struct;
+				CurrentMemory = CurrentMemory ? StructProperty->ContainerPtrToValuePtr<void>(CurrentMemory) : nullptr;
+			}
+			else
+			{
+				CurrentStruct = nullptr;
+				CurrentMemory = nullptr;
+			}
 		}
 		return Result;
+	}
+
+	FPropertyBindingPath MakeBindingPath(const FGuid& StructId, const Model::FDstPropertyPath& Path)
+	{
+		return MakeBindingPath(StructId, Path, nullptr, nullptr);
 	}
 
 	bool ResolveNodeType(const Model::FDstNode& Node, FResolvedNodeType& Out, FString& OutError)

@@ -7,15 +7,19 @@
 //   - the node-side arguments (bTaskEnabled, TransitionHandlingPriority, an editable property of the node struct itself)
 //     are the settings; so is the Name of a node that has nowhere else to put it;
 //   - a value is a literal (DstExportTextToLiteral), a path (`Params.X`, `Info.Target`, `Event.Offer`), `ref path`,
-//     `Prop -> path`, or the operation / call of the property function that feeds it.
+//     `Prop -> path`, or the operation / call of the property function that feeds it;
+//   - a property fed in parts is its constant as a literal (a tuple, a list, a call of a tree's asset) with each fed part written
+//     in at its place (InsertDeepArg).
 // Each choice is the inverse of what DstLowerNode.cpp / DstLowerValue.cpp / DstLowerBinding.cpp accept.
 
 #include "DstRaisePrivate.h"
 
 #include "Engine/Blueprint.h"
+#include "StateTree.h"
 #include "StateTreeEvents.h"
 #include "StateTreeExecutionTypes.h"
 #include "StateTreeNodeBase.h"
+#include "StateTreeReference.h"
 #include "StateTreeSchema.h"
 #include "UObject/Package.h"
 #include "UObject/UObjectGlobals.h"
@@ -624,128 +628,232 @@ namespace UE::DreamStateTree::Compiler::Raising
 
 	namespace
 	{
-		/** Puts Value into Tuple at the member Segments names from Index on, making the tuples in between. */
-		void InsertIntoRaiseTuple(Lang::FDstTupleExpr& Tuple, const TArray<Model::FDstPathSegment>& Segments, const int32 Index, FExprPtr Value)
+		/** The argument of a call or the item of a tuple called Name; a new, empty one at the end when there is none. */
+		Lang::FDstArgument& FindOrAddRaiseArgument(TArray<Lang::FDstArgumentPtr>& Arguments, const FString& Name)
 		{
-			const FString& Name = Segments[Index].Name;
-			Lang::FDstArgument* Existing = nullptr;
-			for (const Lang::FDstArgumentPtr& Item : Tuple.Items)
+			for (const Lang::FDstArgumentPtr& Item : Arguments)
 			{
 				if (Item && Item->Name.Equals(Name, ESearchCase::CaseSensitive))
 				{
-					Existing = Item.Get();
-					break;
+					return *Item;
 				}
 			}
-
-			if (Index + 1 == Segments.Num())
-			{
-				if (Existing)
-				{
-					Existing->Value = MoveTemp(Value);
-				}
-				else
-				{
-					Tuple.Items.Add(MakeArgument(Name, MoveTemp(Value)));
-				}
-				return;
-			}
-
-			Lang::FDstTupleExpr* Inner = Existing && Existing->Value ? Existing->Value->As<Lang::FDstTupleExpr>() : nullptr;
-			if (!Inner)
-			{
-				TUniquePtr<Lang::FDstTupleExpr> Fresh = MakeUnique<Lang::FDstTupleExpr>();
-				Inner = Fresh.Get();
-				if (Existing)
-				{
-					Existing->Value = FExprPtr(MoveTemp(Fresh));
-				}
-				else
-				{
-					Tuple.Items.Add(MakeArgument(Name, FExprPtr(MoveTemp(Fresh))));
-				}
-			}
-			InsertIntoRaiseTuple(*Inner, Segments, Index + 1, MoveTemp(Value));
+			Arguments.Add(MakeArgument(Name, nullptr));
+			return *Arguments.Last();
 		}
 
-		/** The property a path of member names ends in, below a struct property. */
-		const FProperty* FindRaiseNestedProperty(const FProperty* Root, const TArray<Model::FDstPathSegment>& Segments)
+		/** The items of a tuple in the order the struct declares its fields in; an item that names no field stays after them. */
+		void SortRaiseTupleItems(TArray<Lang::FDstArgumentPtr>& Items, const UStruct& Struct)
 		{
-			const FProperty* Current = Root;
-			for (int32 Index = 1; Current && Index < Segments.Num(); ++Index)
+			const TArray<const FProperty*> Fields = GetDstTupleFields(Struct);
+			const auto OrderOf = [&Fields](const Lang::FDstArgumentPtr& Item)
 			{
-				const FStructProperty* StructProperty = CastField<FStructProperty>(Current);
-				Current = StructProperty && StructProperty->Struct ? StructProperty->Struct->FindPropertyByName(FName(*Segments[Index].Name)) : nullptr;
+				for (int32 Index = 0; Index < Fields.Num(); ++Index)
+				{
+					if (Item && Fields[Index]->GetName().Equals(Item->Name, ESearchCase::CaseSensitive))
+					{
+						return Index;
+					}
+				}
+				return Fields.Num();
+			};
+			Items.StableSort([&OrderOf](const Lang::FDstArgumentPtr& A, const Lang::FDstArgumentPtr& B) { return OrderOf(A) < OrderOf(B); });
+		}
+
+		/** The object path of the tree a reference's text names: its callee (or the whole text) is a name or a Path(...). */
+		bool ResolveRaiseTreePath(const Lang::FDstExpr& AssetExpr, FString& OutObjectPath)
+		{
+			if (TryGetDstAssetPath(AssetExpr, OutObjectPath))
+			{
+				return true;
 			}
-			return Current;
+			FString Error;
+			if (const Lang::FDstNameExpr* Name = AssetExpr.As<Lang::FDstNameExpr>())
+			{
+				return FindDstAsset(Name->Name, UStateTree::StaticClass(), OutObjectPath, Error);
+			}
+			if (const Lang::FDstLiteralExpr* Literal = AssetExpr.As<Lang::FDstLiteralExpr>();
+				Literal && Literal->LiteralKind == Lang::EDstLiteralKind::String && Literal->Text.StartsWith(TEXT("/")))
+			{
+				OutObjectPath = Literal->Text;
+				return true;
+			}
+			return false;
 		}
 	}
 
-	FExprPtr FDstRaiser::RaiseMixedArg(const FProperty* Property, const FModelArg* Whole, const TArray<const FModelArg*>& Deep, const FScope& Scope,
-		const FString& Display)
+	bool FDstRaiser::InsertDeepArg(FExprPtr& Slot, const FProperty* Property, const TArray<Model::FDstPathSegment>& Segments, const int32 Index,
+		const FModelArg& Arg, const FScope& Scope, const FString& Display)
 	{
-		if (!Property || !CastField<FStructProperty>(Property))
+		const Model::FDstPathSegment& Segment = Segments[Index];
+		auto Fail = [this, &Display, &Arg](const TCHAR* Why)
 		{
 			Sink.Error(TEXT("DST8054"), Lang::FDstSpan(),
-				FString::Printf(TEXT("%s is fed in parts, and it is not a struct, so the text has no tuple to write for it."), *Display));
+				FString::Printf(TEXT("%s is fed through `%s`, which the text has no way to write: %s"), *Display, *Arg.Property.ToString(), Why));
+			return false;
+		};
+		if (!Property || !Segment.InstanceType.IsEmpty())
+		{
+			return Fail(TEXT("the path enters a value whose type only the instance knows."));
+		}
+
+		// An element of an array: the constant has the list the element sits in.
+		const FProperty* Element = Property;
+		FExprPtr* ElementSlot = &Slot;
+		if (Segment.ArrayIndex != INDEX_NONE)
+		{
+			const FArrayProperty* ArrayProperty = CastField<FArrayProperty>(Property);
+			Lang::FDstListExpr* List = Slot ? Slot->As<Lang::FDstListExpr>() : nullptr;
+			if (!ArrayProperty || !List || !List->Items.IsValidIndex(Segment.ArrayIndex) || !List->Items[Segment.ArrayIndex])
+			{
+				return Fail(TEXT("the constant has no such element."));
+			}
+			Element = ArrayProperty->Inner;
+			ElementSlot = &List->Items[Segment.ArrayIndex];
+		}
+
+		if (Index + 1 == Segments.Num())
+		{
+			bool bOutput = false;
+			FExprPtr Value = RaiseWholeArg(Arg, Element, Scope, bOutput, Display);
+			if (!Value)
+			{
+				return false;
+			}
+			*ElementSlot = MoveTemp(Value);
+			return true;
+		}
+
+		const Model::FDstPathSegment& Next = Segments[Index + 1];
+		const FStructProperty* StructProperty = CastField<FStructProperty>(Element);
+		if (!StructProperty || !StructProperty->Struct)
+		{
+			return Fail(TEXT("the value has no members."));
+		}
+
+		// A reference to a tree: `Parameters`, `Value<PropertyBag>`, the parameter. The text names the parameter in the call.
+		if (StructProperty->Struct == FStateTreeReference::StaticStruct())
+		{
+			const bool bShape = Segments.Num() >= Index + 4 && Next.Name.Equals(TEXT("Parameters"), ESearchCase::CaseSensitive)
+				&& Segments[Index + 2].Name.Equals(TEXT("Value"), ESearchCase::CaseSensitive)
+				&& Segments[Index + 2].InstanceType.Equals(Model::PropertyBagInstanceType, ESearchCase::CaseSensitive);
+			if (!bShape || !*ElementSlot)
+			{
+				return Fail(TEXT("a path into a reference to a tree goes through Parameters.Value<PropertyBag> and a parameter."));
+			}
+
+			FString TreePath;
+			Lang::FDstCallExpr* Call = (*ElementSlot)->As<Lang::FDstCallExpr>();
+			const Lang::FDstExpr* AssetExpr = ElementSlot->Get();
+			if (Call && !TryGetDstAssetPath(*AssetExpr, TreePath))
+			{
+				AssetExpr = Call->Callee.Get();
+			}
+			if (!AssetExpr || !ResolveRaiseTreePath(*AssetExpr, TreePath))
+			{
+				return Fail(TEXT("the reference names no tree."));
+			}
+			const FString& ParameterName = Segments[Index + 3].Name;
+			const FProperty* Parameter = FindDstTreeParameter(TreePath, ParameterName);
+			if (!Parameter)
+			{
+				return Fail(TEXT("the tree has no such parameter."));
+			}
+			if (!Call)
+			{
+				// Only the tree so far: `ST_Shoot` becomes `ST_Shoot(Parameter = ...)`.
+				TUniquePtr<Lang::FDstCallExpr> Wrapped = MakeUnique<Lang::FDstCallExpr>();
+				Call = Wrapped.Get();
+				Call->Callee = MoveTemp(*ElementSlot);
+				*ElementSlot = FExprPtr(MoveTemp(Wrapped));
+			}
+			Lang::FDstArgument& ParameterArgument = FindOrAddRaiseArgument(Call->Args, ParameterName);
+			return InsertDeepArg(ParameterArgument.Value, Parameter, Segments, Index + 3, Arg, Scope, Display);
+		}
+
+		const FProperty* Member = StructProperty->Struct->FindPropertyByName(FName(*Next.Name));
+		if (!Member)
+		{
+			return Fail(TEXT("the struct has no such member."));
+		}
+		if (!*ElementSlot)
+		{
+			*ElementSlot = FExprPtr(MakeUnique<Lang::FDstTupleExpr>());
+		}
+		Lang::FDstTupleExpr* Tuple = (*ElementSlot)->As<Lang::FDstTupleExpr>();
+		if (!Tuple)
+		{
+			return Fail(TEXT("the constant of the struct is not a tuple."));
+		}
+		const int32 NumBefore = Tuple->Items.Num();
+		Lang::FDstArgument& Item = FindOrAddRaiseArgument(Tuple->Items, Next.Name);
+		if (Tuple->Items.Num() != NumBefore)
+		{
+			// A field the constant leaves out because it holds the default goes where the struct declares it.
+			SortRaiseTupleItems(Tuple->Items, *StructProperty->Struct);
+		}
+		return InsertDeepArg(Item.Value, Member, Segments, Index + 1, Arg, Scope, Display);
+	}
+
+	FExprPtr FDstRaiser::RaiseMixedArg(const FProperty* Property, const FModelArg* Whole, const TArray<const FModelArg*>& Deep, const FScope& Scope,
+		const FString& Display, const void* DefaultContainer)
+	{
+		const bool bAggregate = Property && (Property->IsA<FStructProperty>() || Property->IsA<FArrayProperty>());
+		if (!bAggregate)
+		{
+			Sink.Error(TEXT("DST8054"), Lang::FDstSpan(),
+				FString::Printf(TEXT("%s is fed in parts, and it is not a struct or an array, so the text has no tuple or list to write for it."), *Display));
 			return nullptr;
 		}
 
-		// The constant fields first, as the tuple the property's constant makes; then the fields fed from elsewhere.
-		TUniquePtr<Lang::FDstTupleExpr> Tuple;
+		// The constant first: the whole property with the parts fed from elsewhere at their defaults. When the model has none, the
+		// property is at its default; a struct or array at the plain default starts from nothing written.
+		FExprPtr Base;
 		if (Whole && Whole->Kind == Model::EDstValueKind::Constant)
 		{
-			FExprPtr Constant = MakeConstantExpr(Whole->ConstantText, Property, Display);
-			if (Constant && Constant->Is<Lang::FDstTupleExpr>())
+			Base = MakeConstantExpr(Whole->ConstantText, Property, Display);
+		}
+		else
+		{
+			if (Whole)
 			{
-				Tuple = TUniquePtr<Lang::FDstTupleExpr>(static_cast<Lang::FDstTupleExpr*>(Constant.Release()));
+				Sink.Error(TEXT("DST8054"), Lang::FDstSpan(),
+					FString::Printf(TEXT("%s is fed as a whole and in parts at once; the parts are written and the whole is not."), *Display));
 			}
-		}
-		else if (Whole)
-		{
-			Sink.Error(TEXT("DST8054"), Lang::FDstSpan(),
-				FString::Printf(TEXT("%s is fed as a whole and in parts at once; the parts are written and the whole is not."), *Display));
-		}
-		if (!Tuple)
-		{
-			Tuple = MakeUnique<Lang::FDstTupleExpr>();
+			const FString DefaultText = DstExportDefault(*Property, DefaultContainer);
+			if (!IsDstStateTreeReferenceProperty(*Property) && DefaultText.Equals(DstExportDefault(*Property, nullptr), ESearchCase::CaseSensitive))
+			{
+				Base = Property->IsA<FArrayProperty>() ? FExprPtr(MakeUnique<Lang::FDstListExpr>()) : FExprPtr(MakeUnique<Lang::FDstTupleExpr>());
+			}
+			else
+			{
+				Base = MakeConstantExpr(DefaultText, Property, Display);
+			}
 		}
 
 		for (const FModelArg* Arg : Deep)
 		{
-			bool bUsable = true;
-			for (const Model::FDstPathSegment& Segment : Arg->Property.Segments)
-			{
-				bUsable &= Segment.ArrayIndex == INDEX_NONE && Segment.InstanceType.IsEmpty();
-			}
-			const FProperty* Field = FindRaiseNestedProperty(Property, Arg->Property.Segments);
-			if (!bUsable || !Field || Arg->Kind == Model::EDstValueKind::Output)
+			const FString FieldDisplay = Display + TEXT(".") + Arg->Property.ToString();
+			if (Arg->Kind == Model::EDstValueKind::Output)
 			{
 				Sink.Error(TEXT("DST8054"), Lang::FDstSpan(),
 					FString::Printf(TEXT("%s is fed through `%s`, which the text has no way to write."), *Display, *Arg->Property.ToString()));
 				continue;
 			}
-
-			bool bOutput = false;
-			const FString FieldDisplay = Display + TEXT(".") + Arg->Property.ToString();
-			FExprPtr Value = RaiseWholeArg(*Arg, Field, Scope, bOutput, FieldDisplay);
-			if (Value)
-			{
-				InsertIntoRaiseTuple(*Tuple, Arg->Property.Segments, 1, MoveTemp(Value));
-			}
+			InsertDeepArg(Base, Property, Arg->Property.Segments, 0, *Arg, Scope, FieldDisplay);
 		}
-		return FExprPtr(MoveTemp(Tuple));
+		return Base;
 	}
 
 	FExprPtr FDstRaiser::RaiseArgGroup(const FProperty* Property, const FString& PropertyName, const TArray<const FModelArg*>& Group,
-		const FScope& Scope, bool& bOutOutput, const FString& Display)
+		const FScope& Scope, bool& bOutOutput, const FString& Display, const void* DefaultContainer)
 	{
 		bOutOutput = false;
 		const FModelArg* Whole = nullptr;
 		TArray<const FModelArg*> Deep;
 		for (const FModelArg* Arg : Group)
 		{
-			if (Arg->Property.Segments.Num() == 1)
+			if (Arg->Property.Segments.Num() == 1 && Arg->Property.Segments[0].ArrayIndex == INDEX_NONE)
 			{
 				Whole = Arg;
 			}
@@ -759,7 +867,7 @@ namespace UE::DreamStateTree::Compiler::Raising
 		{
 			return Whole ? RaiseWholeArg(*Whole, Property, Scope, bOutOutput, Display) : nullptr;
 		}
-		return RaiseMixedArg(Property, Whole, Deep, Scope, Display);
+		return RaiseMixedArg(Property, Whole, Deep, Scope, Display, DefaultContainer);
 	}
 
 	// ------------------------------------------------------------------------------------------
@@ -798,6 +906,8 @@ namespace UE::DreamStateTree::Compiler::Raising
 			FString Name;
 			const FProperty* Property = nullptr;
 			int32 Order = MAX_int32;
+			/** The group is a property of the node struct itself (an argument of it), not of the instance data. */
+			bool bNodeSide = false;
 			TArray<const FModelArg*> Args;
 		};
 		// A Blueprint task keeps ConsideredForCompletion on its instance object, but the text writes it as a setting.
@@ -827,6 +937,7 @@ namespace UE::DreamStateTree::Compiler::Raising
 				Group->Name = Name;
 				const UStruct* Owner = bNodeArgument ? static_cast<const UStruct*>(Info->NodeStruct) : static_cast<const UStruct*>(Info->InstanceStruct);
 				Group->Property = Owner ? Owner->FindPropertyByName(FName(*Name)) : nullptr;
+				Group->bNodeSide = bNodeArgument;
 			}
 			Group->Args.Add(&Arg);
 		}
@@ -881,7 +992,8 @@ namespace UE::DreamStateTree::Compiler::Raising
 		{
 			bool bOutput = false;
 			FExprPtr Value = RaiseArgGroup(Group->Property, Group->Name, Group->Args, Scope, bOutput,
-				FString::Printf(TEXT("%s of %s"), *Group->Name, *Info->DisplayName));
+				FString::Printf(TEXT("%s of %s"), *Group->Name, *Info->DisplayName),
+				Group->bNodeSide ? Info->GetNodeDefaults() : Info->GetInstanceDefaults());
 			if (!Value)
 			{
 				// A gap: what is left goes by name, so no later argument shifts into this one's place.
@@ -900,7 +1012,8 @@ namespace UE::DreamStateTree::Compiler::Raising
 			}
 			bool bOutput = false;
 			FExprPtr Value = RaiseArgGroup(Group.Property, Group.Name, Group.Args, Scope, bOutput,
-				FString::Printf(TEXT("%s of %s"), *Group.Name, *Info->DisplayName));
+				FString::Printf(TEXT("%s of %s"), *Group.Name, *Info->DisplayName),
+				Group.bNodeSide ? Info->GetNodeDefaults() : Info->GetInstanceDefaults());
 			if (!Value)
 			{
 				continue;

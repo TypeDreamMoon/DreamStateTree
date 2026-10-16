@@ -176,8 +176,10 @@ namespace UE::DreamStateTree::Compiler::Extracting
 		// ---- DstExtractNode.cpp: nodes ----
 		Model::FDstNode ExtractNode(const FStateTreeEditorNode& Editor, const FString& Key, Model::EDstNodeRole Role,
 			const FNodeSite& Site, int32 Depth = 0);
+		/** Bound: properties fed as a whole (no constant). PartBound: the paths of the bindings that feed a part of a property, by property. */
 		void ExtractConstants(const UStruct* Struct, const void* Actual, const void* Default, Model::EDstPropertySide Side,
-			const TSet<FName>& Bound, const FString& NodeKey, const UScriptStruct* NodeStruct, TArray<Model::FDstArg>& OutArgs);
+			const TSet<FName>& Bound, const TMap<FName, TArray<Model::FDstPropertyPath>>& PartBound, const FString& NodeKey,
+			const UScriptStruct* NodeStruct, TArray<Model::FDstArg>& OutArgs);
 
 		// ---- DstExtractBinding.cpp: struct IDs and bindings ----
 		void RegisterStructs();
@@ -201,6 +203,11 @@ namespace UE::DreamStateTree::Compiler::Extracting
 		 * A function's key starts with `<state path>/Parameters`.
 		 */
 		void ExtractParameterBindings(const UStateTreeState& State, const FString& StatePath, Model::FDstState& Out);
+		/**
+		 * A parameter of a linked state whose bindings feed only a part of it keeps, as its value, the whole with those parts at the
+		 * default a text gives them (the same rule as the constants of a node). Run after ExtractParameterBindings.
+		 */
+		void PutFedParameterPartsAtDefault(const UStateTreeState& State, Model::FDstState& Out);
 		void ReportUnconsumedBindings();
 
 		const UStateTree& Asset;

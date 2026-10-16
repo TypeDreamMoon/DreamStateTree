@@ -8,12 +8,19 @@
 //   `GetActorLocation(Player.Pawn)`                            -> a property function call, likewise;
 //   `Prop -> Params.X`                                         -> an output binding;
 // and a whole operation of constants is folded into one constant first.
+//
+// A tuple, a list or a reference to a tree can be constant in some places and fed from elsewhere in others
+// (`(Min = Params.A, Max = 5)`, `[(Value = Params.X)]`, `ST_Shoot(Target = Params.T, Range = 800)`). The constant is
+// then the whole property with the fed places left at their defaults, and each fed place is an argument with a longer
+// path (`Interval.Min`, `QueryConfig[0].Value`, `StateTree.Parameters.Value<PropertyBag>.Target`).
 
 #include "DstLowerPrivate.h"
 
+#include "Misc/PackageName.h"
+#include "PropertyBindingTypes.h"
+#include "StateTree.h"
 #include "StateTreePropertyBindings.h"
 #include "StateTreePropertyRefHelpers.h"
-#include "PropertyBindingTypes.h"
 #include "UObject/UnrealType.h"
 
 namespace UE::DreamStateTree::Compiler::Lowering
@@ -361,9 +368,65 @@ namespace UE::DreamStateTree::Compiler::Lowering
 	// Classification
 	// ------------------------------------------------------------------------------------------
 
-	EValueClass FDstLowerer::ClassifyValue(const FDstExpr& Value, const FBindScope& Scope) const
+	bool FDstLowerer::TryGetReferenceParts(const FDstExpr& Value, const FBindScope& Scope, const FDstExpr*& OutAsset, const TArray<FDstArgumentPtr>*& OutArguments) const
+	{
+		OutAsset = nullptr;
+		OutArguments = nullptr;
+		const FDstExpr& V = StripParens(Value);
+
+		if (const FDstNameExpr* Name = V.As<FDstNameExpr>(); Name && !Name->bQuoted && Name->Name.Equals(TEXT("None"), ESearchCase::CaseSensitive))
+		{
+			return true;
+		}
+		if (const FDstCallExpr* Call = V.As<FDstCallExpr>())
+		{
+			FString Ignored;
+			if (TryGetDstAssetPath(V, Ignored))
+			{
+				OutAsset = &V;
+				return true;
+			}
+			if (!Call->Callee)
+			{
+				return false;
+			}
+			OutAsset = Call->Callee.Get();
+			OutArguments = &Call->Args;
+			return true;
+		}
+		if (V.Is<FDstNameExpr>() || V.Is<FDstMemberExpr>())
+		{
+			if (IsBindingPath(V, Scope))
+			{
+				return false;
+			}
+			OutAsset = &V;
+			return true;
+		}
+		if (const FDstLiteralExpr* Literal = V.As<FDstLiteralExpr>(); Literal && Literal->LiteralKind == EDstLiteralKind::String)
+		{
+			OutAsset = &V;
+			return true;
+		}
+		return false;
+	}
+
+	EValueClass FDstLowerer::ClassifyValue(const FDstExpr& Value, const FBindScope& Scope, const FProperty* Property) const
 	{
 		const FDstExpr& V = StripParens(Value);
+
+		// A reference to a tree is written as a call, which is no property function there. It goes the way of a value with parts
+		// fed from elsewhere, whether or not it has any: that is where its tree and its parameters are checked.
+		if (Property && IsDstStateTreeReferenceProperty(*Property))
+		{
+			const FDstExpr* Asset = nullptr;
+			const TArray<FDstArgumentPtr>* Arguments = nullptr;
+			if (TryGetReferenceParts(V, Scope, Asset, Arguments))
+			{
+				return EValueClass::Mixed;
+			}
+		}
+
 		switch (V.Kind)
 		{
 		case EDstNodeKind::RefExpr:
@@ -388,7 +451,8 @@ namespace UE::DreamStateTree::Compiler::Lowering
 			return (Name && Name->Name.Equals(TEXT("Path"), ESearchCase::CaseSensitive)) ? EValueClass::Constant : EValueClass::Call;
 		}
 		case EDstNodeKind::TupleExpr:
-			return ContainsDynamic(V, *this, Scope) ? EValueClass::MixedTuple : EValueClass::Constant;
+		case EDstNodeKind::ListExpr:
+			return ContainsDynamic(V, *this, Scope) ? EValueClass::Mixed : EValueClass::Constant;
 		default:
 			return EValueClass::Constant;
 		}
@@ -413,7 +477,7 @@ namespace UE::DreamStateTree::Compiler::Lowering
 		}
 
 		const bool bRefProperty = Side == EDstPropertySide::Instance && !Build.bBagProperties && IsPropertyRefProperty(Property);
-		const EValueClass Class = ClassifyValue(V, Build.Scope);
+		const EValueClass Class = ClassifyValue(V, Build.Scope, &Property);
 		if (Class == EValueClass::Ref)
 		{
 			if (!bRefProperty)
@@ -446,8 +510,8 @@ namespace UE::DreamStateTree::Compiler::Lowering
 			return LowerOperation(Build, Side, Path, Property, V);
 		case EValueClass::Call:
 			return LowerFunctionCall(Build, Side, Path, Property, V);
-		case EValueClass::MixedTuple:
-			return LowerMixedTuple(Build, Side, Property, static_cast<const FDstTupleExpr&>(V));
+		case EValueClass::Mixed:
+			return LowerMixed(Build, Side, Property, V);
 		default:
 			return LowerConstant(Build, Side, Property, V);
 		}
@@ -606,34 +670,113 @@ namespace UE::DreamStateTree::Compiler::Lowering
 	}
 
 	// ------------------------------------------------------------------------------------------
-	// A tuple with something dynamic in it
+	// A value that is partly fed from elsewhere
 	// ------------------------------------------------------------------------------------------
 
-	bool FDstLowerer::LowerMixedTuple(FNodeBuild& Build, const EDstPropertySide Side, const FProperty& Property, const FDstTupleExpr& Tuple)
+	bool FDstLowerer::LowerMixed(FNodeBuild& Build, const EDstPropertySide Side, const FProperty& Property, const FDstExpr& Value)
+	{
+		FDstPropertyPath Path;
+		FDstPathSegment Segment;
+		Segment.Name = Property.GetName();
+		Path.Segments.Add(MoveTemp(Segment));
+
+		TUniquePtr<FDstExpr> Constant;
+		if (!SplitValue(Build, Side, Path, Property, Value, DescribeTarget(Build, Property), Constant))
+		{
+			return false;
+		}
+		if (!Constant)
+		{
+			return true;
+		}
+
+		// The constant is always the whole property with the fed places at their defaults, even when it says nothing more
+		// than the default does: what an asset holds there is then the same whichever way the property was fed.
+		FString Text;
+		if (!ConstantToText(*Constant, Property, Text, Value.Span))
+		{
+			return false;
+		}
+		AddConstantArg(Build, Side, Property, Text);
+		return true;
+	}
+
+	bool FDstLowerer::SplitValue(FNodeBuild& Build, const EDstPropertySide Side, const FDstPropertyPath& Path, const FProperty& Property,
+		const FDstExpr& Value, const FString& Display, TUniquePtr<FDstExpr>& OutConstant)
+	{
+		OutConstant.Reset();
+		const FDstExpr& V = StripParens(Value);
+
+		if (IsDstStateTreeReferenceProperty(Property))
+		{
+			const FDstExpr* Asset = nullptr;
+			const TArray<FDstArgumentPtr>* Arguments = nullptr;
+			if (TryGetReferenceParts(V, Build.Scope, Asset, Arguments))
+			{
+				return SplitReference(Build, Side, Path, V, Display, OutConstant);
+			}
+		}
+
+		switch (ClassifyValue(V, Build.Scope, &Property))
+		{
+		case EValueClass::Constant:
+			OutConstant = CloneExpr(V);
+			return true;
+
+		case EValueClass::Binding:
+		{
+			FResolvedSource Source;
+			if (!ResolvePath(V, Build.Scope, Source) || !CheckBindable(Source, Property, V.Span, Display))
+			{
+				return false;
+			}
+			AddBindingArg(Build, Side, Path, EDstValueKind::Binding, Source.Ref);
+			return true;
+		}
+
+		case EValueClass::Operation:
+			return LowerOperation(Build, Side, Path, Property, V);
+
+		case EValueClass::Call:
+			return LowerFunctionCall(Build, Side, Path, Property, V);
+
+		case EValueClass::Mixed:
+			if (const FDstTupleExpr* Tuple = V.As<FDstTupleExpr>())
+			{
+				return SplitTuple(Build, Side, Path, Property, *Tuple, Display, OutConstant);
+			}
+			if (const FDstListExpr* List = V.As<FDstListExpr>())
+			{
+				return SplitList(Build, Side, Path, Property, *List, Display, OutConstant);
+			}
+			break;
+
+		default:
+			break;
+		}
+		Sink.Error(TEXT("DST4008"), V.Span, TEXT("A field of a tuple or an element of a list can be a value, a path, an operation or a property function call, nothing more."));
+		return false;
+	}
+
+	bool FDstLowerer::SplitTuple(FNodeBuild& Build, const EDstPropertySide Side, const FDstPropertyPath& Path, const FProperty& Property,
+		const FDstTupleExpr& Tuple, const FString& Display, TUniquePtr<FDstExpr>& OutConstant)
 	{
 		const FStructProperty* StructProperty = CastField<FStructProperty>(&Property);
 		if (!StructProperty || !StructProperty->Struct)
 		{
-			Sink.Error(TEXT("DST4008"), Tuple.Span, FString::Printf(TEXT("%s is not a struct, so a tuple does not fit it."), *DescribeTarget(Build, Property)));
+			Sink.Error(TEXT("DST4008"), Tuple.Span, FString::Printf(TEXT("%s is not a struct, so a tuple does not fit it."), *Display));
 			return false;
 		}
 
-		TArray<const FProperty*> Fields;
-		for (TFieldIterator<FProperty> It(StructProperty->Struct); It; ++It)
-		{
-			if (!It->HasAnyPropertyFlags(CPF_Deprecated))
-			{
-				Fields.Add(*It);
-			}
-		}
-
+		const TArray<const FProperty*> PositionalFields = GetDstTupleFields(*StructProperty->Struct);
 		TUniquePtr<FDstTupleExpr> ConstantPart = MakeUnique<FDstTupleExpr>();
 		ConstantPart->Span = Tuple.Span;
+		TArray<const FProperty*> Seen;
+		int32 NextPositional = 0;
 		bool bOk = true;
 
-		for (int32 Index = 0; Index < Tuple.Items.Num(); ++Index)
+		for (const FDstArgumentPtr& Item : Tuple.Items)
 		{
-			const FDstArgument* Item = Tuple.Items[Index].Get();
 			if (!Item || !Item->Value)
 			{
 				continue;
@@ -643,78 +786,259 @@ namespace UE::DreamStateTree::Compiler::Lowering
 			{
 				Field = StructProperty->Struct->FindPropertyByName(FName(*Item->Name));
 			}
-			else if (Fields.IsValidIndex(Index))
+			else if (PositionalFields.IsValidIndex(NextPositional))
 			{
-				Field = Fields[Index];
+				Field = PositionalFields[NextPositional];
+			}
+			if (!Item->IsNamed())
+			{
+				++NextPositional;
 			}
 			if (!Field)
 			{
-				Sink.Error(TEXT("DST4008"), Item->Span, FString::Printf(TEXT("%s has no field %s."), *DescribeTarget(Build, Property),
-					Item->IsNamed() ? *FString::Printf(TEXT("`%s`"), *Item->Name) : *FString::Printf(TEXT("number %d"), Index + 1)));
+				Sink.Error(TEXT("DST4008"), Item->Span, FString::Printf(TEXT("%s has no field %s."), *Display,
+					Item->IsNamed() ? *FString::Printf(TEXT("`%s`"), *Item->Name) : *FString::Printf(TEXT("number %d"), NextPositional)));
 				bOk = false;
 				continue;
 			}
+			if (Seen.Contains(Field))
+			{
+				Sink.Error(TEXT("DST4017"), Item->Span, FString::Printf(TEXT("The field `%s` of %s is given twice."), *Field->GetName(), *Display));
+				bOk = false;
+				continue;
+			}
+			Seen.Add(Field);
 
-			const EValueClass Class = ClassifyValue(*Item->Value, Build.Scope);
-			if (Class == EValueClass::Constant)
+			FDstPropertyPath FieldPath = Path;
+			FDstPathSegment FieldSegment;
+			FieldSegment.Name = Field->GetName();
+			FieldPath.Segments.Add(MoveTemp(FieldSegment));
+
+			TUniquePtr<FDstExpr> FieldConstant;
+			if (!SplitValue(Build, Side, FieldPath, *Field, *Item->Value, FString::Printf(TEXT("`%s`"), *FieldPath.ToString()), FieldConstant))
+			{
+				bOk = false;
+				continue;
+			}
+			if (FieldConstant)
 			{
 				FDstArgumentPtr Copy = MakeUnique<FDstArgument>();
 				Copy->Name = Field->GetName();
 				Copy->NameSpan = Item->NameSpan;
-				Copy->Value = CloneExpr(*Item->Value);
+				Copy->Value = MoveTemp(FieldConstant);
 				Copy->Span = Item->Span;
 				ConstantPart->Items.Add(MoveTemp(Copy));
+			}
+		}
+		OutConstant = MoveTemp(ConstantPart);
+		return bOk;
+	}
+
+	bool FDstLowerer::SplitList(FNodeBuild& Build, const EDstPropertySide Side, const FDstPropertyPath& Path, const FProperty& Property,
+		const FDstListExpr& List, const FString& Display, TUniquePtr<FDstExpr>& OutConstant)
+	{
+		const FArrayProperty* ArrayProperty = CastField<FArrayProperty>(&Property);
+		if (!ArrayProperty)
+		{
+			if (CastField<FSetProperty>(&Property))
+			{
+				Sink.Error(TEXT("DST4024"), List.Span,
+					FString::Printf(TEXT("%s cannot have something fed from elsewhere in its list: only the elements of an array can be fed one by one."), *Display),
+					TEXT("A set's elements have no index for a binding path to pick. Write the whole set as constants, or bind the set as a whole."));
+			}
+			else
+			{
+				Sink.Error(TEXT("DST4008"), List.Span, FString::Printf(TEXT("%s is not an array or a set, so a list does not fit it."), *Display));
+			}
+			return false;
+		}
+
+		TUniquePtr<FDstListExpr> ConstantList = MakeUnique<FDstListExpr>();
+		ConstantList->Span = List.Span;
+		bool bOk = true;
+		for (int32 Index = 0; Index < List.Items.Num(); ++Index)
+		{
+			const FDstExpr* Item = List.Items[Index].Get();
+			if (!Item)
+			{
+				bOk = false;
 				continue;
 			}
+			FDstPropertyPath ElementPath = Path;
+			ElementPath.Segments.Last().ArrayIndex = Index;
 
-			FDstPropertyPath Path;
-			FDstPathSegment Outer;
-			Outer.Name = Property.GetName();
-			Path.Segments.Add(MoveTemp(Outer));
-			FDstPathSegment Inner;
-			Inner.Name = Field->GetName();
-			Path.Segments.Add(MoveTemp(Inner));
-
-			const FDstExpr& ItemValue = StripParens(*Item->Value);
-			if (Class == EValueClass::Binding)
+			TUniquePtr<FDstExpr> ElementConstant;
+			if (!SplitValue(Build, Side, ElementPath, *ArrayProperty->Inner, *Item, FString::Printf(TEXT("`%s`"), *ElementPath.ToString()), ElementConstant))
 			{
-				FResolvedSource Source;
-				if (!ResolvePath(ItemValue, Build.Scope, Source) || !CheckBindable(Source, *Field, ItemValue.Span, FString::Printf(TEXT("`%s.%s`"), *Property.GetName(), *Field->GetName())))
+				bOk = false;
+				continue;
+			}
+			if (!ElementConstant)
+			{
+				// The element is fed as a whole: the constant keeps its place with the element's default.
+				ElementConstant = MakeDstDefaultLiteral(*ArrayProperty->Inner, ValueContext);
+				if (!ElementConstant)
 				{
+					Sink.Error(TEXT("DST4008"), Item->Span, FString::Printf(TEXT("The elements of %s cannot be fed one by one: they have no default value for the constant to hold meanwhile."), *Display));
 					bOk = false;
 					continue;
 				}
-				AddBindingArg(Build, Side, Path, EDstValueKind::Binding, Source.Ref);
 			}
-			else if (Class == EValueClass::Operation)
-			{
-				bOk &= LowerOperation(Build, Side, Path, *Field, ItemValue);
-			}
-			else if (Class == EValueClass::Call)
-			{
-				bOk &= LowerFunctionCall(Build, Side, Path, *Field, ItemValue);
-			}
-			else
-			{
-				Sink.Error(TEXT("DST4008"), ItemValue.Span, TEXT("A field of a tuple can be a value, a path, an operation or a property function call, nothing more."));
-				bOk = false;
-			}
+			ConstantList->Items.Add(MoveTemp(ElementConstant));
+		}
+		OutConstant = MoveTemp(ConstantList);
+		return bOk;
+	}
+
+	bool FDstLowerer::SplitReference(FNodeBuild& Build, const EDstPropertySide Side, const FDstPropertyPath& Path, const FDstExpr& Value,
+		const FString& Display, TUniquePtr<FDstExpr>& OutConstant)
+	{
+		const FDstExpr* AssetExpr = nullptr;
+		const TArray<FDstArgumentPtr>* Arguments = nullptr;
+		if (!TryGetReferenceParts(Value, Build.Scope, AssetExpr, Arguments))
+		{
+			Sink.Error(TEXT("DST4008"), Value.Span, FString::Printf(TEXT("Expected the name of a StateTree asset for %s."), *Display));
+			return false;
+		}
+		if (!AssetExpr)
+		{
+			// `None`: no tree.
+			OutConstant = CloneExpr(Value);
+			return true;
 		}
 
-		if (!ConstantPart->Items.IsEmpty())
+		// The tree.
+		const FDstExpr& AssetName = StripParens(*AssetExpr);
+		FString ObjectPath;
+		FString Error;
+		if (TryGetDstAssetPath(AssetName, ObjectPath))
 		{
-			FString Text;
-			FString Error;
-			if (DstLiteralToExportText(*ConstantPart, Property, ValueContext, Text, Error))
+		}
+		else if (const FDstNameExpr* Name = AssetName.As<FDstNameExpr>())
+		{
+			if (!FindDstAsset(Name->Name, UStateTree::StaticClass(), ObjectPath, Error))
 			{
-				AddConstantArg(Build, Side, Property, Text);
+				Sink.Error(TEXT("DST4008"), AssetName.Span, Error, TEXT("A reference names a StateTree asset that has been built, or writes it as Path(Game, \"AI/ST_Other\")."));
+				return false;
+			}
+		}
+		else if (const FDstLiteralExpr* Literal = AssetName.As<FDstLiteralExpr>(); Literal && Literal->LiteralKind == EDstLiteralKind::String && Literal->Text.StartsWith(TEXT("/")))
+		{
+			ObjectPath = Literal->Text;
+		}
+		else
+		{
+			Sink.Error(TEXT("DST4008"), AssetName.Span, FString::Printf(TEXT("Expected the name of a StateTree asset or Path(Root, \"Rel\") for %s."), *Display));
+			return false;
+		}
+		const FParamSet* Signature = LoadAssetSignature(ObjectPath, Error);
+		if (!Signature)
+		{
+			Sink.Error(TEXT("DST4008"), AssetName.Span, Error, TEXT("Only a StateTree asset can be referenced."));
+			return false;
+		}
+
+		if (!Arguments || Arguments->IsEmpty())
+		{
+			OutConstant = CloneExpr(Value);
+			return true;
+		}
+
+		// The parameters it gives values to. A fed one stays in the constant at its default: it is overridden all the same.
+		TUniquePtr<FDstCallExpr> Constant = MakeUnique<FDstCallExpr>();
+		Constant->Span = Value.Span;
+		if (const FDstCallExpr* Call = Value.As<FDstCallExpr>())
+		{
+			Constant->ArgsSpan = Call->ArgsSpan;
+		}
+		Constant->Callee = CloneExpr(*AssetExpr);
+
+		const FString TreeName = FPackageName::ObjectPathToObjectName(ObjectPath);
+		TArray<FString> Given;
+		int32 NextPositional = 0;
+		bool bOk = true;
+		for (const FDstArgumentPtr& Argument : *Arguments)
+		{
+			if (!Argument || !Argument->Value)
+			{
+				continue;
+			}
+			if (Argument->bOutput)
+			{
+				Sink.Error(TEXT("DST4008"), Argument->Span, TEXT("A reference to a StateTree takes `Parameter = value`; `->` is for the outputs of a node."));
+				bOk = false;
+				continue;
+			}
+
+			FString Name;
+			if (Argument->IsNamed())
+			{
+				Name = Argument->Name;
+			}
+			else if (NextPositional < Signature->Params.Num())
+			{
+				Name = Signature->Params[NextPositional++].Name;
 			}
 			else
 			{
-				Sink.Error(TEXT("DST4008"), Tuple.Span, Error);
+				Sink.Error(TEXT("DST4016"), Argument->Span, FString::Printf(TEXT("`%s` has only %d parameter(s)."), *TreeName, Signature->Params.Num()));
 				bOk = false;
+				continue;
 			}
+			const FProperty* Parameter = Signature->FindProperty(Name);
+			if (!Parameter)
+			{
+				Sink.Error(TEXT("DST4023"), Argument->IsNamed() ? Argument->NameSpan : Argument->Span,
+					FString::Printf(TEXT("The tree `%s` has no parameter `%s`."), *TreeName, *Name),
+					Signature->Params.IsEmpty() ? FString(TEXT("The tree has no parameters.")) : MakeSuggestionHint(Name, Signature->GetNames()));
+				bOk = false;
+				continue;
+			}
+			if (Given.Contains(Name))
+			{
+				Sink.Error(TEXT("DST4017"), Argument->Span, FString::Printf(TEXT("`%s` is given twice."), *Name));
+				bOk = false;
+				continue;
+			}
+			Given.Add(Name);
+
+			// `StateTree.Parameters.Value<PropertyBag>.Name`: the parameter inside the reference.
+			FDstPropertyPath ParameterPath = Path;
+			FDstPathSegment ParametersSegment;
+			ParametersSegment.Name = TEXT("Parameters");
+			ParameterPath.Segments.Add(MoveTemp(ParametersSegment));
+			FDstPathSegment ValueSegment;
+			ValueSegment.Name = TEXT("Value");
+			ValueSegment.InstanceType = PropertyBagInstanceType;
+			ParameterPath.Segments.Add(MoveTemp(ValueSegment));
+			FDstPathSegment NameSegment;
+			NameSegment.Name = Parameter->GetName();
+			ParameterPath.Segments.Add(MoveTemp(NameSegment));
+
+			TUniquePtr<FDstExpr> ParameterConstant;
+			if (!SplitValue(Build, Side, ParameterPath, *Parameter, *Argument->Value, FString::Printf(TEXT("the parameter `%s` of `%s`"), *Name, *TreeName), ParameterConstant))
+			{
+				bOk = false;
+				continue;
+			}
+			if (!ParameterConstant)
+			{
+				ParameterConstant = MakeDstDefaultLiteral(*Parameter, ValueContext);
+				if (!ParameterConstant)
+				{
+					Sink.Error(TEXT("DST4008"), Argument->Span, FString::Printf(TEXT("The parameter `%s` of `%s` cannot be fed from elsewhere: it has no default value for the constant to hold meanwhile."), *Name, *TreeName));
+					bOk = false;
+					continue;
+				}
+			}
+			FDstArgumentPtr Copy = MakeUnique<FDstArgument>();
+			Copy->Name = Name;
+			Copy->NameSpan = Argument->NameSpan;
+			Copy->Value = MoveTemp(ParameterConstant);
+			Copy->Span = Argument->Span;
+			Constant->Args.Add(MoveTemp(Copy));
 		}
+		OutConstant = MoveTemp(Constant);
 		return bOk;
 	}
 

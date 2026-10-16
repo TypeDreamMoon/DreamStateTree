@@ -491,7 +491,7 @@ namespace UE::DreamStateTree::Compiler::Lowering
 				TEXT("One side reads something that can change: a path, an operation on one, or a property function."));
 			return false;
 		}
-		if (LeftClass == EValueClass::Ref || RightClass == EValueClass::Ref || LeftClass == EValueClass::MixedTuple || RightClass == EValueClass::MixedTuple)
+		if (LeftClass == EValueClass::Ref || RightClass == EValueClass::Ref || LeftClass == EValueClass::Mixed || RightClass == EValueClass::Mixed)
 		{
 			Sink.Error(TEXT("DST5013"), Compare.Span, TEXT("A comparison compares values: paths, operations, property function calls or constants."));
 			return false;

@@ -159,12 +159,19 @@ namespace UE::DreamStateTree::Compiler::Raising
 		FExprPtr RaiseNodeCall(const FModelNode& Node, const FScope& Scope, const FCallStyle& Style);
 		/** `Name = Call()` etc. for a task. */
 		TUniquePtr<Lang::FDstTaskItem> RaiseTask(const FModelNode& Node, const FScope& Scope);
-		/** The text of one top-level property of a node, from every argument that feeds it. Null (after reporting) when it cannot be written. */
+		/**
+		 * The text of one top-level property of a node, from every argument that feeds it. Null (after reporting) when it cannot be
+		 * written. DefaultContainer holds the property's default (null: the type's zero value).
+		 */
 		FExprPtr RaiseArgGroup(const FProperty* Property, const FString& PropertyName, const TArray<const FModelArg*>& Group,
-			const FScope& Scope, bool& bOutOutput, const FString& Display);
+			const FScope& Scope, bool& bOutOutput, const FString& Display, const void* DefaultContainer = nullptr);
 		FExprPtr RaiseWholeArg(const FModelArg& Arg, const FProperty* Property, const FScope& Scope, bool& bOutOutput, const FString& Display);
+		/** A struct, an array or a reference to a tree with parts fed from elsewhere: the constant, with those parts written in. */
 		FExprPtr RaiseMixedArg(const FProperty* Property, const FModelArg* Whole, const TArray<const FModelArg*>& Deep, const FScope& Scope,
-			const FString& Display);
+			const FString& Display, const void* DefaultContainer);
+		/** Writes the value of Arg into the expression Slot holds for Property, at the place Segments[Index..] lead to. */
+		bool InsertDeepArg(FExprPtr& Slot, const FProperty* Property, const TArray<Model::FDstPathSegment>& Segments, int32 Index,
+			const FModelArg& Arg, const FScope& Scope, const FString& Display);
 		/** A property function feeding Target: an operation when it is one of the sugar's, otherwise a call. */
 		FExprPtr RaiseFunction(const FModelNode& Function, const FProperty* Target, const FScope& Scope);
 		FExprPtr TryRaiseOperation(const FModelNode& Function, const FProperty* Target, const FScope& Scope);

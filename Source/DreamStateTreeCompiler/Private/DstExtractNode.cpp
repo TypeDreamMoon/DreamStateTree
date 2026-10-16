@@ -9,6 +9,9 @@
 //     (DstExportDefault, the same function Lower uses), and only when the property differs from the default both as a
 //     value and as text;
 //   - a property that a binding feeds as a whole has no constant: the binding says everything;
+//   - a property that bindings feed in parts (a member, an element, a parameter of a referenced tree) has a constant with those
+//     parts at the default a text gives them, because whatever is stored under a binding is overwritten and the text cannot
+//     say it (ExportDstValueWithBoundParts); a reference to a tree is also brought in step with its tree;
 //   - what the engine keeps in the node for its own use is not an argument: the Name (it is the node's BindName), the
 //     compile results, the operand and indent the compiler derives from the editor node's own, the class a Blueprint
 //     wrapper holds (it is the node's BlueprintClass).
@@ -166,6 +169,29 @@ namespace UE::DreamStateTree::Compiler::Extracting
 			return IsBlueprintWrapper(Owner);
 		}
 
+		/** Whether a binding feeds only a part of its top-level property: a member, or one element of an array. */
+		bool IsDeepTarget(const FPropertyBindingPath& Target)
+		{
+			return Target.NumSegments() > 1 || (Target.NumSegments() == 1 && Target.GetSegment(0).GetArrayIndex() != INDEX_NONE);
+		}
+
+		/** The paths of the bindings that feed a part of a top-level property, by that property. */
+		void CollectDeepBound(const TArray<const FStateTreePropertyPathBinding*>* Bindings, TMap<FName, TArray<FDstPropertyPath>>& OutBound)
+		{
+			if (!Bindings)
+			{
+				return;
+			}
+			for (const FStateTreePropertyPathBinding* Binding : *Bindings)
+			{
+				const FPropertyBindingPath& Target = Binding->GetTargetPath();
+				if (IsDeepTarget(Target))
+				{
+					OutBound.FindOrAdd(Target.GetSegment(0).GetName()).Add(ToDstPropertyPath(Target));
+				}
+			}
+		}
+
 		/** The top-level properties a node's bindings feed as a whole (a path of one segment, no array index). */
 		void CollectWholeBound(const TArray<const FStateTreePropertyPathBinding*>* Bindings, TSet<FName>& OutBound)
 		{
@@ -241,17 +267,21 @@ namespace UE::DreamStateTree::Compiler::Extracting
 		TSet<FName> NodeBound;
 		CollectWholeBound(InstanceBindings, InstanceBound);
 		CollectWholeBound(NodeBindings, NodeBound);
+		TMap<FName, TArray<FDstPropertyPath>> InstancePartBound;
+		TMap<FName, TArray<FDstPropertyPath>> NodePartBound;
+		CollectDeepBound(InstanceBindings, InstancePartBound);
+		CollectDeepBound(NodeBindings, NodePartBound);
 
 		// Constants.
 		{
 			const FStructOnScope DefaultNode(NodeStruct);
 			ExtractConstants(NodeStruct, Editor.Node.GetMemory(), DefaultNode.GetStructMemory(), EDstPropertySide::Node,
-				NodeBound, Key, NodeStruct, Out.Args);
+				NodeBound, NodePartBound, Key, NodeStruct, Out.Args);
 		}
 		if (InstanceStruct && InstanceData && InstanceDefault)
 		{
 			ExtractConstants(InstanceStruct, InstanceData, InstanceDefault, EDstPropertySide::Instance,
-				InstanceBound, Key, nullptr, Out.Args);
+				InstanceBound, InstancePartBound, Key, nullptr, Out.Args);
 		}
 
 		// Bindings, in editor order; the sort below puts them next to the constants of the same property.
@@ -292,7 +322,8 @@ namespace UE::DreamStateTree::Compiler::Extracting
 	}
 
 	void FExtractor::ExtractConstants(const UStruct* Struct, const void* Actual, const void* Default, const EDstPropertySide Side,
-		const TSet<FName>& Bound, const FString& NodeKey, const UScriptStruct* NodeStruct, TArray<FDstArg>& OutArgs)
+		const TSet<FName>& Bound, const TMap<FName, TArray<FDstPropertyPath>>& PartBound, const FString& NodeKey, const UScriptStruct* NodeStruct,
+		TArray<FDstArg>& OutArgs)
 	{
 		for (TFieldIterator<FProperty> It(Struct); It; ++It)
 		{
@@ -351,12 +382,37 @@ namespace UE::DreamStateTree::Compiler::Extracting
 				continue;
 			}
 
-			if (Property->Identical_InContainer(Actual, Default, 0, PPF_None))
+			// Where a binding feeds a part of the property, the constant holds that part at the default a text gives it: whatever the
+			// asset has stored under a binding is overwritten by it, and the text could not say it. A reference to a tree is also
+			// brought in step with its tree.
+			const TArray<FDstPropertyPath>* PartPaths = PartBound.Find(Property->GetFName());
+			FString ActualText;
+			if (PartPaths || IsDstStateTreeReferenceProperty(*Property))
 			{
-				continue;
+				bool bSameAsDefault = false;
+				FString Problem;
+				if (!ExportDstValueWithBoundParts(*Property, Actual, Default, PartPaths ? TConstArrayView<FDstPropertyPath>(*PartPaths) : TConstArrayView<FDstPropertyPath>(),
+					ActualText, bSameAsDefault, Problem))
+				{
+					Sink.Error(TEXT("DST8007"), Lang::FDstSpan(),
+						FString::Printf(TEXT("A binding ends inside `%s.%s`, but its path leads nowhere in the value: %s"), *NodeKey, *Property->GetName(), *Problem),
+						TEXT("Bind the property again in the editor."));
+					continue;
+				}
+				if (bSameAsDefault)
+				{
+					continue;
+				}
+			}
+			else
+			{
+				if (Property->Identical_InContainer(Actual, Default, 0, PPF_None))
+				{
+					continue;
+				}
+				ActualText = DstExportDefault(*Property, Actual);
 			}
 			// Differs as a value but not as text (something the export does not show): the model could not tell them apart.
-			const FString ActualText = DstExportDefault(*Property, Actual);
 			if (ActualText.Equals(DstExportDefault(*Property, Default), ESearchCase::CaseSensitive))
 			{
 				continue;

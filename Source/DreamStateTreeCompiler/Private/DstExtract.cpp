@@ -532,6 +532,7 @@ namespace UE::DreamStateTree::Compiler::Extracting
 			// Only a link takes its parameters from elsewhere; a binding into any other state's parameters is left for
 			// ReportUnconsumedBindings.
 			ExtractParameterBindings(State, Path, Out);
+			PutFedParameterPartsAtDefault(State, Out);
 		}
 
 		FNodeSite StateSite;

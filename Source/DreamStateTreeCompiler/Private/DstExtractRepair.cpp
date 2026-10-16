@@ -4,6 +4,7 @@
 
 #include "PropertyBindingPath.h"
 #include "StateTreeEvents.h"
+#include "StructUtils/PropertyBag.h"
 #include "UObject/UnrealType.h"
 
 namespace UE::DreamStateTree::Compiler::Extracting
@@ -18,7 +19,9 @@ namespace UE::DreamStateTree::Compiler::Extracting
 			Out.ArrayIndex = Segment.GetArrayIndex() >= 0 ? Segment.GetArrayIndex() : INDEX_NONE;
 			if (const UStruct* InstanceStruct = Segment.GetInstanceStruct())
 			{
-				Out.InstanceType = InstanceStruct->GetPathName();
+				// A reference to a tree holds a bag the engine made from the tree's parameters, named after a hash of their IDs:
+				// the model leaves the struct to the generator.
+				Out.InstanceType = InstanceStruct->IsA<UPropertyBag>() ? FString(Model::PropertyBagInstanceType) : InstanceStruct->GetPathName();
 			}
 		}
 		return Result;

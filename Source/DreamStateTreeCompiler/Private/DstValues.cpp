@@ -23,6 +23,10 @@
 // The language has no way to say "the default of this struct" apart from leaving fields out, so a struct literal
 // starts from the struct's default value and sets the fields it names. FLinearColor and FColor start fully opaque,
 // because `(0.8, 0.25, 0.2)` is meant as a visible colour.
+//
+// A reference to a StateTree (FStateTreeReference) is written as a call of the tree's asset: the arguments are the
+// parameters it overrides, `ST_Shoot(Range = 800)`. The reference takes its parameters from the tree (SetStateTree), so
+// the bag type in its export text is the tree's, and the arguments set values in that bag and mark them overridden.
 
 #include "DstValues.h"
 
@@ -37,8 +41,11 @@
 #include "Misc/PackageName.h"
 #include "Misc/ScopeLock.h"
 #include "Modules/ModuleManager.h"
+#include "StateTree.h"
 #include "StateTreeDelegate.h"
 #include "StateTreePropertyRef.h"
+#include "StateTreeReference.h"
+#include "StructUtils/PropertyBag.h"
 #include "UObject/Class.h"
 #include "UObject/SoftObjectPath.h"
 #include "UObject/SoftObjectPtr.h"
@@ -1325,6 +1332,177 @@ namespace UE::DreamStateTree::Compiler
 				|| Struct.IsChildOf(FStateTreeDelegateListener::StaticStruct());
 		}
 
+		// ---- a reference to a StateTree. Its members are protected; reflection reaches them without a side effect (the
+		// getters would sync the parameters with the tree, which changes the value being read).
+
+		FInstancedPropertyBag* FindReferenceBag(void* Reference)
+		{
+			static const FStructProperty* ParametersProperty = CastField<FStructProperty>(FStateTreeReference::StaticStruct()->FindPropertyByName(TEXT("Parameters")));
+			return ParametersProperty ? ParametersProperty->ContainerPtrToValuePtr<FInstancedPropertyBag>(Reference) : nullptr;
+		}
+
+		const FInstancedPropertyBag* FindReferenceBag(const void* Reference)
+		{
+			return FindReferenceBag(const_cast<void*>(Reference));
+		}
+
+		TArray<FGuid>* FindReferenceOverrides(void* Reference)
+		{
+			static const FArrayProperty* OverridesProperty = CastField<FArrayProperty>(FStateTreeReference::StaticStruct()->FindPropertyByName(TEXT("PropertyOverrides")));
+			return OverridesProperty ? OverridesProperty->ContainerPtrToValuePtr<TArray<FGuid>>(Reference) : nullptr;
+		}
+
+		/** Where a parameter's value sits in the bag. (FInstancedPropertyBag keeps its own address functions protected.) */
+		void* GetBagParameterAddress(FInstancedPropertyBag& Bag, const FPropertyBagPropertyDesc& Desc)
+		{
+			return Desc.CachedProperty->ContainerPtrToValuePtr<void>(Bag.GetMutableValue().GetMemory());
+		}
+
+		const void* GetBagParameterAddress(const FInstancedPropertyBag& Bag, const FPropertyBagPropertyDesc& Desc)
+		{
+			return Desc.CachedProperty->ContainerPtrToValuePtr<void>(Bag.GetValue().GetMemory());
+		}
+
+		/** Names of a tree's parameters for a message. */
+		FString ListParameterNames(const TConstArrayView<FPropertyBagPropertyDesc> Descs)
+		{
+			TArray<FString> Names;
+			for (const FPropertyBagPropertyDesc& Desc : Descs)
+			{
+				Names.Add(Desc.Name.ToString());
+			}
+			return Names.IsEmpty() ? FString(TEXT("none")) : FString::Join(Names, TEXT(", "));
+		}
+
+		/**
+		 * `ST_Shoot`, `ST_Shoot(Range = 800)`, `Path(Game, "AI/ST_Shoot")(Range = 800)`, `None`. The reference starts from the
+		 * tree's own parameters; each argument sets one and marks it overridden, in the order of the tree's parameters.
+		 */
+		bool ApplyReference(void* Value, const FDstExpr& Expr, const FDstValueContext& Context, FString& OutError)
+		{
+			FStateTreeReference& Reference = *static_cast<FStateTreeReference*>(Value);
+			Reference = FStateTreeReference();
+			if (IsNone(Expr))
+			{
+				return true;
+			}
+
+			FString ObjectPath;
+			const FDstExpr* AssetExpr = &Expr;
+			const TArray<FDstArgumentPtr>* Arguments = nullptr;
+			if (const FDstCallExpr* Call = Expr.As<FDstCallExpr>(); Call && !TryGetAssetPathExpr(Expr, ObjectPath))
+			{
+				if (!Call->Callee)
+				{
+					OutError = TEXT("Expected the name of a StateTree asset before the parameters.");
+					return false;
+				}
+				if (Call->Meta)
+				{
+					OutError = TEXT("A reference to a StateTree takes parameters, not node settings in `[ ]`.");
+					return false;
+				}
+				AssetExpr = Call->Callee.Get();
+				Arguments = &Call->Args;
+			}
+			if (!ResolveAssetExpr(*AssetExpr, UStateTree::StaticClass(), ObjectPath, OutError))
+			{
+				return false;
+			}
+			UStateTree* Tree = LoadObject<UStateTree>(nullptr, *ObjectPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+			if (!Tree)
+			{
+				OutError = FString::Printf(TEXT("`%s` is not a StateTree asset that can be loaded."), *ObjectPath);
+				return false;
+			}
+			Reference.SetStateTree(Tree);
+			if (!Arguments || Arguments->IsEmpty())
+			{
+				return true;
+			}
+
+			FInstancedPropertyBag* Bag = FindReferenceBag(&Reference);
+			const UPropertyBag* BagStruct = Bag ? Bag->GetPropertyBagStruct() : nullptr;
+			if (!BagStruct)
+			{
+				OutError = FString::Printf(TEXT("The tree `%s` has no parameters to give values to."), *Tree->GetName());
+				return false;
+			}
+			const TConstArrayView<FPropertyBagPropertyDesc> Descs = BagStruct->GetPropertyDescs();
+
+			struct FGiven
+			{
+				int32 DescIndex = INDEX_NONE;
+				const FDstExpr* Value = nullptr;
+			};
+			TArray<FGiven> Given;
+			int32 NextPositional = 0;
+			for (const FDstArgumentPtr& Argument : *Arguments)
+			{
+				if (!Argument || !Argument->Value)
+				{
+					continue;
+				}
+				if (Argument->bOutput)
+				{
+					OutError = TEXT("A reference to a StateTree takes `Parameter = value`; `->` is for the outputs of a node.");
+					return false;
+				}
+				int32 DescIndex = INDEX_NONE;
+				if (Argument->IsNamed())
+				{
+					for (int32 Index = 0; Index < Descs.Num() && DescIndex == INDEX_NONE; ++Index)
+					{
+						if (Descs[Index].Name.ToString().Equals(Argument->Name, ESearchCase::CaseSensitive))
+						{
+							DescIndex = Index;
+						}
+					}
+					if (DescIndex == INDEX_NONE)
+					{
+						OutError = FString::Printf(TEXT("The tree `%s` has no parameter `%s`. Parameters: %s."), *Tree->GetName(), *Argument->Name, *ListParameterNames(Descs));
+						return false;
+					}
+				}
+				else if (NextPositional < Descs.Num())
+				{
+					DescIndex = NextPositional++;
+				}
+				else
+				{
+					OutError = FString::Printf(TEXT("The tree `%s` has %d parameter(s); the reference gives more values."), *Tree->GetName(), Descs.Num());
+					return false;
+				}
+				if (Given.ContainsByPredicate([DescIndex](const FGiven& Existing) { return Existing.DescIndex == DescIndex; }))
+				{
+					OutError = FString::Printf(TEXT("The parameter `%s` is given twice."), *Descs[DescIndex].Name.ToString());
+					return false;
+				}
+				FGiven& Entry = Given.AddDefaulted_GetRef();
+				Entry.DescIndex = DescIndex;
+				Entry.Value = Argument->Value.Get();
+			}
+			Given.StableSort([](const FGiven& A, const FGiven& B) { return A.DescIndex < B.DescIndex; });
+
+			for (const FGiven& Entry : Given)
+			{
+				const FPropertyBagPropertyDesc& Desc = Descs[Entry.DescIndex];
+				if (!Desc.CachedProperty)
+				{
+					OutError = FString::Printf(TEXT("The parameter `%s` has no property to hold a value."), *Desc.Name.ToString());
+					return false;
+				}
+				FString ParameterError;
+				if (!ApplyValue(*Desc.CachedProperty, GetBagParameterAddress(*Bag, Desc), *Entry.Value, Context, ParameterError))
+				{
+					OutError = FString::Printf(TEXT("%s: %s"), *Desc.Name.ToString(), *ParameterError);
+					return false;
+				}
+				Reference.SetPropertyOverridden(Desc.ID, true);
+			}
+			return true;
+		}
+
 		bool ApplyNumber(const FNumericProperty& Property, void* Value, const FDstExpr& Expr, FString& OutError)
 		{
 			if (Property.IsFloatingPoint())
@@ -1589,6 +1767,10 @@ namespace UE::DreamStateTree::Compiler
 				}
 				Path = FSoftObjectPath(ObjectPath);
 				return true;
+			}
+			if (Struct == FStateTreeReference::StaticStruct())
+			{
+				return ApplyReference(Value, Expr, Context, OutError);
 			}
 			if (IsBindingOnlyStruct(*Struct))
 			{
@@ -1863,14 +2045,73 @@ namespace UE::DreamStateTree::Compiler
 
 	namespace ValuesPrivate
 	{
-		FDstExprPtr BuildLiteral(const FProperty& Property, const void* Value, const FDstValueContext& Context);
+		FDstExprPtr BuildLiteral(const FProperty& Property, const void* Value, const FDstValueContext& Context, bool bElement = false);
 
-		FDstExprPtr BuildStruct(const FStructProperty& Property, const void* Value, const FDstValueContext& Context)
+		/**
+		 * A reference as the call of its tree's asset with the parameters it overrides, in the tree's order: the inverse of
+		 * ApplyReference. A parameter whose value has no literal makes the whole reference inexpressible (null).
+		 */
+		FDstExprPtr BuildReference(const void* Value, const FDstValueContext& Context)
+		{
+			const FStateTreeReference& Reference = *static_cast<const FStateTreeReference*>(Value);
+			const UStateTree* Tree = Reference.GetStateTree();
+			if (!Tree)
+			{
+				return MakeName(TEXT("None"));
+			}
+
+			FDstExprPtr Asset = MakeAssetRefExpr(Tree->GetPathName(), UStateTree::StaticClass());
+			TArray<FDstArgumentPtr> Arguments;
+			const FInstancedPropertyBag* Bag = FindReferenceBag(Value);
+			if (const UPropertyBag* BagStruct = Bag ? Bag->GetPropertyBagStruct() : nullptr)
+			{
+				for (const FPropertyBagPropertyDesc& Desc : BagStruct->GetPropertyDescs())
+				{
+					if (!Reference.IsPropertyOverridden(Desc.ID))
+					{
+						continue;
+					}
+					if (!Desc.CachedProperty)
+					{
+						return nullptr;
+					}
+					FDstExprPtr Item = BuildLiteral(*Desc.CachedProperty, GetBagParameterAddress(*Bag, Desc), Context);
+					if (!Item)
+					{
+						return nullptr;
+					}
+					Arguments.Add(MakeArgument(Desc.Name.ToString(), MoveTemp(Item)));
+				}
+			}
+			if (Arguments.IsEmpty())
+			{
+				return Asset;
+			}
+			// Only a name or a Path(...) can be called; the object path as a string cannot.
+			if (!Asset || Asset->Is<FDstLiteralExpr>())
+			{
+				return nullptr;
+			}
+			TUniquePtr<FDstCallExpr> Call = MakeUnique<FDstCallExpr>();
+			Call->Callee = MoveTemp(Asset);
+			Call->Args = MoveTemp(Arguments);
+			return FDstExprPtr(MoveTemp(Call));
+		}
+
+		/**
+		 * bElement: the value is an element of an array or set, which starts from the struct's default. A struct equal to its default
+		 * in every field is then the empty tuple `()`, where a property that has another default needs its fields named.
+		 */
+		FDstExprPtr BuildStruct(const FStructProperty& Property, const void* Value, const FDstValueContext& Context, const bool bElement)
 		{
 			const UScriptStruct* Struct = Property.Struct;
 			if (!Struct)
 			{
 				return nullptr;
+			}
+			if (Struct == FStateTreeReference::StaticStruct())
+			{
+				return BuildReference(Value, Context);
 			}
 			if (Struct == FGameplayTag::StaticStruct())
 			{
@@ -1937,7 +2178,7 @@ namespace UE::DreamStateTree::Compiler
 					}
 					Tuple->Items.Add(MakeArgument(Field->GetName(), MoveTemp(Item)));
 				}
-				if (!Tuple->Items.IsEmpty() || Pass == 1)
+				if (!Tuple->Items.IsEmpty() || Pass == 1 || bElement)
 				{
 					return FDstExprPtr(MoveTemp(Tuple));
 				}
@@ -1945,7 +2186,7 @@ namespace UE::DreamStateTree::Compiler
 			return nullptr;
 		}
 
-		FDstExprPtr BuildLiteral(const FProperty& Property, const void* Value, const FDstValueContext& Context)
+		FDstExprPtr BuildLiteral(const FProperty& Property, const void* Value, const FDstValueContext& Context, const bool bElement)
 		{
 			if (const FBoolProperty* BoolProperty = CastField<FBoolProperty>(&Property))
 			{
@@ -2020,7 +2261,7 @@ namespace UE::DreamStateTree::Compiler
 
 			if (const FStructProperty* StructProperty = CastField<FStructProperty>(&Property))
 			{
-				return BuildStruct(*StructProperty, Value, Context);
+				return BuildStruct(*StructProperty, Value, Context, bElement);
 			}
 
 			if (const FArrayProperty* ArrayProperty = CastField<FArrayProperty>(&Property))
@@ -2029,7 +2270,7 @@ namespace UE::DreamStateTree::Compiler
 				TUniquePtr<FDstListExpr> List = MakeUnique<FDstListExpr>();
 				for (int32 Index = 0; Index < Helper.Num(); ++Index)
 				{
-					FDstExprPtr Item = BuildLiteral(*ArrayProperty->Inner, Helper.GetRawPtr(Index), Context);
+					FDstExprPtr Item = BuildLiteral(*ArrayProperty->Inner, Helper.GetRawPtr(Index), Context, /*bElement*/ true);
 					if (!Item)
 					{
 						return nullptr;
@@ -2044,7 +2285,7 @@ namespace UE::DreamStateTree::Compiler
 				TUniquePtr<FDstListExpr> List = MakeUnique<FDstListExpr>();
 				for (FScriptSetHelper::FIterator It = Helper.CreateIterator(); It; ++It)
 				{
-					FDstExprPtr Item = BuildLiteral(*SetProperty->ElementProp, Helper.GetElementPtr(It), Context);
+					FDstExprPtr Item = BuildLiteral(*SetProperty->ElementProp, Helper.GetElementPtr(It), Context, /*bElement*/ true);
 					if (!Item)
 					{
 						return nullptr;
@@ -2148,5 +2389,222 @@ namespace UE::DreamStateTree::Compiler
 			return nullptr;
 		}
 		return Literal;
+	}
+
+	// ----------------------------------------------------------------------------------------------------------------
+	// Values with parts fed from elsewhere
+	// ----------------------------------------------------------------------------------------------------------------
+
+	namespace ValuesPrivate
+	{
+		/** The value a text gives a whole field or element it does not write: the type's default, a struct's with its literal defaults. */
+		void ResetWholeValue(const FProperty& Property, void* Value)
+		{
+			Property.DestroyValue(Value);
+			Property.InitializeValue(Value);
+			if (const FStructProperty* StructProperty = CastField<FStructProperty>(&Property); StructProperty && StructProperty->Struct)
+			{
+				ApplyLiteralDefaults(*StructProperty->Struct, Value);
+			}
+		}
+
+		bool ResetBoundValueAt(const FProperty& Property, void* Value, const TConstArrayView<Model::FDstPathSegment> Path, const int32 Index, FString& OutError)
+		{
+			const Model::FDstPathSegment& Segment = Path[Index];
+			const FProperty* Leaf = &Property;
+			void* LeafValue = Value;
+			if (Segment.ArrayIndex != INDEX_NONE)
+			{
+				const FArrayProperty* ArrayProperty = CastField<FArrayProperty>(&Property);
+				if (!ArrayProperty)
+				{
+					OutError = FString::Printf(TEXT("`%s` is not an array, so `[%d]` leads nowhere."), *Segment.Name, Segment.ArrayIndex);
+					return false;
+				}
+				FScriptArrayHelper Helper(ArrayProperty, Value);
+				if (!Helper.IsValidIndex(Segment.ArrayIndex))
+				{
+					OutError = FString::Printf(TEXT("`%s[%d]` does not exist: the array has %d element(s)."), *Segment.Name, Segment.ArrayIndex, Helper.Num());
+					return false;
+				}
+				Leaf = ArrayProperty->Inner;
+				LeafValue = Helper.GetRawPtr(Segment.ArrayIndex);
+			}
+
+			if (Index + 1 >= Path.Num())
+			{
+				ResetWholeValue(*Leaf, LeafValue);
+				return true;
+			}
+
+			const Model::FDstPathSegment& Next = Path[Index + 1];
+			const FStructProperty* StructProperty = CastField<FStructProperty>(Leaf);
+			if (!StructProperty || !StructProperty->Struct)
+			{
+				OutError = FString::Printf(TEXT("`%s` has no members, so `%s` leads nowhere."), *Segment.Name, *Next.Name);
+				return false;
+			}
+
+			if (StructProperty->Struct == FStateTreeReference::StaticStruct())
+			{
+				// `Parameters`, `Value<PropertyBag>`, then the parameter of the tree.
+				const bool bShape = Path.Num() >= Index + 4 && Next.Name.Equals(TEXT("Parameters"), ESearchCase::CaseSensitive)
+					&& Path[Index + 2].Name.Equals(TEXT("Value"), ESearchCase::CaseSensitive)
+					&& Path[Index + 2].InstanceType.Equals(Model::PropertyBagInstanceType, ESearchCase::CaseSensitive);
+				if (!bShape)
+				{
+					OutError = FString::Printf(TEXT("A path into the reference `%s` goes through its Parameters and a parameter, `Parameters.Value<PropertyBag>.Name`."), *Segment.Name);
+					return false;
+				}
+				FInstancedPropertyBag* Bag = FindReferenceBag(LeafValue);
+				const FPropertyBagPropertyDesc* Desc = Bag ? Bag->FindPropertyDescByName(FName(*Path[Index + 3].Name)) : nullptr;
+				if (!Desc || !Desc->CachedProperty)
+				{
+					OutError = FString::Printf(TEXT("The tree `%s` refers to has no parameter `%s`."), *Segment.Name, *Path[Index + 3].Name);
+					return false;
+				}
+				return ResetBoundValueAt(*Desc->CachedProperty, GetBagParameterAddress(*Bag, *Desc), Path, Index + 3, OutError);
+			}
+
+			const FProperty* Member = StructProperty->Struct->FindPropertyByName(FName(*Next.Name));
+			if (!Member)
+			{
+				OutError = FString::Printf(TEXT("`%s` has no member `%s`."), *StructProperty->Struct->GetName(), *Next.Name);
+				return false;
+			}
+			void* MemberValue = Member->ContainerPtrToValuePtr<void>(LeafValue);
+			if (Index + 2 >= Path.Num() && Next.ArrayIndex == INDEX_NONE)
+			{
+				// A field the text leaves out holds what the struct's default has there.
+				FStructOnScope Fresh(StructProperty->Struct);
+				ApplyLiteralDefaults(*StructProperty->Struct, Fresh.GetStructMemory());
+				Member->CopyCompleteValue(MemberValue, Member->ContainerPtrToValuePtr<void>(Fresh.GetStructMemory()));
+				return true;
+			}
+			return ResetBoundValueAt(*Member, MemberValue, Path, Index + 1, OutError);
+		}
+
+		/**
+		 * A reference as the text has it: parameters in step with the tree, fed parameters overridden, the overrides in the order
+		 * of the tree's parameters (the order the editor happened to switch them on in is not something a text can keep).
+		 */
+		void CanonicalizeReference(void* Value, const TArray<FName>& FedParameters)
+		{
+			FStateTreeReference& Reference = *static_cast<FStateTreeReference*>(Value);
+			Reference.SyncParameters();
+			const FInstancedPropertyBag* Bag = FindReferenceBag(Value);
+			const UPropertyBag* BagStruct = Bag ? Bag->GetPropertyBagStruct() : nullptr;
+			TArray<FGuid>* Overrides = FindReferenceOverrides(Value);
+			if (!BagStruct || !Overrides)
+			{
+				return;
+			}
+			for (const FName& Name : FedParameters)
+			{
+				if (const FPropertyBagPropertyDesc* Desc = BagStruct->FindPropertyDescByName(Name))
+				{
+					Reference.SetPropertyOverridden(Desc->ID, true);
+				}
+			}
+			TArray<FGuid> Ordered;
+			for (const FPropertyBagPropertyDesc& Desc : BagStruct->GetPropertyDescs())
+			{
+				if (Overrides->Contains(Desc.ID))
+				{
+					Ordered.Add(Desc.ID);
+				}
+			}
+			*Overrides = MoveTemp(Ordered);
+		}
+	}
+
+	TArray<const FProperty*> GetDstTupleFields(const UStruct& Struct)
+	{
+		TArray<const FProperty*> Fields;
+		for (const FProperty* Field : ValuesPrivate::GetFieldsInDeclarationOrder(Struct))
+		{
+			if (!Field->HasAnyPropertyFlags(CPF_Transient | CPF_Deprecated))
+			{
+				Fields.Add(Field);
+			}
+		}
+		return Fields;
+	}
+
+	Lang::FDstExprPtr MakeDstDefaultLiteral(const FProperty& Property, const FDstValueContext& Context)
+	{
+		if (Property.ArrayDim != 1)
+		{
+			return nullptr;
+		}
+		if (const FStructProperty* StructProperty = CastField<FStructProperty>(&Property); StructProperty && StructProperty->Struct)
+		{
+			const UScriptStruct* Struct = StructProperty->Struct;
+			const bool bHasOwnLiteral = Struct == FGameplayTag::StaticStruct() || Struct == FGameplayTagContainer::StaticStruct()
+				|| Struct == FSoftObjectPath::StaticStruct() || Struct == FStateTreeReference::StaticStruct();
+			if (!bHasOwnLiteral)
+			{
+				// Every field at the struct's default is what a tuple that names none of them is.
+				return Lang::FDstExprPtr(MakeUnique<Lang::FDstTupleExpr>());
+			}
+		}
+		const ValuesPrivate::FTempContainer Fresh(Property);
+		return ValuesPrivate::BuildLiteral(Property, Fresh.Value(), Context);
+	}
+
+	bool IsDstStateTreeReferenceProperty(const FProperty& Property)
+	{
+		const FStructProperty* StructProperty = CastField<FStructProperty>(&Property);
+		return StructProperty && StructProperty->Struct == FStateTreeReference::StaticStruct();
+	}
+
+	const FProperty* FindDstTreeParameter(const FString& TreeObjectPath, const FString& ParameterName)
+	{
+		const UStateTree* Tree = LoadObject<UStateTree>(nullptr, *TreeObjectPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+		const UPropertyBag* BagStruct = Tree ? Tree->GetDefaultParameters().GetPropertyBagStruct() : nullptr;
+		const FPropertyBagPropertyDesc* Desc = BagStruct ? BagStruct->FindPropertyDescByName(FName(*ParameterName)) : nullptr;
+		return Desc ? Desc->CachedProperty : nullptr;
+	}
+
+	bool ResetDstBoundValue(const FProperty& Property, void* Value, const TConstArrayView<Model::FDstPathSegment> Path, FString& OutError)
+	{
+		if (Path.IsEmpty())
+		{
+			OutError = TEXT("A binding path names no property.");
+			return false;
+		}
+		return ValuesPrivate::ResetBoundValueAt(Property, Value, Path, 0, OutError);
+	}
+
+	bool ExportDstValueWithBoundParts(const FProperty& Property, const void* Container, const void* DefaultContainer,
+		const TConstArrayView<Model::FDstPropertyPath> BoundPaths, FString& OutText, bool& bOutSameAsDefault, FString& OutError)
+	{
+		const ValuesPrivate::FTempContainer Copy(Property);
+		Property.CopyCompleteValue(Copy.Value(), Property.ContainerPtrToValuePtr<void>(Container));
+
+		if (IsDstStateTreeReferenceProperty(Property))
+		{
+			// A parameter that is fed is an overridden one: the text cannot feed a parameter without naming it.
+			TArray<FName> Fed;
+			for (const Model::FDstPropertyPath& Path : BoundPaths)
+			{
+				if (Path.Segments.Num() >= 4 && Path.Segments[1].Name.Equals(TEXT("Parameters"), ESearchCase::CaseSensitive))
+				{
+					Fed.AddUnique(FName(*Path.Segments[3].Name));
+				}
+			}
+			ValuesPrivate::CanonicalizeReference(Copy.Value(), Fed);
+		}
+		for (const Model::FDstPropertyPath& Path : BoundPaths)
+		{
+			if (!ResetDstBoundValue(Property, Copy.Value(), Path.Segments, OutError))
+			{
+				return false;
+			}
+		}
+
+		OutText = DstExportDefault(Property, Copy.Container());
+		bOutSameAsDefault = DefaultContainer && Property.Identical_InContainer(Copy.Container(), DefaultContainer, 0, PPF_None);
+		return true;
 	}
 }

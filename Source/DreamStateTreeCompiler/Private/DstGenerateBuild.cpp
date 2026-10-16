@@ -1253,7 +1253,34 @@ namespace UE::DreamStateTree::Compiler::GeneratePrivate
 			}
 
 			const FGuid TargetId = Arg.Side == Model::EDstPropertySide::Node ? NodeStructId : InstanceId;
-			const FPropertyBindingPath Target = MakeBindingPath(TargetId, Arg.Property);
+
+			// The data the path starts in, for the segments that take their struct from it (the parameters of a referenced tree).
+			const UStruct* RootStruct = nullptr;
+			const void* RootMemory = nullptr;
+			if (const FStateTreeEditorNode* Editor = FindNode(OwnerKey))
+			{
+				if (Arg.Side == Model::EDstPropertySide::Node)
+				{
+					RootStruct = Editor->Node.GetScriptStruct();
+					RootMemory = Editor->Node.GetMemory();
+				}
+				else
+				{
+					const FStateTreeDataView Instance = Editor->GetInstance();
+					RootStruct = Instance.GetStruct();
+					RootMemory = Instance.GetMemory();
+				}
+			}
+			const FPropertyBindingPath Target = MakeBindingPath(TargetId, Arg.Property, RootStruct, RootMemory);
+			for (int32 Index = 0; Index < Arg.Property.Segments.Num(); ++Index)
+			{
+				if (Arg.Property.Segments[Index].InstanceType.Equals(Model::PropertyBagInstanceType, ESearchCase::CaseSensitive) && !Target.GetSegment(Index).GetInstanceStruct())
+				{
+					Ctx.Dst7003(OwnerKey, FString::Printf(TEXT("`%s` is fed through the parameters of a referenced tree, but the reference holds none."), *Arg.Property.ToString()),
+						TEXT("A reference has the parameters of its tree once the tree is set."));
+					return;
+				}
+			}
 			const bool bNotifyNode = bNotify && Arg.Side == Model::EDstPropertySide::Instance;
 
 			switch (Arg.Kind)

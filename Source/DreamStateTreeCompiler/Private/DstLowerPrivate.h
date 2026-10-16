@@ -298,8 +298,8 @@ namespace UE::DreamStateTree::Compiler::Lowering
 		Operation,
 		/** A call: a property function (or an asset path, which is a constant). */
 		Call,
-		/** A tuple with a binding or an operation inside. */
-		MixedTuple,
+		/** A tuple or a list with a binding or an operation inside, or a reference to a tree with a parameter fed from elsewhere. */
+		Mixed,
 	};
 
 	/** A node being built: what the argument lowering needs to write into. */
@@ -429,14 +429,35 @@ namespace UE::DreamStateTree::Compiler::Lowering
 		bool LowerValue(FNodeBuild& Build, Model::EDstPropertySide Side, const FProperty& Property, const Lang::FDstExpr& Value);
 		bool LowerOutputArgument(FNodeBuild& Build, const Lang::FDstArgument& Argument);
 		bool LowerConstant(FNodeBuild& Build, Model::EDstPropertySide Side, const FProperty& Property, const Lang::FDstExpr& Value);
-		bool LowerMixedTuple(FNodeBuild& Build, Model::EDstPropertySide Side, const FProperty& Property, const Lang::FDstTupleExpr& Tuple);
+		/** A value partly constant and partly fed from elsewhere: the fed parts become arguments, the constant part the property's constant. */
+		bool LowerMixed(FNodeBuild& Build, Model::EDstPropertySide Side, const FProperty& Property, const Lang::FDstExpr& Value);
+		/**
+		 * One value whose property is reached by Path from the side's root. The parts fed from elsewhere are added to Build.Node as
+		 * arguments at their own paths; OutConstant gets the rest as an expression of constants (a tuple, a list, a reference
+		 * with the fed parts left at their defaults). Null in OutConstant when the whole value is fed. False after an error.
+		 */
+		bool SplitValue(FNodeBuild& Build, Model::EDstPropertySide Side, const Model::FDstPropertyPath& Path, const FProperty& Property,
+			const Lang::FDstExpr& Value, const FString& Display, TUniquePtr<Lang::FDstExpr>& OutConstant);
+		bool SplitTuple(FNodeBuild& Build, Model::EDstPropertySide Side, const Model::FDstPropertyPath& Path, const FProperty& Property,
+			const Lang::FDstTupleExpr& Tuple, const FString& Display, TUniquePtr<Lang::FDstExpr>& OutConstant);
+		bool SplitList(FNodeBuild& Build, Model::EDstPropertySide Side, const Model::FDstPropertyPath& Path, const FProperty& Property,
+			const Lang::FDstListExpr& List, const FString& Display, TUniquePtr<Lang::FDstExpr>& OutConstant);
+		bool SplitReference(FNodeBuild& Build, Model::EDstPropertySide Side, const Model::FDstPropertyPath& Path, const Lang::FDstExpr& Value,
+			const FString& Display, TUniquePtr<Lang::FDstExpr>& OutConstant);
+		/**
+		 * Whether Value names a tree for a reference property: `ST_Shoot`, `Path(...)`, either called with parameters, or `None`.
+		 * A path that starts at a binding root is a binding of the whole reference, not that.
+		 */
+		bool TryGetReferenceParts(const Lang::FDstExpr& Value, const FBindScope& Scope, const Lang::FDstExpr*& OutAsset,
+			const TArray<Lang::FDstArgumentPtr>*& OutArguments) const;
 		bool LowerRef(FNodeBuild& Build, Model::EDstPropertySide Side, const FProperty& Property, const Lang::FDstRefExpr& Ref);
 		bool LowerBinding(FNodeBuild& Build, Model::EDstPropertySide Side, const FProperty& Property, const Lang::FDstExpr& Value);
 		bool LowerOperation(FNodeBuild& Build, Model::EDstPropertySide Side, const Model::FDstPropertyPath& TargetPath, const FProperty& Leaf, const Lang::FDstExpr& Value);
 		bool LowerFunctionCall(FNodeBuild& Build, Model::EDstPropertySide Side, const Model::FDstPropertyPath& TargetPath, const FProperty& Leaf, const Lang::FDstExpr& Value);
 		bool BuildOperationNode(const Lang::FDstExpr& Expression, const FProperty& Target, const FNodeBuild& Owner, const FString& PropertyName,
 			TSharedPtr<Model::FDstNode>& OutFunction);
-		EValueClass ClassifyValue(const Lang::FDstExpr& Value, const FBindScope& Scope) const;
+		/** Property is the property the value is for, when known: a reference to a tree is written as a call that is no property function. */
+		EValueClass ClassifyValue(const Lang::FDstExpr& Value, const FBindScope& Scope, const FProperty* Property = nullptr) const;
 		bool TryFold(const Lang::FDstExpr& Expr, FFoldedConstant& OutValue, EValueDomain Domain = EValueDomain::Other) const;
 		/** A literal expression holding a folded constant, spanning Span. */
 		TUniquePtr<Lang::FDstExpr> MakeConstantExpr(const FFoldedConstant& Value, const Lang::FDstSpan& Span) const;

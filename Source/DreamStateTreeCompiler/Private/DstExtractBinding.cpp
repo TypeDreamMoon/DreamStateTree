@@ -20,6 +20,7 @@
 
 #include "DstExtractCommon.h"
 
+#include "DstValues.h"
 #include "PropertyBindingPath.h"
 #include "StateTreeDelegate.h"
 #include "StateTreeEditorData.h"
@@ -587,6 +588,48 @@ namespace UE::DreamStateTree::Compiler::Extracting
 		{
 			return A.Property.ToString().Compare(B.Property.ToString(), ESearchCase::CaseSensitive) < 0;
 		});
+	}
+
+	void FExtractor::PutFedParameterPartsAtDefault(const UStateTreeState& State, FDstState& Out)
+	{
+		const FInstancedPropertyBag& Bag = State.Parameters.Parameters;
+		const uint8* Memory = Bag.GetValue().GetMemory();
+		if (!Bag.GetPropertyBagStruct() || !Memory)
+		{
+			return;
+		}
+
+		// The parameters whose bindings feed only a part of them.
+		TMap<FString, TArray<FDstPropertyPath>> PartBound;
+		for (const FDstArg& Arg : Out.ParameterBindings)
+		{
+			if (Arg.Property.Segments.Num() > 1 || (Arg.Property.Segments.Num() == 1 && Arg.Property.Segments[0].ArrayIndex != INDEX_NONE))
+			{
+				PartBound.FindOrAdd(Arg.Property.Segments[0].Name).Add(Arg.Property);
+			}
+		}
+
+		for (FDstParameter& Parameter : Out.Parameters)
+		{
+			const TArray<FDstPropertyPath>* Paths = PartBound.Find(Parameter.Name);
+			const FPropertyBagPropertyDesc* Desc = Paths ? Bag.FindPropertyDescByName(FName(*Parameter.Name)) : nullptr;
+			if (!Desc || !Desc->CachedProperty)
+			{
+				continue;
+			}
+			FString Text;
+			FString Problem;
+			bool bSameAsDefault = false;
+			if (!ExportDstValueWithBoundParts(*Desc->CachedProperty, Memory, nullptr, *Paths, Text, bSameAsDefault, Problem))
+			{
+				Sink.Error(TEXT("DST8007"), Lang::FDstSpan(),
+					FString::Printf(TEXT("A binding ends inside the parameter `%s` of `%s`, but its path leads nowhere in the value: %s"), *Parameter.Name, *State.Name.ToString(), *Problem),
+					TEXT("Bind the parameter again in the editor."));
+				continue;
+			}
+			// The model spells the type's zero value as no text.
+			Parameter.ValueText = Text != DstExportDefault(*Desc->CachedProperty, nullptr) ? Text : FString();
+		}
 	}
 
 	void FExtractor::ReportUnconsumedBindings()

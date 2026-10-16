@@ -108,6 +108,12 @@ namespace UE::DreamStateTree::Compiler::GeneratePrivate
 
 	/** A binding path from the model's path: the segments as written, with the instance types the model knows. */
 	FPropertyBindingPath MakeBindingPath(const FGuid& StructId, const Model::FDstPropertyPath& Path);
+	/**
+	 * The same, for a path that starts in the data RootStruct describes (held at RootMemory): a segment of the model's
+	 * PropertyBag instance type, the parameter bag of a reference to a tree, takes the struct that data holds there. The
+	 * segment is left without an instance struct when the data does not reach it.
+	 */
+	FPropertyBindingPath MakeBindingPath(const FGuid& StructId, const Model::FDstPropertyPath& Path, const UStruct* RootStruct, const void* RootMemory);
 
 	/** What a node of the model is in the engine. */
 	struct FResolvedNodeType

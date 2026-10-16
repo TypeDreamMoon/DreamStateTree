@@ -23,6 +23,14 @@
 
 namespace UE::DreamStateTree::Model
 {
+	/**
+	 * The InstanceType of the segment that enters the parameters of a reference to another tree
+	 * (`StateTree.Parameters.Value<PropertyBag>.Target`, FStateTreeReference). The engine makes that struct out of the
+	 * referenced tree's parameters and names it after a hash of their IDs, so the model names no struct: the generator
+	 * takes the one the reference holds.
+	 */
+	inline constexpr const TCHAR* PropertyBagInstanceType = TEXT("PropertyBag");
+
 	/** One step of a property path: `Payload`, `Items[2]`, a struct member. */
 	struct FDstPathSegment
 	{
@@ -108,11 +116,19 @@ namespace UE::DreamStateTree::Model
 		Node,
 	};
 
-	/** One property of a node that differs from its default or is fed from elsewhere. */
+	/**
+	 * One property of a node that differs from its default or is fed from elsewhere.
+	 *
+	 * A constant is the export text of a whole top-level property. When parts of that property are fed from elsewhere
+	 * (`Interval.Min`, `QueryConfig[1].Value`, a parameter of a referenced tree) each part has an argument of its own with
+	 * the longer path, and the constant holds those parts at the default a text gives a field it leaves out: a struct's
+	 * default (FLinearColor and FColor opaque), an array element's default. Whatever an asset holds under a binding is
+	 * overwritten by it, and the text has no place for it.
+	 */
 	struct FDstArg
 	{
 		EDstPropertySide Side = EDstPropertySide::Instance;
-		/** The property, from the side's root: `Duration`, `Interval.Min`. */
+		/** The property, from the side's root: `Duration`, `Interval.Min`, `QueryConfig[1].Value`. */
 		FDstPropertyPath Property;
 		EDstValueKind Kind = EDstValueKind::Constant;
 		/** Constant only: the engine's export text. */
