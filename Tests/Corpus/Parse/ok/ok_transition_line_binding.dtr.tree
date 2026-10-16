@@ -1,0 +1,45 @@
+Document StateTree
+  Arg Name
+    String "AI/ST_TransitionLines"
+  Arg Schema
+    Name Villager
+  State Root
+    Clause Transition
+      Name Root
+    Clause If
+      Name Ready
+    Clause Transition
+      Name Idle
+      On
+        Name Tick
+    Clause On
+      Name Hit
+    Clause Transition
+      Name Root
+      On
+        Name Tick
+      If
+        Binary and
+          Binary >
+            Member Distance
+              Name Player
+            Number 2500
+          Unary not
+            Member Sees
+              Name Player
+      Meta
+        MetaEntry Delay
+          Number 1
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 1
+  State Idle
+    Clause Do
+      Task
+        Call
+          Name Wait
+          Arg
+            Number 2

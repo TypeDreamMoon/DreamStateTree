@@ -1,0 +1,13 @@
+StateTree(Name="AI/ST_TransitionLines", Schema=Villager)
+{
+    State Root {
+        -> Root
+        if Ready
+        -> Idle on Tick
+        on Hit
+        -> Root on Tick if Player.Distance > 2500
+                           and not Player.Sees [ Delay = 1 ]
+        do Wait(1)
+    }
+    State Idle { do Wait(2) }
+}

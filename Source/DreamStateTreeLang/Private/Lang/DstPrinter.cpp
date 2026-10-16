@@ -1517,6 +1517,15 @@ namespace UE::DreamStateTree::Lang
 				{
 					return false;
 				}
+				// An `on` or `if` right after a transition on the same line would read as the transition's own.
+				if (Index > 0 && (Clause->ClauseKind == EDstClauseKind::On || Clause->ClauseKind == EDstClauseKind::If))
+				{
+					const FDstClauseStmt* Before = Ordered[Index - 1]->As<FDstClauseStmt>();
+					if (Before && Before->ClauseKind == EDstClauseKind::Transition)
+					{
+						return false;
+					}
+				}
 				++ClauseCount;
 				if (!IsBareTransition(*Clause))
 				{

@@ -2527,9 +2527,9 @@ namespace UE::DreamStateTree::Lang
 					return EStmtResult::Failed;
 				}
 
-				// `on` and `if` after the target belong to the transition: a clause keyword cannot follow a target any
-				// other way, and the formatter writes the state's own `on` and `if` before its transitions.
-				if (IsWord(Current(), TEXT("on")))
+				// `on` and `if` belong to the transition when they go on the line the transition has reached; on a line of
+				// their own they are the state's clauses (`-> Root` then `if Ready` on the next line is an enter condition).
+				if (IsWord(Current(), TEXT("on")) && Current().Span.Line == Previous().Span.Line)
 				{
 					Clause->OnSpan = Advance().Span;
 					if (!ExpectExpression(TEXT("the trigger after 'on'"), TEXT("The trigger is Succeeded, Failed, Completed, Tick, an event tag, Tag(PayloadType) or Delegate(Path).")))
@@ -2543,7 +2543,7 @@ namespace UE::DreamStateTree::Lang
 					}
 				}
 
-				if (IsWord(Current(), TEXT("if")))
+				if (IsWord(Current(), TEXT("if")) && Current().Span.Line == Previous().Span.Line)
 				{
 					Clause->IfSpan = Advance().Span;
 					if (!ExpectExpression(TEXT("a condition after 'if'"), TEXT("Write a condition node call, a comparison or a bool path.")))
