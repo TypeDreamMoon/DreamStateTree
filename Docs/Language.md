@@ -562,7 +562,9 @@ An argument, a setting or a default is one of these:
 | `(0, 3000)`, `(X = 1, Y = 2)` | a struct constant |
 | `[1, 2, 3]` | an array or set constant |
 | `EQ_Wander`, `Path(Game, "AI/EQ_Wander")` | an asset reference (constant) |
+| `ST_Shoot`, `ST_Shoot(Range = 800)` | a reference to a StateTree, with the parameters it overrides (constant) |
 | `Params.Home`, `Info.DistanceToTarget`, `Event.Clear` | a binding |
+| `(Min = Params.A, Max = 5)`, `[(Value = Params.X), (Value = 300)]`, `ST_Shoot(Target = Params.T)` | a constant with parts bound ([below](#parts-fed-from-elsewhere)) |
 | `1 + Params.Hurry * 0.5`, `GetActorLocation(Player.Pawn)` | a property function bound into the property |
 | `ref Params.WanderSpot` | a property reference |
 | `Prop -> Params.Dist` | an output binding |
@@ -585,6 +587,7 @@ How a constant is read depends on the type of the property it is for.
 | tag container | `[Tag, Tag]` |
 | struct | a tuple, by position in declaration order, `(0, 3000)`, or by field name, `(X = 1, Y = 2)`; a field not written keeps the struct's default (`FLinearColor` and `FColor` start fully opaque) |
 | array, set | `[a, b, c]` |
+| reference to a StateTree (`FStateTreeReference`) | the tree's asset and, in parentheses, the parameters it overrides: `ST_Shoot`, `ST_Shoot(Range = 800)`, `Path(Game, "AI/ST_Shoot")(Range = 800)`, or `None` for no tree ([below](#a-reference-to-a-statetree)) |
 | object, soft object | an asset by short name (when it is unique in the project), `Path(Game, "AI/EQ_Wander")`, or `None` |
 | class, soft class | a class name (`Actor`, `BP_Enemy`), `Path(...)`, or `None` |
 
@@ -596,6 +599,57 @@ expected. A fixed-size array and an instanced subobject have no text form.
 
 Two constants combined with an operator are computed when the text is read: `2 * 0.75` is `1.5`. Whole numbers divide like the
 engine's Int property function does, dropping the fraction.
+
+### Parts fed from elsewhere
+
+A tuple, a list or a reference can be constant in some places and bound in others. Each place that is a path (or an operation, or a
+call) becomes a binding of its own; the rest is the property's constant:
+
+```dtr
+do RunEnvQuery(
+    QueryConfig = [
+        (ParamName = "Min Distance", Value = Params.MinDist),
+        (ParamName = "Max Distance", Value = 300)
+    ],
+    Result = ref Params.Spot)
+do Patrol(Range = (Min = Params.Near, Max = 9), Tint = (R = Params.Glow, G = 0.25))
+```
+
+- A bound place is a field of a tuple (`Range.Min`), an element of an array (`QueryConfig[0]`), or both together
+  (`QueryConfig[1].Value`, `Waypoints[0].Offset.X`); each may be a path, an operation (`Params.A * 2`) or a call. An element that is
+  bound as a whole is `[1, Params.Speed, 3]`.
+- **The constant is the whole value with the bound places at their defaults.** A field a tuple does not write keeps the struct's
+  default, whether the field is bound or not; an array element is the element's default until its fields are written. What an
+  asset happens to store under a binding (the value that was there before the property was bound) is overwritten when the tree
+  runs, so the text has no place for it and the decompiler does not write it.
+- **A tuple is the whole value.** `Range = (Min = Params.A)` leaves `Max` at the struct's default, not at the node's default for
+  `Range`; write the fields you want.
+- Only an array's elements can be bound one by one. A list with a path in it for a set is DST4024. A field that does not exist,
+  or a tuple for something that is not a struct, is DST4008; a field given by position and by name is DST4017.
+- The list is the whole array: `[(Value = Params.X)]` is an array of one element, whose other fields are the element's defaults.
+
+### A reference to a StateTree
+
+A property of type `FStateTreeReference` (the engine's Run Parallel Tree task has one, `StateTree`) holds a tree asset and values
+for that tree's parameters. It is written as a call of the asset; the arguments are the parameters it overrides:
+
+```dtr
+do RunParallelStateTree(StateTree = ST_Shoot)
+do RunParallelStateTree(StateTree = ST_Shoot(Range = 800, Target = Params.Target))
+do RunParallelStateTree(StateTree = Path(Game, "AI/ST_Shoot")(Range = Params.Reach * 2))
+do RunParallelStateTree(StateTree = ST_Shoot(Home = (X = Params.Reach), Weights = [1, Params.Reach]))
+```
+
+- The asset is named by its short name when that is unique (else `Path(Root, "Rel")`); it has to exist. A missing or ambiguous
+  asset, or one that is not a StateTree, is DST4008.
+- The arguments are parameters of that tree, by name or by position in the tree's declaration order. An unknown parameter is
+  DST4023, more positions than parameters DST4016, a parameter given by position and by name DST4017.
+- **Writing a parameter overrides it**, whatever its value: `ST_Shoot(Range = 2)` overrides `Range` even if the tree's default is 2.
+  A parameter not written follows the tree's default.
+- A value may be a constant, a path, an operation or a call, like any argument, or have parts bound as above (`Home = (X =
+  Params.Reach)`, `Weights = [1, Params.Reach]`). A bound parameter is overridden too. A path of the wrong type is DST5003.
+- `StateTree = Params.Preferred` binds the whole reference to a parameter of type `StateTreeReference`; a tree parameter can hold a
+  reference as a default: `StateTreeReference Preferred = ST_Shoot(Range = 4);`.
 
 ### Paths and bindings
 

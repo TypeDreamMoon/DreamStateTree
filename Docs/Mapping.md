@@ -188,9 +188,52 @@ target property of a node, a parameter or a transition.
 | `Prop = ref path` | a property reference to the source |
 | `Prop -> Params.X` | the node's property copied into the parameter (the source of the binding is the destination) |
 | `Prop = a + b`, `Prop = F(x)` | a property function node, created inside the binding, whose result is bound to the property |
+| `Prop = (Min = path, Max = 5)` | a binding into the member: the target path is `Prop.Min` ([Parts of a property](#parts-of-a-property)) |
+| `Prop = [(Value = path)]` | a binding into a member of an element: `Prop[0].Value` |
+| `Prop = Tree(Param = path)` | a binding into a parameter of a reference to a tree: `Prop.Parameters.Value<PropertyBag>.Param`, the parameter marked as overridden |
 | `link Name(Param = path)` | the target state's parameter fed from the path, with the parameter marked as overridden |
 | `on Delegate(path)` | the transition's delegate listener |
 | a task's `.Succeeds` / `.Fails` / `.Completes` | the task's completion dispatcher |
+
+### Parts of a property
+
+A binding may feed only a part of a property: a member of a struct, an element of an array, a member of an element
+(`Waypoints[1].Offset.X`), or a parameter of a referenced tree. Its target path has a segment per step; a segment that picks an
+array element carries the index. The property keeps its constant, and each bound part has an argument of its own:
+
+| | In the model |
+|---|---|
+| the property | one constant argument: the export text of the whole property |
+| each bound part | an argument with the longer path (`Range.Min`, `QueryConfig[0].Value`) |
+
+The constant has the bound parts at the default a text gives them, so that the extractor and the lowering write the same text:
+a field a tuple does not write is the struct's default (`FLinearColor` and `FColor` opaque), an element or a parameter bound as
+a whole is the type's default, and a struct element is the struct's default. The extractor puts each bound part back to that
+default before it exports the property, whatever the asset stored there (the binding overwrites it when the tree runs). The
+constant is a model argument when it differs from the property's default after that. A linked state's parameter whose bindings feed
+a part of it is treated the same.
+
+Raise writes the constant as a tuple or list and puts the bound parts into it in the order the struct declares its fields.
+
+### References to other trees
+
+An `FStateTreeReference` property holds a tree asset, a property bag of values for that tree's parameters, and the IDs of the
+parameters that are overridden (`PropertyOverrides`). The text writes `Tree(Param = value)`.
+
+| Engine | Text |
+|---|---|
+| `StateTree` (the asset) | the callee: the asset's short name, or `Path(Root, "Rel")` |
+| the bag's value of an overridden parameter | the argument `Param = value` |
+| `PropertyOverrides` | which parameters are written as arguments, in the order of the tree's parameters |
+| a parameter of the bag that is not overridden | not written: it follows the tree (`SetStateTree` copies the tree's defaults) |
+| a binding into `StateTree.Parameters.Value.Param` | the argument `Param = path`; the parameter is overridden |
+
+The constant is the reference's export text, which names the bag's struct (`/Engine/Transient.PropertyBag_<hash>`, made by the
+engine from the tree's parameters, so the hash changes with their IDs). The extractor first brings the reference in step with its
+tree (`SyncParameters`), puts the overrides in the order of the tree's parameters, marks the parameters that are bound as
+overridden, and puts the bound parts at their defaults, so the same text gives the same constant. The model does not name the bag
+in a path: the segment that enters it has the instance type `PropertyBag`, and the generator takes the struct the reference holds
+there. A model with a reference can only be generated while the referenced tree is loaded.
 
 Steps the generator takes that the editor takes when a binding is made (they are why a build is not just filling in fields):
 every node a binding is made into is told with `OnBindingChanged` (a Compare Enum condition takes its enum from its binding);
@@ -290,7 +333,7 @@ Everything the build creates gets an ID that is the same on every build, so that
 | a transition | `<state path>#<index>` | |
 | a task, condition or consideration | `<state path>/Task[1]`, `/EnterCondition[0]`, `/Consideration[0]`, `/Transition[2]/Condition[0]` | |
 | a global node | `Global[0]` | |
-| a property function | `<owner key>/Fn:<property>` | |
+| a property function | `<owner key>/Fn:<property path>`, such as `Fn:Duration` or `Fn:QueryConfig[0].Value` | |
 | the tree's parameters struct | `Parameters` | |
 | a tree parameter | `Param:<name>` | |
 | a color | `Color:<name>` | |
@@ -316,6 +359,7 @@ copy fails to compile. Building from the text fixes both; the decompiler repairs
 | a localized `FText` property value | the text holds plain strings (DST8004) |
 | a transition with `ForceSustained` | read as the default, with a warning (DST8004) |
 | a transition's selection fallback | no field in the model (DST8008, warning) |
-| a binding into a member of an array element | no way to name it (DST8054) |
+| a binding that reads from a member of an array element | no way to name it (DST8054) |
+| a binding into a part of a value whose type only the instance knows (an instanced struct, an object), other than a reference's parameters | no way to name it (DST8054) |
 | a property function without a node, a binding into a transition other than its delegate listener | no place in the model (DST8007, DST8008) |
 | two sibling states with the same name | the model identifies a state by its path (DST8005) |

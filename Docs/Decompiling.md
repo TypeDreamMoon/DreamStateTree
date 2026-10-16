@@ -143,7 +143,10 @@ building the result gives the same tree again:
   every other one becomes a call. A Constant consideration alone becomes `utility 0.5`.
 - A constant becomes a literal: numbers in the shortest form that reads back, enum values by name, assets by short name when it
   is unique among assets of that class (else `Path(Root, "Rel")`), structs as tuples with only the fields that differ from the
-  struct's default, tags in full.
+  struct's default, tags in full, a reference to a tree as a call of its asset with the parameters it overrides.
+- A binding that feeds a part of a property (a member of a struct, an element of an array, a parameter of a referenced tree) is
+  written inside the property's tuple, list or call; the part the constant holds under it is the default, which the text leaves
+  out when it can.
 - A context binding the compiler would make by itself is left out; only a real override is written. (Existing trees often bind
   a Context property by hand.)
 - An event binding becomes `Event.X`; a binding to a state's parameters becomes `Params.X`, as does one to the tree's.

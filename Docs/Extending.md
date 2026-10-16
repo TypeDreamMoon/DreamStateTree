@@ -43,7 +43,8 @@ Without any metadata:
   `meta = (Optional)` lets an Input stay unbound. A property reference is a `FStateTreePropertyRef` and is written with `ref`.
 - A struct marked `meta = (Hidden)` is not a node (it is how the engine marks the bases games derive from).
 - Constants of the property types work: numbers, strings, enums, structs as tuples, arrays, gameplay tags, assets by name,
-  classes ([Language.md](Language.md#constants)).
+  classes, references to other StateTrees ([Language.md](Language.md#constants)). Bindings may feed a member of a struct property, an
+  element of an array property, or a parameter of a tree reference ([Language.md](Language.md#parts-fed-from-elsewhere)).
 
 ## L1: metadata
 
