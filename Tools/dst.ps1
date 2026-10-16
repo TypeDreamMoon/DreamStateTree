@@ -5,27 +5,71 @@
 #   dst.ps1 make                  build the test host's editor target (the C++)
 #   dst.ps1 test [-Preset P] [-Filter F] [-NoBuild]
 #                                 make, then run the automation tests headless in the test host. Presets:
-#                                 Spike (the engine-behaviour experiments; the default for now), All.
-#                                 -Filter replaces the preset's tests.
+#                                 Quick (the language, the compiler's corpus and unit tests, write-back, the
+#                                 editor; the default), RoundTrip (every corpus tree decompiled, rebuilt and
+#                                 compared as text, as a model and as a compiled asset), Behavior (rebuilt
+#                                 trees run side by side with the originals), Spike (the engine-behaviour
+#                                 experiments), All. -Filter replaces the preset's tests; several prefixes
+#                                 are joined with `+`.
 #
+#   dst.ps1 build [-File F] [-Root R] [-NoSave] [-Json J]
+#                                 compile the .dtr/.dth sources into StateTree assets and save them
+#   dst.ps1 check [-File F] [-Root R] [-Json J]
+#                                 parse, includes, templates and semantic checks only; nothing is generated
+#   dst.ps1 fmt [-File F] [-Root R] [-Write | -Verify] [-Markers] [-Json J]
+#                                 print the canonical text; -Write rewrites the files that differ (keeping
+#                                 their line ends); -Verify writes nothing and fails on any file not canonical
+#   dst.ps1 decompile (-Asset A[,B] | -Under /Game/Folder) [-Out O] [-TagPrefix P[,Q]] [-Stdout [-Markers]] [-Force] [-Json J]
+#                                 StateTree assets to text, below the project's DTree/ unless -Out;
+#                                 a file that exists and differs is only replaced with -Force; -TagPrefix
+#                                 shortens gameplay tags with these prefixes and declares them in a Tags section
+#
+# build, check, fmt and decompile run `UnrealEditor-Cmd <project> -run=DreamStateTree` on -Project, else the
+# project above -File, else the test host, and keep the lines that matter: diagnostics
+# (`<file>(<line>,<col>): error DSTnnnn: ...`), the summary, errors and crashes (-Raw shows everything).
+# -File is a source (absolute, relative to the current directory, or relative to the project directory);
+# a .dth stands for the trees that include it. -Root replaces the project's and the enabled plugins'
+# DTree/ folders. -Out and -Json are relative to the project directory. -Json writes every diagnostic as
+# JSON for the VS Code extension. fmt and decompile -Stdout print the text on the output stream and their
+# status lines on the host; several files' texts come between `===== begin <name> =====` and
+# `===== end <name> =====` lines, and -Markers puts those lines around a single text too (a host line
+# also reaches a redirected stdout, so a tool reading it needs them). Redirected output is UTF-8.
+# The engine log of each run is kept in <project>/Saved/DreamStateTree/.
 # The engine is the project's EngineAssociation, looked up among registered source builds and Launcher
 # installations; -EngineRoot <dir> names one instead.
+# A build writes packages: close any editor that has the project open.
 #
 # Exit codes
 #   make: 0 built, 2 failed.
 #   test: 0 green, 1 red (a test failed or an ensure fired), 2 not judged (the build failed, the editor
 #         crashed or timed out, or fewer tests ran than the preset expects). Results land in
 #         <host>/Saved/DreamStateTreeTests/<time>-<preset>/: the engine's index.json, the run log and summary.md.
+#   build, check, fmt, decompile: 0 no errors, 1 errors (fmt -Verify: a file not canonical), 2 the
+#         commandlet did not finish (it crashed, timed out, or never printed its summary).
 
 [CmdletBinding()]
 param(
-    [Parameter(Position = 0)][ValidateSet('make', 'test')][string]$Command = 'test',
-    [ValidateSet('Spike', 'All')][string]$Preset = 'Spike',
+    [Parameter(Position = 0)][ValidateSet('make', 'test', 'build', 'check', 'fmt', 'decompile')][string]$Command = 'test',
+    [ValidateSet('Quick', 'RoundTrip', 'Behavior', 'Spike', 'All')][string]$Preset = 'Quick',
     [string]$Filter,
     [switch]$NoBuild,
     [string]$Project,
     [string]$EngineRoot,
-    [int]$TimeoutMinutes = 0
+    [int]$TimeoutMinutes = 0,
+    [string]$File,
+    [string[]]$Root,
+    [switch]$Write,
+    [switch]$Verify,
+    [string[]]$Asset,
+    [string]$Under,
+    [string]$Out,
+    [string[]]$TagPrefix,
+    [switch]$Stdout,
+    [string]$Json,
+    [switch]$NoSave,
+    [switch]$Force,
+    [switch]$Raw,
+    [switch]$Markers
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,8 +80,11 @@ if ([Console]::IsOutputRedirected) { [Console]::OutputEncoding = [Text.UTF8Encod
 
 # MinTests is the least a preset runs: fewer means the filter or the module is broken, not a green run.
 $Presets = @{
-    Spike = @{ Filter = 'DreamStateTree.Spike.'; MinTests = 1; Timeout = 30 }
-    All   = @{ Filter = 'DreamStateTree.'; MinTests = 1; Timeout = 60 }
+    Quick     = @{ Filter = 'DreamStateTree.Lang.+DreamStateTree.Compiler.+DreamStateTree.WriteBack.+DreamStateTree.Editor.'; MinTests = 50; Timeout = 30 }
+    RoundTrip = @{ Filter = 'DreamStateTree.RoundTrip.'; MinTests = 1; Timeout = 60 }
+    Behavior  = @{ Filter = 'DreamStateTree.Behavior.'; MinTests = 1; Timeout = 60 }
+    Spike     = @{ Filter = 'DreamStateTree.Spike.'; MinTests = 1; Timeout = 30 }
+    All       = @{ Filter = 'DreamStateTree.'; MinTests = 100; Timeout = 90 }
 }
 
 function Write-Step([string]$Text) { Write-Host "==> $Text" -ForegroundColor Cyan }
@@ -97,7 +144,15 @@ function Resolve-EngineRoot([string]$UProject) {
     return $root.Replace('/', '\')
 }
 
-$uproject = Find-HostProject
+# -File relative to the current directory, when it names a file there; else as given (the commandlet
+# reads it relative to the project directory).
+$sourceFile = $File
+if ($File -and (Test-Path -LiteralPath $File -PathType Leaf)) { $sourceFile = (Resolve-Path -LiteralPath $File).Path }
+
+$uproject = if ($Command -in 'make', 'test') { Find-HostProject }
+elseif ($Project) { (Resolve-Path $Project).Path }
+elseif ($sourceFile -and [IO.Path]::IsPathRooted($sourceFile) -and (Find-ProjectAbove $sourceFile)) { Find-ProjectAbove $sourceFile }
+else { Find-HostProject }
 $projectDir = Split-Path $uproject
 $hostName = [IO.Path]::GetFileNameWithoutExtension($uproject)
 $engineRoot = Resolve-EngineRoot $uproject
@@ -218,6 +273,118 @@ function Invoke-Tests {
     return (Get-Digest -RunDir $runDir -Floor $floor -TimedOut $timedOut -ExitCode $exitCode -Seconds $watch.Elapsed.TotalSeconds)
 }
 
+# ---------------------------------------------------------------- build / check / fmt / decompile
+
+function Get-EditorsOnProject([string]$UProject) {
+    # Every UnrealEditor*.exe whose command line names this .uproject.
+    $needle = $UProject.Replace('/', '\').ToLowerInvariant()
+    foreach ($p in @(Get-CimInstance -ClassName Win32_Process -Filter "Name LIKE 'UnrealEditor%'" -ErrorAction SilentlyContinue)) {
+        $line = [string]$p.CommandLine
+        if ($line -and $line.Replace('/', '\').ToLowerInvariant().Contains($needle)) { $p }
+    }
+}
+
+function Format-Switch([string]$Name, [string]$Value) {
+    # One argument of the command line, quoted. A value may not end in a backslash (the C runtime reads \"
+    # as a quote) nor hold a quote.
+    if ($Value.Contains('"')) { throw "-$Name may not hold a quote: $Value" }
+    return "-$Name=`"$($Value.TrimEnd('\'))`""
+}
+
+$script:CommandletExit = 2
+
+function Invoke-Commandlet {
+    $arguments = @()
+    switch ($Command) {
+        'check' { $arguments += '-Check' }
+        'fmt' { $arguments += '-Format' }
+        'decompile' { $arguments += '-Decompile' }
+    }
+    if ($sourceFile) { $arguments += Format-Switch 'File' $sourceFile }
+    if ($Root) { $arguments += Format-Switch 'Root' (($Root | ForEach-Object { $_.TrimEnd('\') }) -join ',') }
+    if ($Write) { $arguments += '-Write' }
+    if ($Verify) { $arguments += '-Verify' }
+    foreach ($a in @($Asset)) { if ($a) { $arguments += Format-Switch 'Asset' $a } }
+    if ($Under) { $arguments += Format-Switch 'Under' $Under }
+    if ($Out) { $arguments += Format-Switch 'Out' $Out }
+    if ($TagPrefix) { $arguments += Format-Switch 'TagPrefix' ($TagPrefix -join ',') }
+    if ($Stdout) { $arguments += '-Stdout' }
+    if ($Json) { $arguments += Format-Switch 'Json' $Json }
+    if ($NoSave) { $arguments += '-NoSave' }
+    if ($Force) { $arguments += '-Force' }
+
+    $writesAssets = $Command -eq 'build'
+    if ($writesAssets -and @(Get-EditorsOnProject $uproject).Count -gt 0) {
+        Write-Problem "An editor has $uproject open; a build that saves packages will fight it over them."
+    }
+
+    $runDir = Join-Path $projectDir 'Saved\DreamStateTree'
+    New-Item -ItemType Directory -Force -Path $runDir | Out-Null
+    $stamp = '{0}-{1}' -f $Command, (Get-Date -Format 'yyyyMMdd-HHmmss')
+    $log = Join-Path $runDir "$stamp.log"
+    $stdoutFile = Join-Path $runDir "$stamp.stdout.txt"
+    $stderrFile = Join-Path $runDir "$stamp.stderr.txt"
+    # The log goes to a file, not to stdout: the engine's own -stdout switch is also the commandlet's
+    # "print the decompiled text" switch, and stdout carries only the text this way.
+    $parts = @("`"$uproject`"", '-run=DreamStateTree') + $arguments + @(
+        "-abslog=`"$log`"", '-unattended', '-nopause', '-nosplash', '-NoSound', '-nullrhi', '-NoLiveCoding')
+    $argLine = $parts -join ' '
+    Write-Verbose "`"$editorCmd`" $argLine"
+
+    $proc = Start-Process -FilePath $editorCmd -ArgumentList $argLine -WorkingDirectory $projectDir -NoNewWindow -PassThru `
+        -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+    $null = $proc.Handle
+    $timedOut = $false
+    $limit = if ($TimeoutMinutes -gt 0) { $TimeoutMinutes * 60 * 1000 } else { -1 }
+    if (-not $proc.WaitForExit($limit)) {
+        $timedOut = $true
+        try { $proc.Kill($true) } catch { }
+        $null = $proc.WaitForExit(60000)
+    }
+    $exitCode = if ($timedOut) { $null } else { $proc.ExitCode }
+
+    $stdoutLines = if (Test-Path -LiteralPath $stdoutFile) { @(Get-Content -LiteralPath $stdoutFile -Encoding utf8) } else { @() }
+    $logLines = if (Test-Path -LiteralPath $log) { @(Get-Content -LiteralPath $log -Encoding utf8) } else { @() }
+
+    # fmt and decompile -Stdout print text: that goes on the output stream, everything else on the host.
+    $printsText = ($Command -eq 'fmt' -and -not $Write -and -not $Verify) -or ($Command -eq 'decompile' -and $Stdout)
+    $status = if ($printsText) { { param($Line) Write-Host $Line } } else { { param($Line) Write-Output $Line } }
+
+    if ($Raw) {
+        $stdoutLines | ForEach-Object { Write-Output $_ }
+        $logLines | ForEach-Object { & $status $_ }
+    } else {
+        # The text blocks, between the commandlet's markers; a single one without them unless -Markers.
+        $blocks = [Collections.Generic.List[object]]::new()
+        $current = $null
+        foreach ($line in $stdoutLines) {
+            if ($line -match '^===== begin (.*) =====$') { $current = [pscustomobject]@{ Name = $Matches[1]; Lines = [Collections.Generic.List[string]]::new() }; continue }
+            if ($line -match '^===== end (.*) =====$') { if ($current) { $blocks.Add($current); $current = $null }; continue }
+            if ($current) { $current.Lines.Add($line) }
+        }
+        $marked = $Markers -or $blocks.Count -gt 1
+        foreach ($block in $blocks) {
+            if ($marked) { Write-Output "===== begin $($block.Name) =====" }
+            $block.Lines | ForEach-Object { Write-Output $_ }
+            if ($marked) { Write-Output "===== end $($block.Name) =====" }
+        }
+
+        # The commandlet's own lines in full; from the rest of the engine only errors and crashes.
+        foreach ($line in $logLines) {
+            $clean = ($line -replace '^\[[^\]]*\]\[\s*\d+\]', '').TrimEnd()
+            if ($clean -match '^LogDreamStateTreeCommandlet: (?:(?:Display|Warning|Error|Log): )?(.*)$') { & $status $Matches[1]; continue }
+            if ($clean -match '=== Critical error|Fatal error|Unhandled Exception|Assertion failed|: Error: |DST\d{4}') { & $status $clean }
+        }
+    }
+
+    $crashed = @($logLines + $stdoutLines | Where-Object { $_ -match '=== Critical error: ===|Fatal error!|Unhandled Exception|Assertion failed:' }).Count -gt 0
+    $finished = @($logLines | Where-Object { $_ -match 'LogDreamStateTreeCommandlet: (?:Display: )?DreamStateTree( \w+)?: ' }).Count -gt 0
+    $script:CommandletExit = 0
+    if ($timedOut) { Write-Problem "Still running after $TimeoutMinutes minutes: the editor was killed. Log: $log"; $script:CommandletExit = 2 }
+    elseif ($crashed) { Write-Problem "The editor crashed. Log: $log"; $script:CommandletExit = 2 }
+    elseif (-not $finished) { Write-Problem "The commandlet did not finish (exit $exitCode). Log: $log"; $script:CommandletExit = 2 }
+    elseif ($exitCode -ne 0) { $script:CommandletExit = 1 }
+}
 
 # ---------------------------------------------------------------- main
 
@@ -226,5 +393,10 @@ switch ($Command) {
     'test' {
         if (-not $NoBuild) { if (-not (Invoke-Build)) { exit 2 } }
         exit (Invoke-Tests)
+    }
+    default {
+        # The function writes its lines to the output stream; its verdict comes back through a variable.
+        Invoke-Commandlet
+        exit $script:CommandletExit
     }
 }
