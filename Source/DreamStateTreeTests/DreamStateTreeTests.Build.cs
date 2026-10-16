@@ -25,6 +25,7 @@ public class DreamStateTreeTests : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"AIModule",
+			"ApplicationCore",
 			"GameplayStateTreeModule",
 			"UnrealEd",
 			"AssetTools",
@@ -32,5 +33,8 @@ public class DreamStateTreeTests : ModuleRules
 			"DreamStateTreeLang",
 			"DreamStateTreeCompiler",
 		});
+
+		// StateTreeEditorModule.h includes BlueprintEditorModule.h, which lives in Kismet.
+		PrivateIncludePathModuleNames.Add("Kismet");
 	}
 }
