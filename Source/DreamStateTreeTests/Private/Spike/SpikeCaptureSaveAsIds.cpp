@@ -386,7 +386,7 @@ bool FDstSpikeCaptureSaveAsIdsTest::RunTest(const FString& Parameters)
 		FString Section = TEXT("== Copy made with IAssetTools::DuplicateAsset ==\n");
 		if (!Copy)
 		{
-			Section += TEXT("  DuplicateAsset returned no asset (it needs the UI services or refused the name in this run); the StaticDuplicateObjectEx result above is the same code path without dialogs.\n");
+			Section += TEXT("  Skipped: it crashed the headless editor on the next tick; the StaticDuplicateObjectEx result above is the same code path without dialogs.\n");
 		}
 		else
 		{
