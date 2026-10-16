@@ -28,6 +28,11 @@ public class DreamStateTreeCompiler : ModuleRules
 			"UnrealEd",
 			"AssetTools",
 			"AssetRegistry",
+			"Projects",
+			"Json",
 		});
+
+		// StateTreeEditorModule.h includes BlueprintEditorModule.h, which lives in Kismet.
+		PrivateIncludePathModuleNames.Add("Kismet");
 	}
 }
