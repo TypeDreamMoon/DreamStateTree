@@ -1,0 +1,21 @@
+StateTree(Name="DreamStateTreeTests/Validate/PartFedInTheWrongPlace", Schema=TestAgent)
+{
+    Parameters = { float Speed = 4; }
+
+    State Root {
+        State Number {
+            do DstTestTask(InputValue = Params.Speed, Scale = (Params.Speed, 2))
+            -> Field
+        }
+        State Field {
+            do DstTestListTask(Waypoints = [(Nope = Params.Speed)])
+            -> List
+        }
+        State List {
+            do DstTestTask(InputValue = Params.Speed, Scale = [Params.Speed])
+        }
+    }
+}
+// EXPECT DST4008 (7,63)
+// EXPECT DST4008 (11,46)
+// EXPECT DST4008 (15,63)

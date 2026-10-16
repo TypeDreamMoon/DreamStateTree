@@ -1,0 +1,15 @@
+// The tree TreeReference runs in parallel.
+StateTree(Name="DreamStateTreeTests/Generated/RefChild", Schema=TestAgent)
+{
+    Parameters = {
+        float Radius = 2;
+        int Count = 3;
+        FVector Home = (1, 2, 3);
+        Array<float> Weights = [1, 2];
+        DstTestOwner Boss;
+    }
+
+    State ChildRoot {
+        do Probe = DstTestTask(InputValue = Params.Radius, Scale = Params.Home.Y, TicksToComplete = Params.Count)
+    }
+}

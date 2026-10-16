@@ -1,0 +1,10 @@
+// REQUIRE ../Trees/RefChild.dtr
+StateTree(Name="DreamStateTreeTests/Validate/ReferenceParameterDoesNotFit", Schema=TestAgent)
+{
+    Parameters = { String Label; }
+
+    State Root {
+        do RunParallelStateTree(StateTree = RefChild(Radius = Params.Label))
+    }
+}
+// EXPECT DST5003 (7,63)

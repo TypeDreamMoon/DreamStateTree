@@ -1,0 +1,14 @@
+StateTree(Name="DreamStateTreeTests/Validate/ReferenceTreeMissing", Schema=TestAgent)
+{
+    State Root {
+        State Called {
+            do RunParallelStateTree(StateTree = NoSuchTree(Radius = 3))
+            -> Bare
+        }
+        State Bare {
+            do RunParallelStateTree(StateTree = AlsoMissing)
+        }
+    }
+}
+// EXPECT DST4008 (5,49)
+// EXPECT DST4008 (9,49)

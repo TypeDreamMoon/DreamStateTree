@@ -1,0 +1,51 @@
+// REQUIRE RefChild.dtr
+// Trees run in parallel by reference: the bare tree, constant overrides, parameters fed from paths and operations, parts of
+// a struct and of a list fed, the tree named by its Path, a parameter that holds a reference, and a linked state whose parameters are fed in parts.
+StateTree(Name="DreamStateTreeTests/Generated/TreeReference", Schema=TestAgent)
+{
+    Parameters = {
+        float Reach = 5;
+        int Laps = 2;
+        DstTestOwner Boss;
+        StateTreeReference Preferred = RefChild(Radius = 4);
+    }
+
+    State Root {
+        State Bare {
+            do RunParallelStateTree(StateTree = RefChild)
+            -> Constants
+        }
+        State Constants {
+            do RunParallelStateTree(StateTree = RefChild(Radius = 3, Count = 4))
+            -> Fed
+        }
+        State Fed {
+            do RunParallelStateTree(StateTree = RefChild(Radius = Params.Reach, Count = 4, Boss = Owner))
+            -> Operation
+        }
+        State Operation {
+            do RunParallelStateTree(StateTree = RefChild(Radius = Params.Reach * 2, Count = Params.Laps + 1))
+            -> Parts
+        }
+        State Parts {
+            do RunParallelStateTree(StateTree = RefChild(Home = (Params.Reach, 0, 7), Weights = [1, Params.Reach]))
+            -> ByPath
+        }
+        State ByPath {
+            do RunParallelStateTree(StateTree = Path(Game, "DreamStateTreeTests/Generated/RefChild")(Radius = 9))
+            -> Positional
+        }
+        State Positional {
+            do RunParallelStateTree(StateTree = RefChild(1, Params.Laps))
+            -> Whole
+        }
+        State Whole {
+            do RunParallelStateTree(StateTree = Params.Preferred)
+            -> Linked
+        }
+        State Linked {
+            link asset RefChild(Home = (X = Params.Reach, Z = 7), Weights = [1, Params.Reach])
+            -> TreeSucceeded
+        }
+    }
+}

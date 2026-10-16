@@ -8,6 +8,8 @@
 //   - `// EXPECT DSTnnnn (line,col)` comments list the diagnostics it must raise, exactly, warnings included; a file
 //     without any must come out with no diagnostics at all. A diagnostic about an #included library matches on its
 //     code alone, as in the language corpus.
+//   - `// REQUIRE <file>` (relative to the case) names a tree that is built first, for a case that refers to another
+//     tree's asset (`../Trees/RefChild.dtr`).
 //
 // Coverage checks that every DST4xxx, DST5xxx and DST6xxx code the semantic stage can raise has a case. The list below
 // is the stage's own: a code it raises that is not in the list is found by reading the source when the source is on
@@ -37,7 +39,7 @@ namespace UE::DreamStateTree::Tests::ValidateCorpus
 			static TArray<FString> Codes;
 			if (Codes.IsEmpty())
 			{
-				for (int32 Number = 4001; Number <= 4022; ++Number)
+				for (int32 Number = 4001; Number <= 4024; ++Number)
 				{
 					if (Number != 4012)
 					{
@@ -126,6 +128,12 @@ namespace UE::DreamStateTree::Tests::ValidateCorpus
 		CompilerSupport::EnsureTestTags();
 
 		const FString Root = FPaths::GetPath(Path);
+		CompilerSupport::FGeneratedAssets RequiredAssets;
+		TSet<FString> Done;
+		if (!CompilerSupport::BuildRequiredTrees(*this, Root, Text, RequiredAssets, Done))
+		{
+			return false;
+		}
 		const Compiler::FDstFileResult Result = Compiler::BuildDstText(Path, Text, CompilerSupport::MakeBuildOptions(Root, /*bGenerate*/ false));
 
 		const TArray<LangSupport::FExpectation> Expected = LangSupport::ReadExpectations(Text);

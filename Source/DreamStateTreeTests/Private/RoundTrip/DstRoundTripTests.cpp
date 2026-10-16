@@ -161,6 +161,8 @@ namespace UE::DreamStateTree::Tests::RoundTripTests
 			}
 		}
 		const FString OriginalDump = CompilerSupport::DumpEnsured(Original);
+		// The model the asset gives, kept so a failure further down can be read against it.
+		CompilerSupport::WriteReport(TEXT("RoundTrip"), ReportName + TEXT(".model"), OriginalDump);
 
 		// 2. The asset as text, against its golden.
 		FString Text;
@@ -257,19 +259,30 @@ namespace UE::DreamStateTree::Tests::RoundTripTests
 		TArray<FString> Lines;
 		Dump.ParseIntoArray(Lines, TEXT("\n"), false);
 		TSet<FString> Bound;
+		// `target={property=Value root=QueryConfig}`: the property a copy ends in, and the one at the top of the target struct
+		// it sits in. Both are fed; a value stored in either is what the binding overwrites.
 		static const FString TargetMarker = TEXT("target={property=");
+		static const FString RootMarker = TEXT(" root=");
+		auto ReadName = [](const FString& Line, const int32 Start)
+		{
+			int32 End = Start;
+			while (End < Line.Len() && (FChar::IsAlnum(Line[End]) || Line[End] == TEXT('_')))
+			{
+				++End;
+			}
+			return Line.Mid(Start, End - Start);
+		};
 		for (const FString& Line : Lines)
 		{
 			const int32 At = Line.Find(TargetMarker, ESearchCase::CaseSensitive);
 			if (At != INDEX_NONE)
 			{
-				const int32 Start = At + TargetMarker.Len();
-				int32 End = Start;
-				while (End < Line.Len() && (FChar::IsAlnum(Line[End]) || Line[End] == TEXT('_')))
+				Bound.Add(ReadName(Line, At + TargetMarker.Len()));
+				const int32 RootAt = Line.Find(RootMarker, ESearchCase::CaseSensitive, ESearchDir::FromStart, At);
+				if (RootAt != INDEX_NONE)
 				{
-					++End;
+					Bound.Add(ReadName(Line, RootAt + RootMarker.Len()));
 				}
-				Bound.Add(Line.Mid(Start, End - Start));
 			}
 		}
 		TArray<FString> Kept;

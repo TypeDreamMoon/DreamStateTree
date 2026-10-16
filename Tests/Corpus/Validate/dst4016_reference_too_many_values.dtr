@@ -1,0 +1,8 @@
+// REQUIRE ../Trees/RefChild.dtr
+StateTree(Name="DreamStateTreeTests/Validate/ReferenceTooManyValues", Schema=TestAgent)
+{
+    State Root {
+        do RunParallelStateTree(StateTree = RefChild(1, 2, (1, 2, 3), [1], None, 1))
+    }
+}
+// EXPECT DST4016 (5,82)

@@ -1,0 +1,8 @@
+// REQUIRE ../Trees/RefChild.dtr
+StateTree(Name="DreamStateTreeTests/Validate/ReferenceUnknownParameter", Schema=TestAgent)
+{
+    State Root {
+        do RunParallelStateTree(StateTree = RefChild(Radious = 3))
+    }
+}
+// EXPECT DST4023 (5,54)

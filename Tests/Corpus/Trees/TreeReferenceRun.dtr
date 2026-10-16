@@ -1,0 +1,14 @@
+// REQUIRE RefChild.dtr
+// A tree that runs another tree in parallel with parameters fed from its own: the copies land in the reference's parameters.
+// RUN ticks=8 dt=0.1 seed=1
+StateTree(Name="DreamStateTreeTests/Generated/TreeReferenceRun", Schema=TestAgent)
+{
+    Parameters = {
+        float Reach = 5;
+        int Laps = 2;
+    }
+
+    State Root {
+        do Runner = RunParallelStateTree(StateTree = RefChild(Radius = Params.Reach * 2, Count = Params.Laps, Home = (Y = Params.Reach)))
+    }
+}

@@ -1,0 +1,41 @@
+// Lists and tuples with parts fed from elsewhere: fields of list elements, elements of a list of numbers, a list inside
+// an element, a struct inside an element, a colour, and structs with and without constants next to the fed fields.
+// RUN ticks=6 dt=0.1 seed=1
+StateTree(Name="DreamStateTreeTests/Generated/ListBindings", Schema=TestAgent)
+{
+    Parameters = {
+        float Speed = 4;
+        float Spread = 0.5;
+        int Count = 3;
+        FVector Home = (10, 20, 30);
+    }
+
+    State Root {
+        State Mixed {
+            do Walk = DstTestListTask(
+                   Waypoints = [
+                       (Label = "Gate", Weight = Params.Speed, Count = 2, Stops = [Params.Spread, 4, Params.Speed]),
+                       (Label = "Yard", Weight = 2.5, Count = Params.Count, Offset = (Params.Home.X, 0, 5)),
+                       (Label = "Roof", bActive = false, Tint = (R = Params.Spread, G = 0.25)),
+                       (Weight = Params.Speed * 2)
+                   ],
+                   Weights = [1, Params.Speed, Params.Spread * 2],
+                   Range = (Min = Params.Spread, Max = 9),
+                   Marks = [2, 7])
+            -> Whole
+        }
+        State Whole {
+            do Fed = DstTestListTask(
+                   Waypoints = [(Label = "Only")],
+                   Weights = [Params.Speed, Params.Spread],
+                   Range = (Params.Spread, Params.Speed))
+            -> Plain
+        }
+        State Plain {
+            do Quiet = DstTestListTask(
+                   Waypoints = [(Label = "A", Weight = 3), (), (Label = "B", Count = 2)],
+                   Range = (Min = 5))
+            -> TreeSucceeded
+        }
+    }
+}

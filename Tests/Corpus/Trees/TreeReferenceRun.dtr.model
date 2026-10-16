@@ -1,0 +1,19 @@
+Tree /Game/DreamStateTreeTests/Generated/TreeReferenceRun.TreeReferenceRun
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Reach = 5.000000
+  Parameter int32 Laps = 2
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+      Key Root/Task[0]
+      Bind Runner
+      Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=0.000000,Count=0,Home=(X=0.000000,Y=0.000000,Z=0.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2,CFC82686A929F8F05B28D8A0ECC3A766,E85150A786D094EB81C972CEF8426C2D))
+      Arg Instance StateTree.Parameters.Value<PropertyBag>.Count <- Parameters:Laps
+      Arg Instance StateTree.Parameters.Value<PropertyBag>.Home.Y <- Parameters:Reach
+      Arg Instance StateTree.Parameters.Value<PropertyBag>.Radius fn
+        PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+          Key Root/Task[0]/Fn:StateTree.Parameters.Value<PropertyBag>.Radius
+          Arg Instance Left <- Parameters:Reach
+          Arg Instance Right = 2.000000

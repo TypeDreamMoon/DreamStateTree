@@ -1,0 +1,106 @@
+Tree /Game/DreamStateTreeTests/Generated/TreeReference.TreeReference
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Reach = 5.000000
+  Parameter int32 Laps = 2
+  Parameter Object:/Script/DreamStateTreeTests.DstTestOwner Boss
+  Parameter Struct:/Script/StateTreeModule.StateTreeReference Preferred = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=4.000000,Count=3,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2))
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Bare
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Bare/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=2.000000,Count=3,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=)
+      Transition OnStateCompleted -> GotoState Root/Constants
+    State Root/Constants
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Constants/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=3.000000,Count=4,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2,CFC82686A929F8F05B28D8A0ECC3A766))
+      Transition OnStateCompleted -> GotoState Root/Fed
+    State Root/Fed
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Fed/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=0.000000,Count=4,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2,CFC82686A929F8F05B28D8A0ECC3A766,9664FD4768C9DA03797FEA4E916C790D))
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Boss <- Context:Owner
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Radius <- Parameters:Reach
+      Transition OnStateCompleted -> GotoState Root/Operation
+    State Root/Operation
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Operation/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=0.000000,Count=0,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2,CFC82686A929F8F05B28D8A0ECC3A766))
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Count fn
+          PropertyFunction /Script/StateTreeModule.StateTreeAddIntPropertyFunction
+            Key Root/Operation/Task[0]/Fn:StateTree.Parameters.Value<PropertyBag>.Count
+            Arg Instance Left <- Parameters:Laps
+            Arg Instance Right = 1
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Radius fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Root/Operation/Task[0]/Fn:StateTree.Parameters.Value<PropertyBag>.Radius
+            Arg Instance Left <- Parameters:Reach
+            Arg Instance Right = 2.000000
+      Transition OnStateCompleted -> GotoState Root/Parts
+    State Root/Parts
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Parts/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=2.000000,Count=3,Home=(X=0.000000,Y=0.000000,Z=7.000000),Weights=(1.000000,0.000000),Boss=None)),PropertyOverrides=(E85150A786D094EB81C972CEF8426C2D,95BA45966F2FA626C7CABA0A76AEAAC6))
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Home.X <- Parameters:Reach
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Weights[1] <- Parameters:Reach
+      Transition OnStateCompleted -> GotoState Root/ByPath
+    State Root/ByPath
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/ByPath/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=9.000000,Count=3,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2))
+      Transition OnStateCompleted -> GotoState Root/Positional
+    State Root/Positional
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Positional/Task[0]
+        Arg Instance StateTree = (StateTree="/Script/StateTreeModule.StateTree'/Game/DreamStateTreeTests/Generated/RefChild.RefChild'",Parameters=(Value=/Engine/Transient.PropertyBag_6145a2655687bdba(Radius=1.000000,Count=0,Home=(X=1.000000,Y=2.000000,Z=3.000000),Weights=(1.000000,2.000000),Boss=None)),PropertyOverrides=(82FEC4102565050501DA756E74A42AF2,CFC82686A929F8F05B28D8A0ECC3A766))
+        Arg Instance StateTree.Parameters.Value<PropertyBag>.Count <- Parameters:Laps
+      Transition OnStateCompleted -> GotoState Root/Whole
+    State Root/Whole
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/StateTreeModule.StateTreeRunParallelStateTreeTask
+        Key Root/Whole/Task[0]
+        Arg Instance StateTree <- Parameters:Preferred
+      Transition OnStateCompleted -> GotoState Root/Linked
+    State Root/Linked
+      Type LinkedAsset
+      Selection TryEnterState
+      Complete Any
+      FixedLayout true
+      Link /Game/DreamStateTreeTests/Generated/RefChild.RefChild
+      Parameter float Radius = 2.000000
+      Parameter int32 Count = 3
+      Parameter Struct:/Script/CoreUObject.Vector Home = (X=0.000000,Y=0.000000,Z=7.000000)
+        Overridden
+      Parameter Array<float> Weights = (1.000000,0.000000)
+        Overridden
+      Parameter Object:/Script/DreamStateTreeTests.DstTestOwner Boss
+      ParameterBindings
+        Arg Instance Home.X <- Parameters:Reach
+        Arg Instance Weights[1] <- Parameters:Reach
+      Transition OnStateCompleted -> Succeeded

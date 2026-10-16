@@ -1,0 +1,17 @@
+// REQUIRE ../Trees/RefChild.dtr
+StateTree(Name="DreamStateTreeTests/Validate/ReferenceParameterTwice", Schema=TestAgent)
+{
+    Parameters = { float Reach = 5; }
+
+    State Root {
+        State Twice {
+            do RunParallelStateTree(StateTree = RefChild(1, Radius = Params.Reach))
+            -> Field
+        }
+        State Field {
+            do DstTestListTask(Waypoints = [("a", Label = "b", Weight = Params.Reach)])
+        }
+    }
+}
+// EXPECT DST4017 (8,61)
+// EXPECT DST4017 (12,51)

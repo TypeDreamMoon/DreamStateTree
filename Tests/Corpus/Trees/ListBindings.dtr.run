@@ -1,0 +1,23 @@
+run ticks=6 dt=0.1 seed=1
+owner Level=1 Health=100 Mode=Patrol Alerted=false
+started=yes
+--- steps
+start    Running | Root/Mixed | recorded=1 | Walk: Enter:Waypoints=[Gate:4*2@0,0,0 tint=1,1,1,1 stops=0.5/4/4; Yard:2.5*3@10,0,5 tint=1,1,1,1 stops=; Roof:1*1(off)@0,0,0 tint=0.5,0.25,0,1 stops=; None:8*1@0,0,0 tint=1,1,1,1 stops=] Weights=[1,4,1] Range=0.5..9 Marks={2,7} Total=30.5
+tick 0   Running | Root/Whole | recorded=2 | Walk: Tick ; Fed: Enter:Waypoints=[Only:1*1@0,0,0 tint=1,1,1,1 stops=] Weights=[4,0.5] Range=0.5..4 Marks={} Total=5.5
+tick 1   Running | Root/Plain | recorded=3 | Fed: Tick ; Quiet: Enter:Waypoints=[A:3*1@0,0,0 tint=1,1,1,1 stops=; None:1*1@0,0,0 tint=1,1,1,1 stops=; B:1*2@0,0,0 tint=1,1,1,1 stops=] Weights=[] Range=5..2 Marks={} Total=6
+tick 2   Succeeded |  | recorded=3 | Quiet: Tick
+tick 3   Succeeded |  | recorded=3 | 
+tick 4   Succeeded |  | recorded=3 | 
+tick 5   Succeeded |  | recorded=3 | 
+stop     Succeeded | recorded=3 | 
+--- recorded transitions
+Root/Mixed
+Root/Whole
+Root/Plain
+--- log
+Walk: Enter:Waypoints=[Gate:4*2@0,0,0 tint=1,1,1,1 stops=0.5/4/4; Yard:2.5*3@10,0,5 tint=1,1,1,1 stops=; Roof:1*1(off)@0,0,0 tint=0.5,0.25,0,1 stops=; None:8*1@0,0,0 tint=1,1,1,1 stops=] Weights=[1,4,1] Range=0.5..9 Marks={2,7} Total=30.5
+Walk: Tick
+Fed: Enter:Waypoints=[Only:1*1@0,0,0 tint=1,1,1,1 stops=] Weights=[4,0.5] Range=0.5..4 Marks={} Total=5.5
+Fed: Tick
+Quiet: Enter:Waypoints=[A:3*1@0,0,0 tint=1,1,1,1 stops=; None:1*1@0,0,0 tint=1,1,1,1 stops=; B:1*2@0,0,0 tint=1,1,1,1 stops=] Weights=[] Range=5..2 Marks={} Total=6
+Quiet: Tick

@@ -1267,13 +1267,16 @@ namespace
 			const FPropertyBindingCopyInfoBatch& Batch = Batches[BatchIndex];
 
 			FString Target = TEXT("none");
+			const UStruct* TargetStruct = nullptr;
 			if (const FStateTreeBindableStructDesc* Desc = Batch.TargetStruct.GetPtr<FStateTreeBindableStructDesc>())
 			{
 				Target = FString::Printf(TEXT("%s dataHandle=%s struct=%s"), *EnumToString(Desc->DataSource), *Desc->DataHandle.Describe(), *ObjectPathText(Desc->Struct));
+				TargetStruct = Desc->Struct;
 			}
 			else if (const FPropertyBindingBindableStructDescriptor* BaseDesc = Batch.TargetStruct.GetPtr())
 			{
 				Target = FString::Printf(TEXT("struct=%s"), *ObjectPathText(BaseDesc->Struct));
+				TargetStruct = BaseDesc->Struct;
 			}
 
 			Writer.Add(Indent + 1, FString::Printf(TEXT("batch[%d] target={%s} bindings=[%d,%d) functions=[%d,%d)"), BatchIndex, *Target,
@@ -1288,10 +1291,24 @@ namespace
 			int32 CopyIndex = 0;
 			for (const FPropertyBindingCopyInfo& Copy : Collection.GetBatchCopies(Batch))
 			{
-				Writer.Add(Indent + 2, FString::Printf(TEXT("copy[%d] type=%s size=%d source={handle=%s struct=%s property=%s} target={property=%s} fromTarget=%s promoteArray=%s"),
+				// The property the copy sits in at the top of the target struct: the leaf alone does not say it when the binding
+				// feeds a member (`Interval.Min`) or an element (`Items[2]`), and the values the test ignores belong to that property.
+				FString TargetRoot = TEXT("null");
+				if (TargetStruct)
+				{
+					for (TFieldIterator<FProperty> It(TargetStruct); It; ++It)
+					{
+						if (It->GetOffset_ForInternal() == Copy.TargetIndirection.Offset)
+						{
+							TargetRoot = It->GetName();
+							break;
+						}
+					}
+				}
+				Writer.Add(Indent + 2, FString::Printf(TEXT("copy[%d] type=%s size=%d source={handle=%s struct=%s property=%s} target={property=%s root=%s} fromTarget=%s promoteArray=%s"),
 					CopyIndex, *EnumToString(Copy.Type), Copy.CopySize, *DataHandleText(Copy.SourceDataHandle), *ObjectPathText(Copy.SourceStructType),
 					Copy.SourceLeafProperty ? *Copy.SourceLeafProperty->GetName() : TEXT("null"),
-					Copy.TargetLeafProperty ? *Copy.TargetLeafProperty->GetName() : TEXT("null"),
+					Copy.TargetLeafProperty ? *Copy.TargetLeafProperty->GetName() : TEXT("null"), *TargetRoot,
 					*BoolText(Copy.bCopyFromTargetToSource), *BoolText(Copy.bPromoteArrayCopy)));
 				++CopyIndex;
 			}

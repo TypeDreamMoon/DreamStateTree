@@ -1,0 +1,64 @@
+Tree /Game/DreamStateTreeTests/Generated/ListBindings.ListBindings
+  Schema /Script/DreamStateTreeTests.DstTestSchema
+  Parameter float Speed = 4.000000
+  Parameter float Spread = 0.500000
+  Parameter int32 Count = 3
+  Parameter Struct:/Script/CoreUObject.Vector Home = (X=10.000000,Y=20.000000,Z=30.000000)
+  State Root
+    Type State
+    Selection TrySelectChildrenInOrder
+    Complete Any
+    State Root/Mixed
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestListTask
+        Key Root/Mixed/Task[0]
+        Bind Walk
+        Arg Instance Marks = (2,7)
+        Arg Instance Range = (Min=1.000000,Max=9.000000)
+        Arg Instance Range.Min <- Parameters:Spread
+        Arg Instance Waypoints = ((Label="Gate",Count=2,Stops=(0.000000,4.000000,0.000000)),(Label="Yard",Weight=2.500000,Offset=(X=0.000000,Y=0.000000,Z=5.000000)),(Label="Roof",bActive=False,Tint=(R=0.000000,G=0.250000,B=0.000000,A=1.000000)),())
+        Arg Instance Waypoints[0].Stops[0] <- Parameters:Spread
+        Arg Instance Waypoints[0].Stops[2] <- Parameters:Speed
+        Arg Instance Waypoints[0].Weight <- Parameters:Speed
+        Arg Instance Waypoints[1].Count <- Parameters:Count
+        Arg Instance Waypoints[1].Offset.X <- Parameters:Home.X
+        Arg Instance Waypoints[2].Tint.R <- Parameters:Spread
+        Arg Instance Waypoints[3].Weight fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Root/Mixed/Task[0]/Fn:Waypoints[3].Weight
+            Arg Instance Left <- Parameters:Speed
+            Arg Instance Right = 2.000000
+        Arg Instance Weights = (1.000000,0.000000,0.000000)
+        Arg Instance Weights[1] <- Parameters:Speed
+        Arg Instance Weights[2] fn
+          PropertyFunction /Script/StateTreeModule.StateTreeMultiplyFloatPropertyFunction
+            Key Root/Mixed/Task[0]/Fn:Weights[2]
+            Arg Instance Left <- Parameters:Spread
+            Arg Instance Right = 2.000000
+      Transition OnStateCompleted -> GotoState Root/Whole
+    State Root/Whole
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestListTask
+        Key Root/Whole/Task[0]
+        Bind Fed
+        Arg Instance Range.Max <- Parameters:Speed
+        Arg Instance Range.Min <- Parameters:Spread
+        Arg Instance Waypoints = ((Label="Only"))
+        Arg Instance Weights = (0.000000,0.000000)
+        Arg Instance Weights[0] <- Parameters:Speed
+        Arg Instance Weights[1] <- Parameters:Spread
+      Transition OnStateCompleted -> GotoState Root/Plain
+    State Root/Plain
+      Type State
+      Selection TrySelectChildrenInOrder
+      Complete Any
+      Task /Script/DreamStateTreeTests.DstTestListTask
+        Key Root/Plain/Task[0]
+        Bind Quiet
+        Arg Instance Range = (Min=5.000000,Max=2.000000)
+        Arg Instance Waypoints = ((Label="A",Weight=3.000000),(),(Label="B",Count=2))
+      Transition OnStateCompleted -> Succeeded
