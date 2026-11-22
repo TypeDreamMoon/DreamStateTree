@@ -28,9 +28,6 @@
 
 #define LOCTEXT_NAMESPACE "DreamStateTreeEditor"
 
-using namespace UE::DreamStateTree;
-using namespace UE::DreamStateTree::Compiler;
-
 namespace DreamStateTreeEditorPrivate
 {
 	const FName LogName(TEXT("DreamStateTree"));
@@ -90,8 +87,6 @@ namespace DreamStateTreeEditorPrivate
 	}
 }
 
-using namespace DreamStateTreeEditorPrivate;
-
 // ---------------------------------------------------------------------------------------------
 // Lifetime
 // ---------------------------------------------------------------------------------------------
@@ -126,6 +121,8 @@ ETickableTickType UDreamStateTreeEditorSubsystem::GetTickableTickType() const
 
 void UDreamStateTreeEditorSubsystem::Tick(float DeltaTime)
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	const double Now = FPlatformTime::Seconds();
 
 	TArray<FString> Settled;
@@ -175,23 +172,31 @@ void UDreamStateTreeEditorSubsystem::Tick(float DeltaTime)
 
 FString UDreamStateTreeEditorSubsystem::FindSource(const UObject& Asset) const
 {
+	using namespace UE::DreamStateTree::Compiler;
+
 	const FDstSourceEntry* Entry = Index.FindByAsset(Asset.GetPathName());
 	return Entry ? Entry->FilePath : FString();
 }
 
 UStateTree* UDreamStateTreeEditorSubsystem::FindLoadedTree(const FString& FilePath) const
 {
+	using namespace UE::DreamStateTree::Compiler;
+
 	const FDstSourceEntry* Entry = Index.FindByFile(FilePath);
 	return Entry && !Entry->AssetPath.IsEmpty() ? FindObject<UStateTree>(nullptr, *Entry->AssetPath) : nullptr;
 }
 
 TArray<FString> UDreamStateTreeEditorSubsystem::GetActiveRoots() const
 {
+	using namespace UE::DreamStateTree::Compiler;
+
 	return RootsOverride.IsEmpty() ? GetDstSourceRoots() : RootsOverride;
 }
 
 void UDreamStateTreeEditorSubsystem::SetSourceRoots(const TArray<FString>& Roots)
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	RootsOverride.Reset();
 	for (const FString& Root : Roots)
 	{
@@ -253,6 +258,9 @@ void UDreamStateTreeEditorSubsystem::UnwatchRoots()
 
 void UDreamStateTreeEditorSubsystem::OnDirectoryChanged(const TArray<FFileChangeData>& Changes)
 {
+	using namespace DreamStateTreeEditorPrivate;
+	using namespace UE::DreamStateTree::Compiler;
+
 	const double Now = FPlatformTime::Seconds();
 	for (const FFileChangeData& Change : Changes)
 	{
@@ -265,6 +273,8 @@ void UDreamStateTreeEditorSubsystem::OnDirectoryChanged(const TArray<FFileChange
 
 void UDreamStateTreeEditorSubsystem::HandleChangedSources(const TArray<FString>& FilePaths)
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	// Each document once; one reached only through a library may still have its own text.
 	TMap<FString, bool> Documents;
 	for (const FString& RawPath : FilePaths)
@@ -286,7 +296,7 @@ void UDreamStateTreeEditorSubsystem::HandleChangedSources(const TArray<FString>&
 		{
 			continue;
 		}
-		if (Lang::GetDstFileKindFromPath(Path) == Lang::EDstFileKind::Library)
+		if (UE::DreamStateTree::Lang::GetDstFileKindFromPath(Path) == UE::DreamStateTree::Lang::EDstFileKind::Library)
 		{
 			for (const FString& Dependent : Index.FindDependents(Path))
 			{
@@ -320,6 +330,9 @@ void UDreamStateTreeEditorSubsystem::HandleChangedSources(const TArray<FString>&
 
 bool UDreamStateTreeEditorSubsystem::AllowSourceRebuild(const FString& FilePath, bool bViaLibrary)
 {
+	using namespace DreamStateTreeEditorPrivate;
+	using namespace UE::DreamStateTree::Compiler;
+
 	FString Text;
 	if (!LoadSourceText(FilePath, Text))
 	{
@@ -351,6 +364,8 @@ bool UDreamStateTreeEditorSubsystem::AllowSourceRebuild(const FString& FilePath,
 
 bool UDreamStateTreeEditorSubsystem::SaveSource(const FString& FilePath, const FString& Text)
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	const FFileHelper::EEncodingOptions Encoding = HasUtf8ByteOrderMark(FilePath) ? FFileHelper::EEncodingOptions::ForceUTF8 : FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM;
 	if (!FFileHelper::SaveStringToFile(Text, *FilePath, Encoding))
 	{
@@ -365,6 +380,8 @@ bool UDreamStateTreeEditorSubsystem::SaveSource(const FString& FilePath, const F
 
 FString UDreamStateTreeEditorSubsystem::MakeMetadataSourcePath(const FString& FilePath) const
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	for (const FString& Root : Index.GetRoots())
 	{
 		FString Prefix = NormalizeSourcePath(Root);
@@ -386,6 +403,8 @@ FString UDreamStateTreeEditorSubsystem::MakeMetadataSourcePath(const FString& Fi
 
 UStateTree* UDreamStateTreeEditorSubsystem::Rebuild(const FString& FilePath)
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	const FString Path = NormalizeSourcePath(FilePath);
 	TMap<FString, UStateTree*> Built;
 	RebuildFiles({ Path }, true, &Built);
@@ -395,6 +414,9 @@ UStateTree* UDreamStateTreeEditorSubsystem::Rebuild(const FString& FilePath)
 
 int32 UDreamStateTreeEditorSubsystem::RebuildFiles(const TArray<FString>& FilePaths, bool bNotify, TMap<FString, UStateTree*>* OutBuilt)
 {
+	using namespace DreamStateTreeEditorPrivate;
+	using namespace UE::DreamStateTree::Compiler;
+
 	const UDreamStateTreeEditorSettings* Settings = GetDefault<UDreamStateTreeEditorSettings>();
 
 	// A library stands for the trees that include it.
@@ -402,7 +424,7 @@ int32 UDreamStateTreeEditorSubsystem::RebuildFiles(const TArray<FString>& FilePa
 	for (const FString& RawPath : FilePaths)
 	{
 		const FString Path = NormalizeSourcePath(RawPath);
-		if (Lang::GetDstFileKindFromPath(Path) == Lang::EDstFileKind::Library)
+		if (UE::DreamStateTree::Lang::GetDstFileKindFromPath(Path) == UE::DreamStateTree::Lang::EDstFileKind::Library)
 		{
 			for (const FString& Dependent : Index.FindDependents(Path))
 			{
@@ -476,10 +498,12 @@ int32 UDreamStateTreeEditorSubsystem::RebuildFiles(const TArray<FString>& FilePa
 
 void UDreamStateTreeEditorSubsystem::RebuildAll()
 {
+	using namespace UE::DreamStateTree::Compiler;
+
 	TArray<FString> Files;
 	for (const FDstSourceEntry& Entry : Index.GetEntries())
 	{
-		if (Entry.Kind == Lang::EDstFileKind::StateTree)
+		if (Entry.Kind == UE::DreamStateTree::Lang::EDstFileKind::StateTree)
 		{
 			Files.Add(Entry.FilePath);
 		}
@@ -493,6 +517,8 @@ void UDreamStateTreeEditorSubsystem::RebuildAll()
 
 UStateTree* UDreamStateTreeEditorSubsystem::FindOwningTree(UObject* Object)
 {
+	using namespace UE::DreamStateTree::Compiler;
+
 	UStateTree* Tree = Cast<UStateTree>(Object);
 	if (!Tree && Object)
 	{
@@ -538,6 +564,8 @@ void UDreamStateTreeEditorSubsystem::OnObjectPreSave(UObject* Object, FObjectPre
 
 bool UDreamStateTreeEditorSubsystem::HasEditorChanges(UStateTree& Tree, TArray<FString>* OutChanges) const
 {
+	using namespace UE::DreamStateTree::Compiler;
+
 	const FString Path = FindSource(Tree);
 	FString Base;
 	FString BaseSourcePath;
@@ -559,7 +587,7 @@ bool UDreamStateTreeEditorSubsystem::HasEditorChanges(UStateTree& Tree, TArray<F
 			OutChanges->Add(FString::Printf(TEXT("%s: %s"), *Change.Location, *Change.What));
 		}
 		// What was refused says why: a change inside a template or a library, a structural change while those are off, ...
-		for (const Lang::FDstDiagnostic& Diagnostic : Result.Diagnostics.GetDiagnostics())
+		for (const UE::DreamStateTree::Lang::FDstDiagnostic& Diagnostic : Result.Diagnostics.GetDiagnostics())
 		{
 			OutChanges->Add(FString::Printf(TEXT("%s: %s"), *Diagnostic.Code, *Diagnostic.Message));
 		}
@@ -579,6 +607,9 @@ bool UDreamStateTreeEditorSubsystem::HasPendingWriteBack(const UStateTree& Tree)
 
 bool UDreamStateTreeEditorSubsystem::WriteBack(UStateTree& Tree)
 {
+	using namespace DreamStateTreeEditorPrivate;
+	using namespace UE::DreamStateTree::Compiler;
+
 	const FString Path = FindSource(Tree);
 	FString Text;
 	if (Path.IsEmpty() || !LoadSourceText(Path, Text))
@@ -617,7 +648,7 @@ bool UDreamStateTreeEditorSubsystem::WriteBack(UStateTree& Tree)
 
 	// Refusals are repeated only when they change: moving states about writes nothing and says nothing.
 	TArray<FString> RefusalKeys;
-	for (const Lang::FDstDiagnostic& Diagnostic : Result.Diagnostics.GetDiagnostics())
+	for (const UE::DreamStateTree::Lang::FDstDiagnostic& Diagnostic : Result.Diagnostics.GetDiagnostics())
 	{
 		RefusalKeys.Add(FString::Printf(TEXT("%s@%d:%s"), *Diagnostic.Code, Diagnostic.Span.Line, *Diagnostic.Message));
 	}
@@ -668,6 +699,8 @@ bool UDreamStateTreeEditorSubsystem::IsInConflict(const UStateTree& Tree) const
 
 void UDreamStateTreeEditorSubsystem::ShowConflict(UStateTree& Tree, const FString& FilePath, const TArray<FString>& EditorChanges)
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	EditedTrees.Remove(&Tree);
 	CloseConflict(Tree);
 
@@ -740,6 +773,9 @@ UStateTree* UDreamStateTreeEditorSubsystem::UseText(UStateTree& Tree)
 
 bool UDreamStateTreeEditorSubsystem::MergeEditorChanges(UStateTree& Tree)
 {
+	using namespace DreamStateTreeEditorPrivate;
+	using namespace UE::DreamStateTree::Compiler;
+
 	const FString Path = FindSource(Tree);
 	FString Base;
 	FString BaseSourcePath;
@@ -793,11 +829,14 @@ bool UDreamStateTreeEditorSubsystem::MergeEditorChanges(UStateTree& Tree)
 
 FString UDreamStateTreeEditorSubsystem::Decompile(UStateTree& Tree, bool bOverwrite, bool bRebuild)
 {
+	using namespace DreamStateTreeEditorPrivate;
+	using namespace UE::DreamStateTree::Compiler;
+
 	const FString Path = NormalizeSourcePath(GetDefaultDstDecompilePath(Tree));
 	FDstDecompileOptions Options;
 	Options.FilePath = Path;
 	FString Text;
-	Lang::FDstDiagnosticSink Sink;
+	UE::DreamStateTree::Lang::FDstDiagnosticSink Sink;
 	const bool bSucceeded = DecompileDstAsset(Tree, Options, Text, Sink);
 	Report(FString::Printf(TEXT("Writing %s as text"), *Tree.GetName()), Sink);
 	if (!bSucceeded)
@@ -832,6 +871,8 @@ FString UDreamStateTreeEditorSubsystem::Decompile(UStateTree& Tree, bool bOverwr
 
 void UDreamStateTreeEditorSubsystem::OpenSource(const FString& FilePath, int32 Line, int32 Column) const
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	const FString Full = NormalizeSourcePath(FilePath);
 	const FString Command = GetDefault<UDreamStateTreeEditorSettings>()->OpenSourceCommand.TrimStartAndEnd();
 	if (!Command.IsEmpty())
@@ -857,8 +898,10 @@ void UDreamStateTreeEditorSubsystem::OpenSource(const FString& FilePath, int32 L
 // Reporting
 // ---------------------------------------------------------------------------------------------
 
-void UDreamStateTreeEditorSubsystem::Report(const FString& Title, const Lang::FDstDiagnosticSink& Diagnostics) const
+void UDreamStateTreeEditorSubsystem::Report(const FString& Title, const UE::DreamStateTree::Lang::FDstDiagnosticSink& Diagnostics) const
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	if (Diagnostics.Num() == 0)
 	{
 		return;
@@ -866,10 +909,10 @@ void UDreamStateTreeEditorSubsystem::Report(const FString& Title, const Lang::FD
 	FMessageLog Log(LogName);
 	Log.Info(FText::FromString(Title));
 	const TWeakObjectPtr<const UDreamStateTreeEditorSubsystem> WeakThis(this);
-	for (const Lang::FDstDiagnostic& Diagnostic : Diagnostics.GetDiagnostics())
+	for (const UE::DreamStateTree::Lang::FDstDiagnostic& Diagnostic : Diagnostics.GetDiagnostics())
 	{
-		const EMessageSeverity::Type Severity = Diagnostic.Severity == Lang::EDstSeverity::Error ? EMessageSeverity::Error
-			: Diagnostic.Severity == Lang::EDstSeverity::Warning ? EMessageSeverity::Warning : EMessageSeverity::Info;
+		const EMessageSeverity::Type Severity = Diagnostic.Severity == UE::DreamStateTree::Lang::EDstSeverity::Error ? EMessageSeverity::Error
+			: Diagnostic.Severity == UE::DreamStateTree::Lang::EDstSeverity::Warning ? EMessageSeverity::Warning : EMessageSeverity::Info;
 		const TSharedRef<FTokenizedMessage> Message = FTokenizedMessage::Create(Severity);
 		const FString Where = FString::Printf(TEXT("%s(%d,%d)"), *FPaths::GetCleanFilename(Diagnostic.FilePath), Diagnostic.Span.Line, Diagnostic.Span.Column);
 		if (FPaths::FileExists(Diagnostic.FilePath))
@@ -901,6 +944,8 @@ void UDreamStateTreeEditorSubsystem::Report(const FString& Title, const Lang::FD
 
 TSharedPtr<SNotificationItem> UDreamStateTreeEditorSubsystem::Notify(const FText& Message, bool bSuccess, bool bShowLogLink) const
 {
+	using namespace DreamStateTreeEditorPrivate;
+
 	if (!FSlateApplication::IsInitialized())
 	{
 		return nullptr;
