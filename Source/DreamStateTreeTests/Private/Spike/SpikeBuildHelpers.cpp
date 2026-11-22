@@ -73,8 +73,6 @@ namespace UE::DreamStateTree::Spike
 		}
 	}
 
-	using namespace BuildHelpersPrivate;
-
 	FGuid DstBuildGuid(const FString& Path)
 	{
 		return FGuid::NewDeterministicGuid(Path);
@@ -158,6 +156,8 @@ namespace UE::DreamStateTree::Spike
 
 	FDstBuildCompileOutcome DstBuildCompile(UStateTree& Tree)
 	{
+		using namespace BuildHelpersPrivate;
+
 		FDstBuildCompilerLog Log;
 		FStateTreeCompiler Compiler(Log);
 		const bool bResult = Compiler.Compile(Tree);
@@ -166,6 +166,8 @@ namespace UE::DreamStateTree::Spike
 
 	FDstBuildCompileOutcome DstBuildCompileViaManager(UStateTree& Tree)
 	{
+		using namespace BuildHelpersPrivate;
+
 		FDstBuildCompilerLog Log;
 		const bool bResult = UE::StateTree::Compiler::FCompilerManager::CompileSynchronously(&Tree, Log);
 		return ToOutcome(bResult, Log);
@@ -642,10 +644,9 @@ namespace UE::DreamStateTree::Spike
 		}
 	}
 
-	using namespace BuildHelpersPrivate;
-
 	FDstBuildRunResult DstBuildRunTree(UStateTree& Tree, UDstTestOwner& Owner, const FDstBuildRunOptions& Options)
 	{
+		using namespace BuildHelpersPrivate;
 		using UE::DreamStateTree::Tests::FExecutionLog;
 
 		FDstBuildRunResult Result;
