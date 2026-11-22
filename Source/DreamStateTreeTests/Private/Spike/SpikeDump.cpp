@@ -32,7 +32,7 @@
 
 namespace UE::DreamStateTree::Spike
 {
-namespace
+namespace SpikeDumpPrivate
 {
 	// ---- Text helpers ----------------------------------------------------------------------------------------
 
@@ -1325,16 +1325,20 @@ namespace
 				Index, *Desc.Name.ToString(), *ObjectPathText(Desc.Struct), *EnumToString(Desc.Requirement), *Desc.Handle.DataHandle.Describe()));
 		}
 	}
-} // namespace
+} // namespace SpikeDumpPrivate
 
 FString DumpEditorData(const UStateTreeEditorData& EditorData, const FDumpOptions& Options)
 {
+	using namespace SpikeDumpPrivate;
+
 	FEditorDataDumper Dumper(EditorData, Options);
 	return Dumper.Run();
 }
 
 FString DumpCompiled(const UStateTree& StateTree)
 {
+	using namespace SpikeDumpPrivate;
+
 	FLineWriter Writer;
 	// The asset name is left out on purpose, so the dumps of two assets built from the same data are equal.
 	Writer.Add(0, TEXT("StateTree compiled"));

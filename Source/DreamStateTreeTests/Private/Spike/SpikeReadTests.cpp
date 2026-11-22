@@ -40,7 +40,7 @@
 
 namespace UE::DreamStateTree::Spike
 {
-namespace
+namespace SpikeReadTestsPrivate
 {
 	// ---- Small helpers ---------------------------------------------------------------------------------------
 
@@ -1072,7 +1072,7 @@ namespace
 		}
 		Test.AddInfo(FString::Printf(TEXT("Reports are in %s"), *FPaths::GetPath(InventoryPath)));
 	}
-} // namespace
+} // namespace SpikeReadTestsPrivate
 } // namespace UE::DreamStateTree::Spike
 
 // Loading a corpus tree also loads what it references; in the test host the templates' Blueprints lack their
@@ -1082,6 +1082,6 @@ IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(FDreamStateTreeSpikeReadCorpusTest, FDst
 
 bool FDreamStateTreeSpikeReadCorpusTest::RunTest(const FString& Parameters)
 {
-	UE::DreamStateTree::Spike::RunCorpus(*this);
+	UE::DreamStateTree::Spike::SpikeReadTestsPrivate::RunCorpus(*this);
 	return !HasAnyErrors();
 }
