@@ -12,10 +12,6 @@
 
 namespace UE::DreamStateTree::Compiler
 {
-	using namespace Lang;
-	using namespace Model;
-	using Model::FDstNode;
-
 	// ------------------------------------------------------------------------------------------
 	// FDstPlaces
 	// ------------------------------------------------------------------------------------------
@@ -65,23 +61,23 @@ namespace UE::DreamStateTree::Compiler
 		}
 	}
 
-	void FDstPlaces::Add(const FString& Key, const FDstSpan& Span)
+	void FDstPlaces::Add(const FString& Key, const Lang::FDstSpan& Span)
 	{
 		Spans.Add(Key, Span);
 	}
 
-	FDstSpan FDstPlaces::Find(const FString& Key) const
+	Lang::FDstSpan FDstPlaces::Find(const FString& Key) const
 	{
 		FString Current = Key;
 		while (true)
 		{
-			if (const FDstSpan* Found = Spans.Find(Current))
+			if (const Lang::FDstSpan* Found = Spans.Find(Current))
 			{
 				return *Found;
 			}
 			if (Current.IsEmpty())
 			{
-				return FDstSpan();
+				return Lang::FDstSpan();
 			}
 			Current = GetEnclosingKey(Current);
 		}
@@ -91,7 +87,7 @@ namespace UE::DreamStateTree::Compiler
 	// LowerDst
 	// ------------------------------------------------------------------------------------------
 
-	bool LowerDst(const FDstCompilationUnit& Unit, FDstLowerResult& Out, FDstDiagnosticSink& Sink, const FDstLowerOptions& Options)
+	bool LowerDst(const Lang::FDstCompilationUnit& Unit, FDstLowerResult& Out, Lang::FDstDiagnosticSink& Sink, const FDstLowerOptions& Options)
 	{
 		Lowering::FDstLowerer Lowerer(Unit, Out, Sink, Options);
 		return Lowerer.Run();
@@ -101,6 +97,9 @@ namespace UE::DreamStateTree::Compiler
 	{
 		bool FDstLowerer::Run()
 		{
+			using namespace Lang;
+			using namespace Model;
+
 			const int32 ErrorsBefore = Sink.Real.NumErrors();
 			if (!Unit.Main || !Unit.Main->Document)
 			{
@@ -147,9 +146,13 @@ namespace UE::DreamStateTree::Compiler
 	// EnsureDstBindNames
 	// ------------------------------------------------------------------------------------------
 
-	namespace
+	namespace LowerPrivate
 	{
-		void VisitNode(FDstNode& Node, const TFunctionRef<void(FDstNode&)>& Visit)
+		using namespace Lang;
+		using namespace Model;
+		using Model::FDstNode;
+
+		void VisitNode(FDstNode& Node,const TFunctionRef<void(FDstNode&)>& Visit)
 		{
 			Visit(Node);
 			for (FDstArg& Arg : Node.Args)
@@ -231,8 +234,13 @@ namespace UE::DreamStateTree::Compiler
 		}
 	}
 
-	void EnsureDstBindNames(FDstTree& Tree)
+	void EnsureDstBindNames(Model::FDstTree& Tree)
 	{
+		using namespace Lang;
+		using namespace Model;
+		using namespace LowerPrivate;
+		using Model::FDstNode;
+
 		// What is already a name: nodes' own, the words of paths, and the schema's contexts.
 		TArray<FString> Used = { TEXT("Params"), TEXT("Event") };
 		if (const UClass* SchemaClass = FindObject<UClass>(nullptr, *Tree.SchemaClass))
